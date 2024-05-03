@@ -55,16 +55,14 @@ public class ExcelService {
 
                 rowIndex++;
             }
-            // Define the absolute output directory within the project resources
-            String projectPath = new File("").getAbsolutePath(); // Get project root directory
-            String outputDirectoryPath = projectPath + "/src/main/resources/Output/";
+            // Get the output directory path relative to the classpath
+            String outputDirectoryPath = "principal/src/main/resources/Output/";
 
             // Create the output directory if it doesn't exist
             File outputDirectory = new File(outputDirectoryPath);
             if (!outputDirectory.exists()) {
                 outputDirectory.mkdirs();
             }
-
             // Define the absolute output file path
             String outputFilePath = outputDirectoryPath + schoolName + "_LR-2024.xlsx";
 
