@@ -23,6 +23,14 @@ public class DocumentsController {
         return new ResponseEntity<>(savedDocument, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{school}/lrs/{year}/{month}")
+    public ResponseEntity<Documents> getDocumentBySchoolYearMonth(@PathVariable String school,
+            @PathVariable String year,
+            @PathVariable String month) throws Exception {
+        Documents document = documentsService.getDocumentBySchoolYearMonth(school, year, month);
+        return new ResponseEntity<>(document, HttpStatus.OK);
+    }
+
     // Endpoint to retrieve all documents
     @GetMapping("/all")
     public ResponseEntity<List<Documents>> getAllDocuments() {
