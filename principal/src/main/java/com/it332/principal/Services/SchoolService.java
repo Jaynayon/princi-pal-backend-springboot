@@ -48,8 +48,14 @@ public class SchoolService {
         if (!ObjectId.isValid(id)) {
             throw new IllegalArgumentException("Invalid ID format");
         }
-
+        // Check if school exists
         School existingSchool = getSchoolById(id);
+        // Check if school name is already taken
+        School nameAlreadyExists = schoolRepository.findByName(existingSchool.getName());
+
+        if (nameAlreadyExists != null) {
+            throw new IllegalArgumentException("School with name " + updatedSchool.getName() + " already exists");
+        }
 
         existingSchool.setName(updatedSchool.getName());
 

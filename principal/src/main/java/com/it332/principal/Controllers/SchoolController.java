@@ -91,7 +91,7 @@ public class SchoolController {
             School updatedEntity = schoolService.updateSchool(id, updatedSchool);
             return ResponseEntity.ok(updatedEntity);
         } catch (IllegalArgumentException e) {
-            err.setMessage("Invalid ID format: " + e.getMessage());
+            err.setMessage("Failed to patch School: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(err);
         } catch (NotFoundException e) {
