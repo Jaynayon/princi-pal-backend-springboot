@@ -1,16 +1,18 @@
 package com.it332.principal.Models;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.*;
 
+//@Data and @AllArgsConstructor to i think create getters and setters
 @Document(collection = "Documents")
 public class Documents {
 
     @Id
     private String id;
 
-    private String school; // Store ObjectId as String for referencing
+    private String schoolId;
 
     @NotBlank
     private String month;
@@ -41,12 +43,12 @@ public class Documents {
     public Documents() {
     }
 
-    public Documents(String school, @NotBlank String month, @NotBlank String year,
+    public Documents(String schoolId, @NotBlank String month, @NotBlank String year,
             @Min(value = 0, message = "Budget must be a non-negative number") @Max(value = 999999, message = "Budget must not exceed 999999") Double budget,
             @Min(value = 0, message = "Budget limit must be a non-negative number") @Max(value = 999999, message = "Budget limit must not exceed 999999") Double budgetLimit,
             @Min(value = 0, message = "Cash advance must be a non-negative number") @Max(value = 999999, message = "Cash advance must not exceed 999999") Double cashAdvance,
             boolean budgetExceeded, String sds, String claimant, String headAccounting) {
-        this.school = school;
+        this.schoolId = schoolId;
         this.month = month;
         this.year = year;
         this.budget = budget;
@@ -66,12 +68,12 @@ public class Documents {
         this.id = id;
     }
 
-    public String getSchool() {
-        return school;
+    public String getSchoolId() {
+        return schoolId;
     }
 
-    public void setSchool(String school) {
-        this.school = school;
+    public void setSchoolId(String school) {
+        this.schoolId = school;
     }
 
     public String getMonth() {
