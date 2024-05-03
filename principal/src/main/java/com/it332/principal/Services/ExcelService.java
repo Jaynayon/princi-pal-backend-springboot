@@ -26,7 +26,7 @@ public class ExcelService {
         dataToWrite.add(new LR("11/11/2023", "SI# 2056",
                 "TINONGS FOOD INTRNL- Purchased torta bread (small) for District Meet", 3124));
         dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars", 2500));
-        dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars", 500));
+        dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars", 4000));
 
         // School name for output file naming
         String schoolName = "Jaclupan";
@@ -55,8 +55,11 @@ public class ExcelService {
 
                 rowIndex++;
             }
-            // Get the output directory path relative to the classpath
-            String outputDirectoryPath = "principal/src/main/resources/Output/";
+            // Get the absolute path to the project's root directory
+            String projectRootPath = System.getProperty("user.dir");
+
+            // Define the output directory path within the project's resources
+            String outputDirectoryPath = projectRootPath + "/src/main/resources/Output/";
 
             // Create the output directory if it doesn't exist
             File outputDirectory = new File(outputDirectoryPath);
