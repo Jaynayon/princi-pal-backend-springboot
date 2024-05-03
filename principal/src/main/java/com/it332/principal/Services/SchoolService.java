@@ -51,7 +51,7 @@ public class SchoolService {
         // Check if school exists
         School existingSchool = getSchoolById(id);
         // Check if school name is already taken
-        School nameAlreadyExists = schoolRepository.findByName(existingSchool.getName());
+        School nameAlreadyExists = schoolRepository.findByName(updatedSchool.getName());
 
         if (nameAlreadyExists != null) {
             throw new IllegalArgumentException("School with name " + updatedSchool.getName() + " already exists");
