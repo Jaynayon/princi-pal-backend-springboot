@@ -45,12 +45,11 @@ public class UserService {
                 user = userByUsername;
             }
 
-        } else {
-            return false; // user not found
+            // Verify the password using BCrypt
+            return passwordEncoder.matches(password, user.getPassword());
         }
 
-        // Verify the password using BCrypt
-        return passwordEncoder.matches(password, user.getPassword());
+        return false; // User not found
     }
 
     public User getUserByEmail(String email) {
@@ -67,5 +66,11 @@ public class UserService {
 
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
+    }
+    public boolean checkIfUserExists(String emailOrUsername) {
+        User userByEmail = userRepository.findByEmail(emailOrUsername);
+        User userByUsername = userRepository.findByUsername(emailOrUsername);
+        
+        return userByEmail != null || userByUsername != null;
     }
 }
