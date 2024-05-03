@@ -14,12 +14,14 @@ public class PrincipalApplication {
 		SpringApplication.run(PrincipalApplication.class, args);
 
 		// Manually invoke ExcelService to insert LR data upon application startup
-		ExcelService excelService = new ExcelService();
-		try {
-			excelService.insertLRData();
-		} catch (IOException e) {
-			e.printStackTrace(); // Handle or log the exception appropriately
-		}
+		/*
+		 * ExcelService excelService = new ExcelService();
+		 * try {
+		 * excelService.insertLRData();
+		 * } catch (IOException e) {
+		 * e.printStackTrace(); // Handle or log the exception appropriately
+		 * }
+		 */
 	}
 
 }
