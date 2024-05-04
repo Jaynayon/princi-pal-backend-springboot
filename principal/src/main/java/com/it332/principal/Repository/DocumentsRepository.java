@@ -7,4 +7,6 @@ import com.it332.principal.Models.Documents;
 public interface DocumentsRepository extends MongoRepository<Documents, String> {
     // Define custom query methods here if needed
     Documents findBySchoolIdAndYearAndMonth(String schoolId, String year, String month);
+
+    Documents findByYearAndMonth(String year, String month);
 }

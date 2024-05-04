@@ -1,6 +1,11 @@
 package com.it332.principal.Controllers;
 
+import com.it332.principal.DTO.DocumentsPatch;
+import com.it332.principal.DTO.DocumentsResponse;
+import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Models.Documents;
+import com.it332.principal.Models.School;
+import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.DocumentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,17 +23,55 @@ public class DocumentsController {
 
     // Endpoint to create a new document
     @PostMapping("/create")
-    public ResponseEntity<Documents> createDocument(@RequestBody Documents document) {
-        Documents savedDocument = documentsService.saveDocument(document);
-        return new ResponseEntity<>(savedDocument, HttpStatus.CREATED);
+    public ResponseEntity<Object> createDocument(@RequestBody Documents document) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            DocumentsResponse savedDocument = documentsService.saveDocument(document);
+            return new ResponseEntity<>(savedDocument, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate document is detected
+            err.setMessage("Failed to create Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
     }
 
     @GetMapping("/{school}/lrs/{year}/{month}")
-    public ResponseEntity<Documents> getDocumentBySchoolYearMonth(@PathVariable String school,
+    public ResponseEntity<Object> getDocumentBySchoolYearMonth(@PathVariable String school,
             @PathVariable String year,
             @PathVariable String month) throws Exception {
-        Documents document = documentsService.getDocumentBySchoolYearMonth(school, year, month);
-        return new ResponseEntity<>(document, HttpStatus.OK);
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            DocumentsResponse document = documentsService.getDocumentBySchoolYearMonth(school, year, month);
+            return new ResponseEntity<>(document, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
     }
 
     // Endpoint to retrieve all documents
@@ -49,6 +92,47 @@ public class DocumentsController {
         }
     }
 
-    // Add more endpoints as needed (e.g., update and delete)
+    @PatchMapping("/{id}")
+    public ResponseEntity<Object> updateDocument(@PathVariable String id, @RequestBody DocumentsPatch updatedSchool) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            Documents updatedEntity = documentsService.updateDocument(id, updatedSchool);
+            return ResponseEntity.ok(updatedEntity);
+        } catch (IllegalArgumentException e) {
+            err.setMessage("Failed to patch Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Document not found: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            err.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteDocument(@PathVariable String id) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            documentsService.deleteDocumentById(id);
+            return ResponseEntity.noContent().build(); // Return 204 No Content on successful deletion
+        } catch (IllegalArgumentException e) {
+            err.setMessage("Failed to delete Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to delete Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            err.setMessage("Failed to delete Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
 
 }
