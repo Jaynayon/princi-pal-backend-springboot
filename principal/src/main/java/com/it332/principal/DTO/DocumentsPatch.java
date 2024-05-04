@@ -25,14 +25,16 @@ public class DocumentsPatch {
     public DocumentsPatch() {
     }
 
-    public DocumentsPatch(Documents document) {
-        setBudget(document.getBudget());
-        setBudgetLimit(document.getBudgetLimit());
-        setCashAdvance(document.getCashAdvance());
-        setBudgetExceeded(document.isBudgetExceeded());
-        setSds(document.getSds());
-        setClaimant(document.getClaimant());
-        setHeadAccounting(document.getHeadAccounting());
-    }
+    /*
+     * public DocumentsPatch(Documents document) {
+     * setBudget(document.getBudget());
+     * setBudgetLimit(document.getBudgetLimit());
+     * setCashAdvance(document.getCashAdvance());
+     * setBudgetExceeded(document.isBudgetExceeded());
+     * setSds(document.getSds());
+     * setClaimant(document.getClaimant());
+     * setHeadAccounting(document.getHeadAccounting());
+     * }
+     */
 
 }
