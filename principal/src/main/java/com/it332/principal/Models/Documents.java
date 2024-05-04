@@ -21,15 +21,12 @@ public class Documents {
     private String year;
 
     @Min(value = 0, message = "Budget must be a non-negative number")
-    @Max(value = 999999, message = "Budget must not exceed 999999")
     private Double budget;
 
     @Min(value = 0, message = "Budget limit must be a non-negative number")
-    @Max(value = 999999, message = "Budget limit must not exceed 999999")
     private Double budgetLimit;
 
     @Min(value = 0, message = "Cash advance must be a non-negative number")
-    @Max(value = 999999, message = "Cash advance must not exceed 999999")
     private Double cashAdvance;
 
     private boolean budgetExceeded;
@@ -44,9 +41,9 @@ public class Documents {
     }
 
     public Documents(String schoolId, @NotBlank String month, @NotBlank String year,
-            @Min(value = 0, message = "Budget must be a non-negative number") @Max(value = 999999, message = "Budget must not exceed 999999") Double budget,
-            @Min(value = 0, message = "Budget limit must be a non-negative number") @Max(value = 999999, message = "Budget limit must not exceed 999999") Double budgetLimit,
-            @Min(value = 0, message = "Cash advance must be a non-negative number") @Max(value = 999999, message = "Cash advance must not exceed 999999") Double cashAdvance,
+            @Min(value = 0, message = "Budget must be a non-negative number") Double budget,
+            @Min(value = 0, message = "Budget limit must be a non-negative number") Double budgetLimit,
+            @Min(value = 0, message = "Cash advance must be a non-negative number") Double cashAdvance,
             boolean budgetExceeded, String sds, String claimant, String headAccounting) {
         this.schoolId = schoolId;
         this.month = month;
