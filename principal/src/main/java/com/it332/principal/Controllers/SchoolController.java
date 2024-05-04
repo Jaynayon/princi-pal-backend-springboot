@@ -36,7 +36,7 @@ public class SchoolController {
             return new ResponseEntity<>(newSchool, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate school name is detected
-            err.setMessage("Failed to get school: " + e.getMessage());
+            err.setMessage("Failed to create school: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(err);
         } catch (Exception e) {
