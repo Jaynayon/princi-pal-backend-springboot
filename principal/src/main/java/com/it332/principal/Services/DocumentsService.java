@@ -2,15 +2,15 @@ package com.it332.principal.Services;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.DocumentsPatch;
 import com.it332.principal.DTO.DocumentsResponse;
+import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.Documents;
+import com.it332.principal.Models.LR;
 import com.it332.principal.Models.School;
 import com.it332.principal.Repository.DocumentsRepository;
-import com.it332.principal.Repository.SchoolRepository;
 import com.it332.principal.Security.NotFoundException;
 
 import java.util.List;
