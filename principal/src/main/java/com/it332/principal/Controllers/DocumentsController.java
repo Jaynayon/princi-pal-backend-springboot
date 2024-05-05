@@ -4,7 +4,6 @@ import com.it332.principal.DTO.DocumentsPatch;
 import com.it332.principal.DTO.DocumentsResponse;
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Models.Documents;
-import com.it332.principal.Models.School;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.DocumentsService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,12 +1,7 @@
 package com.it332.principal.Models;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.Month;
-import java.util.Date;
 
 import javax.validation.constraints.*;
 
