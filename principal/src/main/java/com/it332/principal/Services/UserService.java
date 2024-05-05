@@ -1,5 +1,7 @@
 package com.it332.principal.Services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,8 +55,18 @@ public class UserService {
         return false; // User not found
     }
 
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new NotFoundException("User not found with email: " + email);
+        }
+
+        return user;
     }
 
     public User getUserById(String id) {

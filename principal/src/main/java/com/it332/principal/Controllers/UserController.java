@@ -3,6 +3,8 @@ package com.it332.principal.Controllers;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +93,41 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(err);
         }
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Object> getUserByEmail(@Valid @PathVariable String email) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            User user = userService.getUserByEmail(email);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> allUsers = userService.getAllUsers();
+        return new ResponseEntity<>(allUsers, HttpStatus.OK);
     }
 
     private ResponseCookie createJwtCookie(String token) {
