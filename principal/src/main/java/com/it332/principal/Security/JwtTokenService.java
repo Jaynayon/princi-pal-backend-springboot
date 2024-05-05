@@ -22,8 +22,8 @@ public class JwtTokenService {
                 String userId = claims.get("sub", String.class);
 
                 // Remove "sub" and add "id" with the same value
-                claims.remove("sub");
                 claims.put("id", userId);
+                claims.remove("sub");
             }
 
             return claims;

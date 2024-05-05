@@ -3,17 +3,24 @@ package com.it332.principal.Controllers;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.it332.principal.DTO.ErrorMessage;
+import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
 import com.it332.principal.Models.UserCredentials;
+import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UserService;
 
 @RestController
@@ -55,6 +62,35 @@ public class UserController {
         String emailOrUsername = credentials.getEmailOrUsername();
         boolean exists = userService.checkIfUserExists(emailOrUsername);
         return ResponseEntity.ok(exists);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getUserById(@Valid @PathVariable String id) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            User user = userService.getUserById(id);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
     }
 
     private ResponseCookie createJwtCookie(String token) {
