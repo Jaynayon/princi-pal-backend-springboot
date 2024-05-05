@@ -1,6 +1,13 @@
 package com.it332.principal.Models;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "LR")
 public class LR {
+    @Id
+    private String id;
+    private String documentsId;
     private String date;
     private String orsBursNo;
     private String particulars;
@@ -45,5 +52,21 @@ public class LR {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public String getDocumentsId() {
+        return documentsId;
+    }
+
+    public void setDocumentsId(String documentsId) {
+        this.documentsId = documentsId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

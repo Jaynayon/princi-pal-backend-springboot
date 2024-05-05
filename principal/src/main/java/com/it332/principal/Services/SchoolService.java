@@ -44,12 +44,15 @@ public class SchoolService {
     }
 
     public School updateSchool(String id, School updatedSchool) {
-        // Validate the format of the provided ID
-        if (!ObjectId.isValid(id)) {
-            throw new IllegalArgumentException("Invalid ID format");
-        }
-
+        // Check if school exists
         School existingSchool = getSchoolById(id);
+
+        // Check if school name is already taken
+        School nameAlreadyExists = schoolRepository.findByName(updatedSchool.getName());
+
+        if (nameAlreadyExists != null) {
+            throw new IllegalArgumentException("School with name " + updatedSchool.getName() + " already exists");
+        }
 
         existingSchool.setName(updatedSchool.getName());
 
@@ -57,11 +60,6 @@ public class SchoolService {
     }
 
     public void deleteSchoolById(String id) {
-        // Validate the format of the provided ID
-        if (!ObjectId.isValid(id)) {
-            throw new IllegalArgumentException("Invalid ID format");
-        }
-
         School school = getSchoolById(id);
 
         schoolRepository.delete(school);

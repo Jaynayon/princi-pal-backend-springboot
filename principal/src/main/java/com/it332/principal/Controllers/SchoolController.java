@@ -7,9 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,20 +30,21 @@ public class SchoolController {
 
     @PostMapping("/create")
     public ResponseEntity<Object> createSchool(@Valid @RequestBody School school) {
+        ErrorMessage err = new ErrorMessage("");
         try {
             School newSchool = schoolService.createSchool(school);
             return new ResponseEntity<>(newSchool, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate school name is detected
-            String errorMessage = "Failed to create school: " + e.getMessage();
-            ErrorMessage err = new ErrorMessage(errorMessage);
-            return new ResponseEntity<>(err, HttpStatus.CONFLICT);
+            err.setMessage("Failed to create school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
         } catch (Exception e) {
             // Catching any other unexpected exceptions
             e.printStackTrace();
-            String errorMessage = "Internal server error occurred";
-            ErrorMessage err = new ErrorMessage(errorMessage);
-            return new ResponseEntity<>(err, HttpStatus.INTERNAL_SERVER_ERROR);
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
         }
     }
 
@@ -91,7 +90,7 @@ public class SchoolController {
             School updatedEntity = schoolService.updateSchool(id, updatedSchool);
             return ResponseEntity.ok(updatedEntity);
         } catch (IllegalArgumentException e) {
-            err.setMessage("Invalid ID format: " + e.getMessage());
+            err.setMessage("Failed to patch School: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(err);
         } catch (NotFoundException e) {
@@ -112,12 +111,12 @@ public class SchoolController {
             schoolService.deleteSchoolById(id);
             return ResponseEntity.noContent().build(); // Return 204 No Content on successful deletion
         } catch (IllegalArgumentException e) {
-            err.setMessage("Invalid ID format: " + e.getMessage());
+            err.setMessage("Failed to delete school: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(err);
         } catch (NotFoundException e) {
             // This exception is thrown when a no school is detected
-            err.setMessage("Failed to get school: " + e.getMessage());
+            err.setMessage("Failed to delete school: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(err);
         } catch (Exception e) {
