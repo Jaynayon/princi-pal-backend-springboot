@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class LRResponse {
+    private String id;
     private String date;
     private String orsBursNo;
     private String particulars;

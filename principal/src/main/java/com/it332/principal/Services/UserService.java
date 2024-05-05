@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.it332.principal.Models.User;
 import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.JwtUtil;
+import com.it332.principal.Security.NotFoundException;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -56,6 +57,11 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public User getUserById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Document not found with ID: " + id));
+    }
+
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -67,10 +73,11 @@ public class UserService {
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
     }
+
     public boolean checkIfUserExists(String emailOrUsername) {
         User userByEmail = userRepository.findByEmail(emailOrUsername);
         User userByUsername = userRepository.findByUsername(emailOrUsername);
-        
+
         return userByEmail != null || userByUsername != null;
     }
 }
