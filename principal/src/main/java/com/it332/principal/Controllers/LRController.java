@@ -54,7 +54,7 @@ public class LRController {
         return new ResponseEntity<>(lrList, HttpStatus.OK);
     }
 
-    @GetMapping("/by-documents/{documentsId}")
+    @GetMapping("/documents/{documentsId}")
     public ResponseEntity<Object> getAllLRsByDocumentsId(@PathVariable String documentsId) {
         try {
             List<LRResponse> lrList = lrService.getAllLRsByDocumentsId(documentsId);
