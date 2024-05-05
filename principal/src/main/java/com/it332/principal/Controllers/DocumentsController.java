@@ -48,7 +48,7 @@ public class DocumentsController {
         }
     }
 
-    @GetMapping("/school/{school}/lrs/{year}/{month}")
+    @GetMapping("/school/{school}/{year}/{month}")
     public ResponseEntity<Object> getDocumentBySchoolYearMonth(@PathVariable String school,
             @PathVariable String year,
             @PathVariable String month) throws Exception {
