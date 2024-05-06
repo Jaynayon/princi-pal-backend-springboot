@@ -3,9 +3,11 @@ package com.it332.principal.Services;
 import org.apache.poi.ss.usermodel.*;
 //import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.LR;
 
 import java.io.IOException;
@@ -16,7 +18,10 @@ import java.io.ByteArrayOutputStream;
 @Service
 public class ExcelService {
 
-    public byte[] generateLRData(List<LR> dataToWrite) throws IOException {
+    @Autowired
+    LRService lrService;
+
+    public byte[] generateLRData(String id) throws IOException {
         // Mock LR data for testing
         // List<LR> dataToWrite = new ArrayList<>();
         // dataToWrite.add(new LR("11/11/2023", "SI# 2056",
@@ -26,6 +31,8 @@ public class ExcelService {
         // 2500));
         // dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars",
         // 5000));
+
+        List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(id);
 
         // School name for output file naming
         String schoolName = "Jaclupan";
@@ -76,7 +83,7 @@ public class ExcelService {
             }
 
             // Write values to specific cells and apply the correct cell styles
-            for (LR data : dataToWrite) {
+            for (LRResponse data : dataToWrite) {
                 Row row = sheet.createRow(rowIndex);
 
                 // Populate cells and apply styles
