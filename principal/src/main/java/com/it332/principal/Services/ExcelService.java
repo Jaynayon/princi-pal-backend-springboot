@@ -1,31 +1,31 @@
 package com.it332.principal.Services;
 
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellReference;
+//import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.it332.principal.Models.LR;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
-
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 
 @Service
 public class ExcelService {
 
-    public void insertLRData() throws IOException {
+    public byte[] generateLRData(List<LR> dataToWrite) throws IOException {
         // Mock LR data for testing
-        List<LR> dataToWrite = new ArrayList<>();
-        dataToWrite.add(new LR("11/11/2023", "SI# 2056",
-                "TINONGS FOOD INTRNL- Purchased torta bread (small) for District Meet", 3124));
-        dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars", 2500));
-        dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars", 5000));
+        // List<LR> dataToWrite = new ArrayList<>();
+        // dataToWrite.add(new LR("11/11/2023", "SI# 2056",
+        // "TINONGS FOOD INTRNL- Purchased torta bread (small) for District Meet",
+        // 3124));
+        // dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars",
+        // 2500));
+        // dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars",
+        // 5000));
 
         // School name for output file naming
         String schoolName = "Jaclupan";
@@ -119,26 +119,32 @@ public class ExcelService {
             workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
 
             // Get the absolute path to the project's root directory
-            String projectRootPath = System.getProperty("user.dir");
+            // String projectRootPath = System.getProperty("user.dir");
 
-            // Define the output directory path within the project's resources
-            String outputDirectoryPath = projectRootPath + "/src/main/resources/Output/";
+            // // Define the output directory path within the project's resources
+            // String outputDirectoryPath = projectRootPath + "/src/main/resources/Output/";
 
-            // Create the output directory if it doesn't exist
-            File outputDirectory = new File(outputDirectoryPath);
-            if (!outputDirectory.exists()) {
-                outputDirectory.mkdirs();
-            }
-            // Define the absolute output file path
-            String outputFilePath = outputDirectoryPath + schoolName + "_LR-2024.xlsx";
+            // // Create the output directory if it doesn't exist
+            // File outputDirectory = new File(outputDirectoryPath);
+            // if (!outputDirectory.exists()) {
+            // outputDirectory.mkdirs();
+            // }
+            // // Define the absolute output file path
+            // String outputFilePath = outputDirectoryPath + schoolName + "_LR-2024.xlsx";
 
-            // Save the workbook to the output file
-            try (FileOutputStream fileOut = new FileOutputStream(outputFilePath)) {
-                workbook.write(fileOut);
-            }
+            // // Save the workbook to the output file
+            // try (FileOutputStream fileOut = new FileOutputStream(outputFilePath)) {
+            // workbook.write(fileOut);
+            // }
 
-            System.out.println("Values written to Excel file: " + outputFilePath);
-            workbook.close();
+            // System.out.println("Values written to Excel file: " + outputFilePath);
+            // workbook.close();
+
+            // Write workbook to ByteArrayOutputStream
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            // workbook.close();
+            return outputStream.toByteArray(); // Return the byte array
 
         }
     }
