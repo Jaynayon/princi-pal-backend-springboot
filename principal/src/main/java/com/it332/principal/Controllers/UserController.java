@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,17 +36,33 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User newUser = userService.createUser(user);
-        String token = userService.generateToken(newUser.getId()); // Generate JWT token
+    public ResponseEntity<Object> createUser(@RequestBody User user) {
+        // User newUser = userService.createUser(user);
+        // // String token = userService.generateToken(newUser.getId()); // Generate JWT token
 
-        // Set the token as a cookie in the response
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.SET_COOKIE, createJwtCookie(token).toString());
+        // // Set the token as a cookie in the response
+        // // HttpHeaders headers = new HttpHeaders();
+        // // headers.add(HttpHeaders.SET_COOKIE, createJwtCookie(token).toString());
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .headers(headers)
-                .body(newUser);
+        // return ResponseEntity.status(HttpStatus.CREATED)
+        //         //.headers(headers)
+        //         .body(newUser);
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            User newUser = userService.createUser(user); // Corrected method invocation
+            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to create user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
     }
 
     @PostMapping("/validate")
@@ -130,6 +148,31 @@ public class UserController {
         return new ResponseEntity<>(allUsers, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteUserById(@PathVariable String id) {
+        try {
+            userService.deleteUserById(id);
+            String successMessage = "User " + id + " is successfully deleted";
+            return ResponseEntity.ok().body(successMessage); // User deleted successfully
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with ID: " + id);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred");
+        }
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Object> updateUser(@PathVariable String id, @RequestBody User updateUser) {
+        try {
+            userService.updateUser(id, updateUser);
+            String successMessage = "User " + id + " updated successfully";
+            return ResponseEntity.ok().body(successMessage); // User updated successfully
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Failed to update user: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred");
+        }
+    }
     private ResponseCookie createJwtCookie(String token) {
         return ResponseCookie.from("jwt", token)
                 // .httpOnly(true) // Make the cookie accessible only via HTTP (not accessible
