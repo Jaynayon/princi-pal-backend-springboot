@@ -70,8 +70,8 @@ public class ExcelService {
                 // Set borders (all borders)
                 cellStyles[i].setBorderTop(BorderStyle.THIN);
                 cellStyles[i].setBorderBottom(BorderStyle.THIN);
-                cellStyles[i].setBorderLeft(BorderStyle.THIN);
                 cellStyles[i].setBorderRight(BorderStyle.MEDIUM);
+                cellStyles[i].setBorderLeft(BorderStyle.MEDIUM);
 
                 // Apply number format with two decimal places to column 4 (Amount)
                 if (i == 4) {
@@ -176,6 +176,7 @@ public class ExcelService {
 
         // Set alignment to centered
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setBorderLeft(BorderStyle.MEDIUM);
 
         // Apply the new CellStyle to cell B96
         cell.setCellStyle(cellStyle);
