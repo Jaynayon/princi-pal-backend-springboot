@@ -56,6 +56,26 @@ public class UserService {
         return false; // User not found
     }
 
+    public User getUserByEmailUsername(String emailOrUsername) {
+        // Find user by email or username
+        User userByEmail = userRepository.findByEmail(emailOrUsername);
+        User userByUsername = userRepository.findByUsername(emailOrUsername);
+        User user;
+
+        if (userByEmail != null || userByUsername != null) {
+            if (userByEmail != null) {
+                user = getUserByEmail(emailOrUsername);
+            } else {
+                user = getUserByUsername(emailOrUsername);
+            }
+
+            // Verify the password using BCrypt
+            return user;
+        }
+
+        throw new NotFoundException("User not found with email/username: " + emailOrUsername);
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -83,7 +103,7 @@ public class UserService {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-    
+
             // Update only the fields that are present in updateUser
             if (updateUser.getFname() != null) {
                 user.setFname(updateUser.getFname());
@@ -110,14 +130,12 @@ public class UserService {
             if (updateUser.getAvatar() != null) {
                 user.setAvatar(updateUser.getAvatar());
             }
-    
+
             userRepository.save(user); // Save the updated user object
         } else {
             throw new NotFoundException("User not found with ID: " + userId);
         }
     }
-    
-
 
     public void deleteUserById(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
