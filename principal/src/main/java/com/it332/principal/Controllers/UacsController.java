@@ -50,7 +50,7 @@ public class UacsController {
 
     @GetMapping("/all")
     public ResponseEntity<List<Uacs>> getAllUacs() {
-        List<Uacs> allUacs = uacsService.getAllSchools();
+        List<Uacs> allUacs = uacsService.getAllUacs();
         return new ResponseEntity<>(allUacs, HttpStatus.OK);
     }
 
