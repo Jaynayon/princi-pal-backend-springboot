@@ -26,13 +26,6 @@ public class ExcelController {
     @GetMapping("/downloadExcel/{id}")
     public ResponseEntity<byte[]> downloadExcel(@PathVariable String id) {
         try {
-            // Mock LR data for testing
-            List<LR> dataToWrite = new ArrayList<>();
-            dataToWrite.add(new LR("11/11/2023", "SI# 2056",
-                    "TINONGS FOOD INTRNL- Purchased torta bread (small) for District Meet", 3124));
-            dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars", 2500));
-            dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars", 5000));
-
             // Generate Excel file content as byte array
             byte[] excelBytes = excelService.generateLRData(id);
 
