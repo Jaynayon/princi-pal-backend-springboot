@@ -79,10 +79,11 @@ public class UserController {
 
     @PostMapping("/exists")
     public ResponseEntity<Boolean> checkIfUserExists(@RequestBody UserCredentials credentials) {
-        String emailOrUsername = credentials.getEmailOrUsername();
-        boolean exists = userService.checkIfUserExists(emailOrUsername);
-        return ResponseEntity.ok(exists);
+    String emailOrUsername = credentials.getEmailOrUsername();
+    boolean exists = userService.checkIfUserExists(emailOrUsername);
+    return ResponseEntity.ok(exists);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getUserById(@Valid @PathVariable String id) {
