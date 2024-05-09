@@ -21,6 +21,8 @@ public class PositionController {
     @Autowired
     private PositionService positionService;
 
+    ErrorMessage err = new ErrorMessage("");
+
     @PostMapping("/create")
     public ResponseEntity<Object> createPosition(@Valid @RequestBody Position position) {
         ErrorMessage err = new ErrorMessage("");
@@ -43,9 +45,24 @@ public class PositionController {
         return new ResponseEntity<>(allPositions, HttpStatus.OK);
     }
 
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Object> getPositionByName(@PathVariable String name) {
+        try {
+            Position existingPos = positionService.getPositionByName(name);
+            return new ResponseEntity<>(existingPos, HttpStatus.OK);
+        } catch (IllegalArgumentException | NotFoundException e) {
+            err.setMessage("Failed to get position: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+        } catch (Exception e) {
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Object> getPositionById(@Valid @PathVariable String id) {
-        ErrorMessage err = new ErrorMessage("");
+
         try {
             Position position = positionService.getPositionById(id);
             return new ResponseEntity<>(position, HttpStatus.OK);

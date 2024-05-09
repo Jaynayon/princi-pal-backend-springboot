@@ -26,7 +26,12 @@ public class PositionService {
     }
 
     public Position getPositionByName(String name) {
-        return positionRepository.findByName(name);
+        Position existPos = positionRepository.findByName(name);
+
+        if (existPos == null) {
+            throw new NotFoundException("Position not found with ID: " + name);
+        }
+        return existPos;
     }
 
     public List<Position> getAllPositions() {
