@@ -1,6 +1,7 @@
 package com.it332.principal.Controllers;
 
 import com.it332.principal.DTO.ErrorMessage;
+import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.LR;
 import com.it332.principal.Security.NotFoundException;
@@ -25,7 +26,7 @@ public class LRController {
 
     // Endpoint to create a new LR document
     @PostMapping("/create")
-    public ResponseEntity<Object> createLR(@RequestBody @Valid LR lr) {
+    public ResponseEntity<Object> createLR(@RequestBody @Valid LRRequest lr) {
         try {
             LR savedLR = lrService.saveLR(lr);
             return new ResponseEntity<>(savedLR, HttpStatus.CREATED);
@@ -106,7 +107,7 @@ public class LRController {
 
     // Endpoint to update an existing LR document
     @PatchMapping("/{id}")
-    public ResponseEntity<Object> updateLR(@PathVariable String id, @RequestBody @Valid LR updatedLR) {
+    public ResponseEntity<Object> updateLR(@PathVariable String id, @RequestBody @Valid LRRequest updatedLR) {
         try {
             LR updatedEntity = lrService.updateLR(id, updatedLR);
             return ResponseEntity.ok(updatedEntity);
