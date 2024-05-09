@@ -52,7 +52,7 @@ public class UacsService {
         return entity;
     }
 
-    public List<Uacs> getAllSchools() {
+    public List<Uacs> getAllUacs() {
         return uacsRepository.findAll();
     }
 

@@ -1,8 +1,10 @@
 package com.it332.principal.Services;
 
+import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.LR;
+import com.it332.principal.Models.Uacs;
 import com.it332.principal.Repository.DocumentsRepository;
 import com.it332.principal.Repository.LRRepository;
 import com.it332.principal.Security.NotFoundException;
@@ -25,19 +27,23 @@ public class LRService {
     @Autowired
     private DocumentsService documentsService;
 
+    @Autowired
+    private UacsService uacsService;
+
     Documents existingDocument;
 
-    public LR saveLR(LR lr) {
+    public LR saveLR(LRRequest lr) {
         // Validate LR fields if needed before saving (e.g., check for required fields)
         existingDocument = documentsService.getDocumentById(lr.getDocumentsId());
+        Uacs existingUacs = uacsService.getUacsByCode(lr.getObjectCode());
 
         // Save the LR
-        LR savedLR = lrRepository.save(lr);
+        LR savedLR = new LR(lr, existingUacs);
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentAmount(lr.getDocumentsId());
 
-        return savedLR;
+        return lrRepository.save(savedLR);
     }
 
     public void updateDocumentAmount(String id) {
@@ -81,7 +87,7 @@ public class LRService {
         return lrRepository.findByDocumentsId(documentsId);
     }
 
-    public LR updateLR(String id, LR updatedLR) {
+    public LR updateLR(String id, LRRequest updatedLR) {
         LR lr = getLRById(id);
 
         // Update LR fields based on the provided updatedLR object
@@ -96,6 +102,16 @@ public class LRService {
         }
         if (updatedLR.getAmount() != 0) {
             lr.setAmount(updatedLR.getAmount());
+        }
+        if (updatedLR.getObjectCode() != null) {
+            Uacs existingUacs = uacsService.getUacsByCode(updatedLR.getObjectCode());
+            lr.setObjectCode(existingUacs);
+        }
+        if (updatedLR.getPayee() != null) {
+            lr.setPayee(updatedLR.getPayee());
+        }
+        if (updatedLR.getNatureOfPayment() != null) {
+            lr.setNatureOfPayment(updatedLR.getNatureOfPayment());
         }
 
         LR newLR = lrRepository.save(lr);
