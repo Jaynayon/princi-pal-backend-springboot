@@ -3,6 +3,11 @@ package com.it332.principal.Models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.it332.principal.DTO.LRRequest;
+
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 @Document(collection = "LR")
 public class LR {
     @Id
@@ -12,16 +17,74 @@ public class LR {
     private String orsBursNo;
     private String particulars;
     private double amount;
+    private Uacs objectCode;
+    private String payee;
+    private String natureOfPayment;
 
     // Constructor
-    public LR(String date, String orsBursNo, String particulars, double amount) {
+    public LR() {
+    }
+
+    public LR(String date, String orsBursNo, String particulars, double amount, String documentsId,
+            Uacs objectCode, String payee, String natureOfPayment) {
+        this.documentsId = documentsId;
         this.date = date;
         this.orsBursNo = orsBursNo;
         this.particulars = particulars;
         this.amount = amount;
+        this.objectCode = objectCode;
+        this.payee = payee;
+        this.natureOfPayment = natureOfPayment;
+    }
+
+    // Overload constructor without ObjectCode
+    public LR(String date, String orsBursNo, String particulars, double amount, String documentsId, String payee,
+            String natureOfPayment) {
+        this.documentsId = documentsId;
+        this.date = date;
+        this.orsBursNo = orsBursNo;
+        this.particulars = particulars;
+        this.amount = amount;
+        this.payee = payee;
+        this.natureOfPayment = natureOfPayment;
+    }
+
+    public LR(LRRequest lr, Uacs objectCode) {
+        this.documentsId = lr.getDocumentsId();
+        this.date = lr.getDate();
+        this.orsBursNo = lr.getOrsBursNo();
+        this.particulars = lr.getParticulars();
+        this.amount = lr.getAmount();
+        this.objectCode = objectCode;
+        this.payee = lr.getPayee();
+        this.natureOfPayment = lr.getNatureOfPayment();
     }
 
     // Getters and setters
+    public String getPayee() {
+        return payee;
+    }
+
+    public void setPayee(String payee) {
+        this.payee = payee;
+    }
+
+    public String getNatureOfPayment() {
+        return natureOfPayment;
+    }
+
+    public void setNatureOfPayment(String natureOfPayment) {
+        this.natureOfPayment = natureOfPayment;
+    }
+
+    public Uacs getObjectCode() {
+        return objectCode;
+    }
+
+    public void setObjectCode(Uacs objectCode) {
+        this.objectCode = objectCode;
+    }
+
     public String getDate() {
         return date;
     }
