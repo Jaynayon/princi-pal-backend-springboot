@@ -14,5 +14,5 @@ public interface LRRepository extends MongoRepository<LR, String> {
 
     // Custom query method to find LR entities by documentsId
     @Query(value = "{'documentsId': ?0}")
-    List<LR> findLRsByDocumentsId(String documentsId);
+    List<LRResponse> findLRsByDocumentsId(String documentsId);
 }

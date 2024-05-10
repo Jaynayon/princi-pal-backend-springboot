@@ -13,6 +13,9 @@ public class LRResponse {
     private String orsBursNo;
     private String particulars;
     private Double amount;
+    private String objectCode;
+    private String payee;
+    private String natureOfPayment;
 
     public LRResponse() {
     }
@@ -22,5 +25,8 @@ public class LRResponse {
         this.setOrsBursNo(lr.getOrsBursNo());
         this.setParticulars(lr.getParticulars());
         this.setAmount(lr.getAmount());
+        this.setObjectCode(lr.getObjectCode());
+        this.setPayee(lr.getPayee());
+        this.setNatureOfPayment(lr.getNatureOfPayment());
     }
 }

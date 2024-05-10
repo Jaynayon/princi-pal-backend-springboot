@@ -17,7 +17,7 @@ public class LR {
     private String orsBursNo;
     private String particulars;
     private double amount;
-    private Uacs objectCode;
+    private String objectCode;
     private String payee;
     private String natureOfPayment;
 
@@ -26,7 +26,7 @@ public class LR {
     }
 
     public LR(String date, String orsBursNo, String particulars, double amount, String documentsId,
-            Uacs objectCode, String payee, String natureOfPayment) {
+            String objectCode, String payee, String natureOfPayment) {
         this.documentsId = documentsId;
         this.date = date;
         this.orsBursNo = orsBursNo;
@@ -49,7 +49,7 @@ public class LR {
         this.natureOfPayment = natureOfPayment;
     }
 
-    public LR(LRRequest lr, Uacs objectCode) {
+    public LR(LRRequest lr, String objectCode) {
         this.documentsId = lr.getDocumentsId();
         this.date = lr.getDate();
         this.orsBursNo = lr.getOrsBursNo();
@@ -77,11 +77,11 @@ public class LR {
         this.natureOfPayment = natureOfPayment;
     }
 
-    public Uacs getObjectCode() {
+    public String getObjectCode() {
         return objectCode;
     }
 
-    public void setObjectCode(Uacs objectCode) {
+    public void setObjectCode(String objectCode) {
         this.objectCode = objectCode;
     }
 

@@ -37,13 +37,13 @@ public class LRService {
         existingDocument = documentsService.getDocumentById(lr.getDocumentsId());
         Uacs existingUacs = uacsService.getUacsByCode(lr.getObjectCode());
 
-        // Save the LR
-        LR savedLR = new LR(lr, existingUacs);
+        // Save the LR first
+        LR newLr = lrRepository.save(new LR(lr, existingUacs.getCode()));
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentAmount(lr.getDocumentsId());
 
-        return lrRepository.save(savedLR);
+        return newLr;
     }
 
     public void updateDocumentAmount(String id) {
@@ -105,7 +105,7 @@ public class LRService {
         }
         if (updatedLR.getObjectCode() != null) {
             Uacs existingUacs = uacsService.getUacsByCode(updatedLR.getObjectCode());
-            lr.setObjectCode(existingUacs);
+            lr.setObjectCode(existingUacs.getCode());
         }
         if (updatedLR.getPayee() != null) {
             lr.setPayee(updatedLR.getPayee());
