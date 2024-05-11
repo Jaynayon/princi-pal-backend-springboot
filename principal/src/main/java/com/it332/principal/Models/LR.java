@@ -1,8 +1,14 @@
 package com.it332.principal.Models;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.it332.principal.DTO.LRRequest;
 
 import lombok.AllArgsConstructor;
@@ -13,7 +19,10 @@ public class LR {
     @Id
     private String id;
     private String documentsId;
-    private String date;
+
+    @JsonFormat(pattern = "MM/dd/yyyy")
+    private Date date;
+
     private String orsBursNo;
     private String particulars;
     private double amount;
@@ -25,10 +34,10 @@ public class LR {
     public LR() {
     }
 
-    public LR(String date, String orsBursNo, String particulars, double amount, String documentsId,
+    public LR(Date date, String orsBursNo, String particulars, double amount, String documentsId,
             String objectCode, String payee, String natureOfPayment) {
         this.documentsId = documentsId;
-        this.date = date;
+        this.date = date; // Directly assign the date
         this.orsBursNo = orsBursNo;
         this.particulars = particulars;
         this.amount = amount;
@@ -38,10 +47,10 @@ public class LR {
     }
 
     // Overload constructor without ObjectCode
-    public LR(String date, String orsBursNo, String particulars, double amount, String documentsId, String payee,
+    public LR(Date date, String orsBursNo, String particulars, double amount, String documentsId, String payee,
             String natureOfPayment) {
         this.documentsId = documentsId;
-        this.date = date;
+        this.date = date; // Directly assign the date
         this.orsBursNo = orsBursNo;
         this.particulars = particulars;
         this.amount = amount;
@@ -51,7 +60,7 @@ public class LR {
 
     public LR(LRRequest lr, String objectCode) {
         this.documentsId = lr.getDocumentsId();
-        this.date = lr.getDate();
+        this.date = lr.getDate(); // Convert string date to Date type
         this.orsBursNo = lr.getOrsBursNo();
         this.particulars = lr.getParticulars();
         this.amount = lr.getAmount();
@@ -61,6 +70,63 @@ public class LR {
     }
 
     // Getters and setters
+    // Helper method to parse string date to Date object
+    private Date parseDate(String dateStr) {
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            return dateFormat.parse(dateStr);
+        } catch (ParseException e) {
+            // Handle parsing error appropriately
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Helper method to format Date object to string date
+    private String formatDate(Date date) {
+        if (date != null) {
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            return dateFormat.format(date);
+        }
+        return null;
+    }
+
+    // Helper method to parse string date to Date object and format it
+    private void setFormattedDate(String dateStr) {
+        try {
+            DateFormat inputFormat = new SimpleDateFormat("MM/dd/yyyy");
+            this.date = inputFormat.parse(dateStr); // Parse the input date string
+        } catch (ParseException e) {
+            e.printStackTrace();
+            this.date = null; // Handle parsing error appropriately
+        }
+    }
+
+    public String getDate() {
+        if (date != null) {
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            return dateFormat.format(date); // Format Date object as "MM/dd/yyyy" string
+        }
+        return null; // Return null if date is null (handle this case as needed)
+    }
+
+    public void setDate(String date) { // string args to date
+        try {
+            // Parse input date string into a Date object
+            DateFormat inputFormat = new SimpleDateFormat("MM/dd/yyyy");
+            Date parsedDate = inputFormat.parse(date);
+            this.date = parsedDate; // Set the parsed Date object
+        } catch (ParseException e) {
+            // Handle date parsing errors appropriately
+            e.printStackTrace();
+            // Optionally, set a default value or throw an exception
+        }
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     public String getPayee() {
         return payee;
     }
@@ -83,14 +149,6 @@ public class LR {
 
     public void setObjectCode(String objectCode) {
         this.objectCode = objectCode;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
     }
 
     public String getOrsBursNo() {

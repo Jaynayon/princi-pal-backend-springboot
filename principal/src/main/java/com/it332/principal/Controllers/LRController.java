@@ -28,6 +28,9 @@ public class LRController {
     @PostMapping("/create")
     public ResponseEntity<Object> createLR(@RequestBody @Valid LRRequest lr) {
         try {
+            // Debugging: Print LRRequest details for inspection
+            System.out.println("Received LRRequest: " + lr.getDate());
+
             LR savedLR = lrService.saveLR(lr);
             return new ResponseEntity<>(savedLR, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {

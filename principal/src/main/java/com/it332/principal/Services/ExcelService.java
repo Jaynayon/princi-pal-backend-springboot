@@ -22,16 +22,7 @@ public class ExcelService {
     LRService lrService;
 
     public byte[] generateLRData(String id) throws IOException {
-        // Mock LR data for testing
-        // List<LR> dataToWrite = new ArrayList<>();
-        // dataToWrite.add(new LR("11/11/2023", "SI# 2056",
-        // "TINONGS FOOD INTRNL- Purchased torta bread (small) for District Meet",
-        // 3124));
-        // dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars",
-        // 2500));
-        // dataToWrite.add(new LR("12/12/2023", "SI# 2057", "Example Particulars",
-        // 5000));
-
+        // Data to write
         List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(id);
 
         // School name for output file naming

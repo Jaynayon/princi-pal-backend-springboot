@@ -1,9 +1,14 @@
 package com.it332.principal.DTO;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class LRRequest {
     private String id;
     private String documentsId;
-    private String date;
+    private Date date;
     private String orsBursNo;
     private String particulars;
     private double amount;
@@ -17,7 +22,7 @@ public class LRRequest {
 
     public LRRequest(String date, String orsBursNo, String particulars, double amount, String documentId,
             String objectCode, String payee, String natureOfPayment) {
-        this.date = date;
+        setDate(date);
         this.documentsId = documentId;
         this.orsBursNo = orsBursNo;
         this.particulars = particulars;
@@ -28,6 +33,22 @@ public class LRRequest {
     }
 
     // Getters and setters
+    public void setDate(String date) {
+        try {
+            // Parse input date string into a Date object
+            DateFormat inputFormat = new SimpleDateFormat("MM/dd/yyyy");
+            this.date = inputFormat.parse(date);
+        } catch (ParseException e) {
+            // Handle date parsing errors appropriately
+            e.printStackTrace();
+            // Optionally, set a default value or throw an exception
+        }
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
     public String getObjectCode() {
         return objectCode;
     }
@@ -50,14 +71,6 @@ public class LRRequest {
 
     public void setNatureOfPayment(String natureOfPayment) {
         this.natureOfPayment = natureOfPayment;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
     }
 
     public String getOrsBursNo() {

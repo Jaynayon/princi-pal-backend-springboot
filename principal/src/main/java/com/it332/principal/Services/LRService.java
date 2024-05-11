@@ -13,7 +13,11 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LRService {
@@ -73,18 +77,22 @@ public class LRService {
     }
 
     public List<LR> getAllLRs() {
+        // List<LR> lrList = lrRepository.findAll();
         return lrRepository.findAll();
     }
 
     // Method to retrieve all LR documents with the same documentsId
     public List<LRResponse> getAllLRsByDocumentsId(String documentsId) {
         existingDocument = documentsService.getDocumentById(documentsId);
+        List<LR> lrList = lrRepository.findByDocumentsIdOrderByDateAsc(documentsId);
 
         if (existingDocument == null) {
             throw new NotFoundException("LR not found with ID: " + documentsId);
         }
 
-        return lrRepository.findByDocumentsId(documentsId);
+        return lrList.stream()
+                .map(LRResponse::new) // Map each LR to LRResponse using constructor
+                .collect(Collectors.toList());
     }
 
     public LR updateLR(String id, LRRequest updatedLR) {
