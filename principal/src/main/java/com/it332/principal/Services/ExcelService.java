@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import com.it332.principal.DTO.DocumentsResponse;
+import com.it332.principal.DTO.ExcelRequest;
 import com.it332.principal.DTO.LRResponse;
-import com.it332.principal.Models.LR;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,9 +22,16 @@ public class ExcelService {
     @Autowired
     LRService lrService;
 
-    public byte[] generateLRData(String id) throws IOException {
+    @Autowired
+    DocumentsService documentsService;
+
+    public byte[] generateLRData(ExcelRequest request) throws IOException {
         // Data to write
-        List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(id);
+        List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(request.getDocumentId());
+        DocumentsResponse document = documentsService.getDocumentBySchoolYearMonth(
+                request.getSchoolId(),
+                request.getYear(),
+                request.getMonth());
 
         // School name for output file naming
         String schoolName = "Jaclupan";
@@ -34,9 +42,11 @@ public class ExcelService {
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
 
-            setPeopleCells(sheet, workbook, "John Hammock", 96, 1);
+            setPeopleCells(sheet, workbook, document.getClaimant(), 96, 1);
 
-            setPeopleCells(sheet, workbook, "John Davello Verture", 96, 3);
+            setPeopleCells(sheet, workbook, document.getSds(), 96, 3);
+
+            setPeopleCells(sheet, workbook, document.getHeadAccounting(), 96, 4);
 
             int rowIndex = 12; // Start from row 13 (zero-based index)
 
@@ -138,6 +148,7 @@ public class ExcelService {
         // Set alignment to centered
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         cellStyle.setBorderLeft(BorderStyle.MEDIUM);
+        cellStyle.setBorderRight(BorderStyle.MEDIUM);
 
         // Apply the new CellStyle to cell B96
         cell.setCellStyle(cellStyle);
