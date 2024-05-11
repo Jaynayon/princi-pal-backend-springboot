@@ -33,19 +33,22 @@ public class ExcelService {
                 request.getYear(),
                 request.getMonth());
 
-        // School name for output file naming
-        String schoolName = "Jaclupan";
-
         // Load template workbook from the classpath
         ClassPathResource resource = new ClassPathResource("Templates/LR-2024.xlsx");
         try (InputStream inputStream = resource.getInputStream()) {
             Workbook workbook = new XSSFWorkbook(inputStream);
+
+            // Rename the sheet
+            // Formats sheet name to ex: JAN'24
+            workbook.setSheetName(0, formatMonthYear(
+                    request.getMonth(),
+                    request.getYear()));
+
             Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
 
+            // Claimant, SDS, and Head Accounting cells
             setPeopleCells(sheet, workbook, document.getClaimant(), 96, 1);
-
             setPeopleCells(sheet, workbook, document.getSds(), 96, 3);
-
             setPeopleCells(sheet, workbook, document.getHeadAccounting(), 96, 4);
 
             int rowIndex = 12; // Start from row 13 (zero-based index)
@@ -152,6 +155,18 @@ public class ExcelService {
 
         // Apply the new CellStyle to cell B96
         cell.setCellStyle(cellStyle);
+    }
 
+    public String formatMonthYear(String month, String year) {
+        // Convert month to uppercase and get the first three letters
+        String monthAbbreviation = month.substring(0, 3).toUpperCase();
+
+        // Get the last two characters of the year
+        String yearAbbreviation = year.substring(year.length() - 2);
+
+        // Concatenate the formatted month and year
+        String formatted = monthAbbreviation + "'" + yearAbbreviation;
+
+        return formatted;
     }
 }
