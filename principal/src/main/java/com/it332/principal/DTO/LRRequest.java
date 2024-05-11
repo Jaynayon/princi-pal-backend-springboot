@@ -40,8 +40,9 @@ public class LRRequest {
             this.date = inputFormat.parse(date);
         } catch (ParseException e) {
             // Handle date parsing errors appropriately
-            e.printStackTrace();
-            // Optionally, set a default value or throw an exception
+            // e.printStackTrace();
+            // Catch ParseException and rethrow as a custom runtime exception
+            throw new IllegalArgumentException("Invalid date format. Please provide the date in MM/dd/yyyy format.", e);
         }
     }
 
