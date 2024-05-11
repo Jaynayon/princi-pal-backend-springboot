@@ -72,18 +72,8 @@ public class DocumentsService {
         // Check if document exists
         Documents document = getDocumentById(id);
 
-        if (updatedSchool.getBudget() != null) {
-            document.setBudget(updatedSchool.getBudget());
-        }
         if (updatedSchool.getBudgetLimit() != null) {
             document.setBudgetLimit(updatedSchool.getBudgetLimit());
-        }
-        if (updatedSchool.getCashAdvance() != null) {
-            document.setCashAdvance(updatedSchool.getCashAdvance());
-        }
-        Boolean budgetExceeded = updatedSchool.isBudgetExceeded();
-        if (budgetExceeded != null) {
-            document.setBudgetExceeded(budgetExceeded);
         }
         if (updatedSchool.getSds() != null) {
             document.setSds(updatedSchool.getSds());
