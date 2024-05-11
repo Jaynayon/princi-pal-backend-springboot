@@ -105,38 +105,8 @@ public class ExcelService {
                 rowIndex++;
             }
 
-            /*
-             * // Update formula in cell E89 to sum values in column E from E12 to E88
-             * CellReference formulaCellRef = new CellReference("E89");
-             * Row formulaRow = sheet.getRow(formulaCellRef.getRow());
-             * Cell formulaCell = formulaRow.getCell(formulaCellRef.getCol());
-             * formulaCell.setCellFormula("SUM(E12:E" + (rowIndex) + ")");
-             */
-
             // Force recalculation of all formulas in the workbook
             workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
-
-            // Get the absolute path to the project's root directory
-            // String projectRootPath = System.getProperty("user.dir");
-
-            // // Define the output directory path within the project's resources
-            // String outputDirectoryPath = projectRootPath + "/src/main/resources/Output/";
-
-            // // Create the output directory if it doesn't exist
-            // File outputDirectory = new File(outputDirectoryPath);
-            // if (!outputDirectory.exists()) {
-            // outputDirectory.mkdirs();
-            // }
-            // // Define the absolute output file path
-            // String outputFilePath = outputDirectoryPath + schoolName + "_LR-2024.xlsx";
-
-            // // Save the workbook to the output file
-            // try (FileOutputStream fileOut = new FileOutputStream(outputFilePath)) {
-            // workbook.write(fileOut);
-            // }
-
-            // System.out.println("Values written to Excel file: " + outputFilePath);
-            // workbook.close();
 
             // Write workbook to ByteArrayOutputStream
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
