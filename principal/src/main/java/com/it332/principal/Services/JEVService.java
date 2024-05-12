@@ -1,6 +1,7 @@
 package com.it332.principal.Services;
 
 import com.it332.principal.DTO.JEVRequest;
+import com.it332.principal.DTO.JEVResponse;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.JEV;
 import com.it332.principal.Models.Uacs;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class JEVService {
@@ -48,11 +50,11 @@ public class JEVService {
     public void updateDocumentAmount(String id) {
         // Find all LR objects with the specified documentId
         existingDocument = documentsService.getDocumentById(id);
-        List<JEV> lrList = getAllJEVsByDocumentsId(id);
+        List<JEVResponse> lrList = getAllJEVsByDocumentsId(id);
 
         // Calculate the sum of amounts from the LR list
         double totalAmount = lrList.stream()
-                .mapToDouble(JEV::getAmount)
+                .mapToDouble(JEVResponse::getAmount)
                 .sum();
         // Update the Documents amount property with the calculated total amount
         existingDocument.setCashAdvance(totalAmount);
@@ -77,7 +79,7 @@ public class JEVService {
     }
 
     // Method to retrieve all LR documents with the same documentsId
-    public List<JEV> getAllJEVsByDocumentsId(String documentsId) {
+    public List<JEVResponse> getAllJEVsByDocumentsId(String documentsId) {
         existingDocument = documentsService.getDocumentById(documentsId);
         List<JEV> lrList = jevRepository.findByDocumentsId(documentsId);
 
@@ -85,10 +87,10 @@ public class JEVService {
             throw new NotFoundException("LR not found with ID: " + documentsId);
         }
 
-        // return lrList.stream()
-        // .map(LRResponse::new) // Map each LR to LRResponse using constructor
-        // .collect(Collectors.toList());
-        return lrList;
+        return lrList.stream()
+                .map(JEVResponse::new) // Map each LR to LRResponse using constructor
+                .collect(Collectors.toList());
+        // return lrList;
     }
 
     public JEV updateJEV(String id, JEVRequest updatedJEV) {
@@ -98,8 +100,8 @@ public class JEVService {
         if (updatedJEV.getAmount() != null) {
             jev.setAmount(updatedJEV.getAmount());
         }
-        if (updatedJEV.getCredit() != null) {
-            jev.setCredit(updatedJEV.getCredit());
+        if (updatedJEV.getAmountType() != null) {
+            jev.setAmountType(updatedJEV.getAmountType());
         }
 
         JEV newJEV = jevRepository.save(jev);

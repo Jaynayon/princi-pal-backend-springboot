@@ -10,24 +10,24 @@ public class JEVRequest {
     @NotBlank
     @NotNull
     private String documentsId;
-    private Boolean credit;
+    private String amountType;
     private Float amount;
 
     public JEVRequest() {
     }
 
-    public JEVRequest(@NotBlank @NotNull String objectCode, @NotBlank @NotNull String documentsId, Boolean credit,
+    public JEVRequest(@NotBlank @NotNull String objectCode, @NotBlank @NotNull String documentsId, String amountType,
             Float amount) {
         this.objectCode = objectCode;
         this.documentsId = documentsId;
-        setCredit(credit);
+        setAmountType(amountType);
         setAmount(amount);
     }
 
     public JEVRequest(@NotBlank @NotNull String objectCode, @NotBlank @NotNull String documentsId) {
         this.objectCode = objectCode;
         this.documentsId = documentsId;
-        setCredit(true);
+        setAmountType("Credit");
         setAmount(Float.parseFloat("0"));
     }
 
@@ -47,15 +47,15 @@ public class JEVRequest {
         this.documentsId = documentsId;
     }
 
-    public Boolean getCredit() {
-        return credit;
+    public String getAmountType() {
+        return amountType;
     }
 
-    public void setCredit(Boolean credit) {
-        if (credit == null) {
-            this.credit = true;
+    public void setAmountType(String amountType) {
+        if (amountType == null) {
+            this.amountType = "Credit";
         } else
-            this.credit = credit;
+            this.amountType = amountType;
     }
 
     public Float getAmount() {

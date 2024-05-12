@@ -2,6 +2,7 @@ package com.it332.principal.Controllers;
 
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.DTO.JEVRequest;
+import com.it332.principal.DTO.JEVResponse;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.JEV;
 import com.it332.principal.Security.NotFoundException;
@@ -61,7 +62,7 @@ public class JEVController {
     @GetMapping("/documents/{documentsId}")
     public ResponseEntity<Object> getAllLRsByDocumentsId(@PathVariable String documentsId) {
         try {
-            List<JEV> jevList = jevService.getAllJEVsByDocumentsId(documentsId);
+            List<JEVResponse> jevList = jevService.getAllJEVsByDocumentsId(documentsId);
             return new ResponseEntity<>(jevList, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected

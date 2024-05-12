@@ -22,13 +22,13 @@ public class JEV {
     @NotBlank
     @NotNull
     private String documentsId;
-    private Boolean credit;
+    private String amountType;
     private Float amount;
 
     public JEV(JEVRequest jev, Uacs uacs) {
         this.uacs = uacs;
         this.documentsId = jev.getDocumentsId();
-        setCredit(jev.getCredit());
+        setAmountType(jev.getAmountType());
         setAmount(jev.getAmount());
     }
 
@@ -59,15 +59,15 @@ public class JEV {
         this.documentsId = documentsId;
     }
 
-    public Boolean getCredit() {
-        return credit;
+    public String getAmountType() {
+        return amountType;
     }
 
-    public void setCredit(Boolean credit) {
-        if (credit == null) {
-            this.credit = true;
+    public void setAmountType(String amountType) {
+        if (amountType == null) {
+            this.amountType = "Credit";
         } else
-            this.credit = credit;
+            this.amountType = amountType;
 
     }
 
