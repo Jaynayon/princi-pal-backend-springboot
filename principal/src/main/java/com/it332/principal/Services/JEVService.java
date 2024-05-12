@@ -25,8 +25,8 @@ public class JEVService {
     @Autowired
     private DocumentsRepository documentsRepository;
 
-    @Autowired
-    private DocumentsService documentsService;
+    // @Autowired
+    // private DocumentsService documentsService;
 
     @Autowired
     private UacsService uacsService;
@@ -35,21 +35,54 @@ public class JEVService {
 
     public JEV saveJEV(JEVRequest jev) {
         // Validate LR fields if needed before saving (e.g., check for required fields)
-        existingDocument = documentsService.getDocumentById(jev.getDocumentsId());
+        existingDocument = getDocumentById(jev.getDocumentsId());
         Uacs existingUacs = uacsService.getUacsByCode(jev.getObjectCode());
 
-        // Save the LR first
+        // Check if JEV exists
+        JEV exist = jevRepository.findByDocumentsIdAndUacs_Code(jev.getDocumentsId(), jev.getObjectCode());
+
+        if (exist != null) {
+            throw new IllegalArgumentException("JEV with code " + jev.getObjectCode() + " already exists in Document: "
+                    + jev.getDocumentsId());
+        }
+
+        // Save the JEV first
         JEV newJev = jevRepository.save(new JEV(jev, existingUacs));
 
-        // Update the associated Document's budget based on the saved LR's amount
+        // Update the associated Document's budget based on the saved JEV's amount
         updateDocumentAmount(jev.getDocumentsId());
 
         return newJev;
     }
 
+    public void initializeJEV(String documentId) {
+        List<Uacs> allUacs = uacsService.getAllUacs();
+
+        // Iterate over each Uacs object in the list using a for-each loop
+        for (Uacs uacs : allUacs) {
+            saveJEV(new JEVRequest(uacs.getCode(), documentId));
+        }
+    }
+
+    public Documents getDocumentById(String id) {
+        // Validate the format of the provided ID
+        if (!ObjectId.isValid(id)) {
+            throw new IllegalArgumentException("Invalid ID format");
+        }
+
+        return documentsRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Document not found with ID: " + id));
+    }
+
+    public JEV findExistingJEV(String documentsId, String uacsCode) {
+        JEV exist = jevRepository.findByDocumentsIdAndUacs_Code(documentsId, uacsCode);
+
+        return exist;
+    }
+
     public void updateDocumentAmount(String id) {
-        // Find all LR objects with the specified documentId
-        existingDocument = documentsService.getDocumentById(id);
+        // Find all JEV objects with the specified documentId
+        existingDocument = getDocumentById(id);
         List<JEVResponse> lrList = getAllJEVsByDocumentsId(id);
 
         // Calculate the sum of amounts from the LR list
@@ -80,7 +113,7 @@ public class JEVService {
 
     // Method to retrieve all LR documents with the same documentsId
     public List<JEVResponse> getAllJEVsByDocumentsId(String documentsId) {
-        existingDocument = documentsService.getDocumentById(documentsId);
+        existingDocument = getDocumentById(documentsId);
         List<JEV> lrList = jevRepository.findByDocumentsId(documentsId);
 
         if (existingDocument == null) {
