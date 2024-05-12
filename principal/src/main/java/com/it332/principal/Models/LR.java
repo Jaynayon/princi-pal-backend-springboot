@@ -70,38 +70,6 @@ public class LR {
     }
 
     // Getters and setters
-    // Helper method to parse string date to Date object
-    private Date parseDate(String dateStr) {
-        try {
-            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-            return dateFormat.parse(dateStr);
-        } catch (ParseException e) {
-            // Handle parsing error appropriately
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    // Helper method to format Date object to string date
-    private String formatDate(Date date) {
-        if (date != null) {
-            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-            return dateFormat.format(date);
-        }
-        return null;
-    }
-
-    // Helper method to parse string date to Date object and format it
-    private void setFormattedDate(String dateStr) {
-        try {
-            DateFormat inputFormat = new SimpleDateFormat("MM/dd/yyyy");
-            this.date = inputFormat.parse(dateStr); // Parse the input date string
-        } catch (ParseException e) {
-            e.printStackTrace();
-            this.date = null; // Handle parsing error appropriately
-        }
-    }
-
     public String getDate() {
         if (date != null) {
             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
