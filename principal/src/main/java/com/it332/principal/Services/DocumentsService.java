@@ -22,6 +22,9 @@ public class DocumentsService {
     @Autowired
     private SchoolService schoolService;
 
+    @Autowired
+    public JEVService jevService;
+
     public DocumentsResponse saveDocument(Documents document) {
         // Check if school exists
         School existingSchool = schoolService.getSchoolById(document.getSchoolId());
@@ -36,6 +39,9 @@ public class DocumentsService {
 
         // Save the new document
         Documents newDoc = documentRepository.save(document);
+
+        // Initialize JEV's in new document
+        jevService.initializeJEV(newDoc.getId());
 
         return new DocumentsResponse(existingSchool, newDoc);
     }
