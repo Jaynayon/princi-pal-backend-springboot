@@ -35,6 +35,8 @@ public class ExcelService {
 
         // Load template workbook from the classpath
         ClassPathResource resource = new ClassPathResource("Templates/LR-2024.xlsx");
+
+        // LR Automation
         try (InputStream inputStream = resource.getInputStream()) {
             Workbook workbook = new XSSFWorkbook(inputStream);
 
@@ -121,12 +123,18 @@ public class ExcelService {
             // Force recalculation of all formulas in the workbook
             workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
 
+            // Assuming 'workbook' is your XSSFWorkbook object and 'sheet' is your target
+            // sheet
+            String sheetName = workbook.getSheetName(0); // Get sheet name (assuming first sheet)
+            // Set print area (adjust row and column indices)
+            workbook.setPrintArea(workbook.getSheetIndex(sheetName), 0, 4, 2, 100);
+
             // Write workbook to ByteArrayOutputStream
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
+
             // workbook.close();
             return outputStream.toByteArray(); // Return the byte array
-
         }
     }
 
