@@ -41,6 +41,19 @@ public class Documents {
     public Documents() {
     }
 
+    public Documents(String schoolId, @NotBlank String month, @NotBlank String year) {
+        this.schoolId = schoolId;
+        this.month = month;
+        this.year = year;
+        this.budget = 0.0;
+        this.budgetLimit = 0.0;
+        this.cashAdvance = 0.0;
+        this.budgetExceeded = false;
+        this.sds = "";
+        this.claimant = "";
+        this.headAccounting = "";
+    }
+
     public Documents(String schoolId, @NotBlank String month, @NotBlank String year,
             @Min(value = 0, message = "Budget must be a non-negative number") Double budget,
             @Min(value = 0, message = "Budget limit must be a non-negative number") Double budgetLimit,
