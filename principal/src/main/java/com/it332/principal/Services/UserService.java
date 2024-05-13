@@ -2,12 +2,17 @@ package com.it332.principal.Services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.it332.principal.DTO.UserResponse;
+import com.it332.principal.Models.Association;
+import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
+import com.it332.principal.Repository.AssociationRepository;
 import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.JwtUtil;
 import com.it332.principal.Security.NotFoundException;
@@ -19,6 +24,12 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AssociationRepository associationRepository;
+
+    @Autowired
+    private SchoolService schoolService;
 
     @Autowired
     private JwtUtil jwtUtil; // Inject your JwtUtil for token management
@@ -56,7 +67,7 @@ public class UserService {
         return false; // User not found
     }
 
-    public User getUserByEmailUsername(String emailOrUsername) {
+    public UserResponse getUserByEmailUsername(String emailOrUsername) {
         // Find user by email or username
         User userByEmail = userRepository.findByEmail(emailOrUsername);
         User userByUsername = userRepository.findByUsername(emailOrUsername);
@@ -69,8 +80,21 @@ public class UserService {
                 user = getUserByUsername(emailOrUsername);
             }
 
+            List<Association> associations = associationRepository.findByUserId(user.getId());
+
+            // Filter associations where approved is true
+            List<String> approvedSchoolIds = associations.stream()
+                    .filter(Association::isApproved)
+                    .map(Association::getSchoolId)
+                    .collect(Collectors.toList());
+
+            // Retrieve School objects for approved schoolIds
+            List<School> approvedSchools = approvedSchoolIds.stream()
+                    .map(schoolId -> schoolService.getSchoolById(schoolId))
+                    .collect(Collectors.toList());
+
             // Verify the password using BCrypt
-            return user;
+            return new UserResponse(user, approvedSchools);
         }
 
         throw new NotFoundException("User not found with email/username: " + emailOrUsername);
@@ -90,9 +114,25 @@ public class UserService {
         return user;
     }
 
-    public User getUserById(String id) {
-        return userRepository.findById(id)
+    public UserResponse getUserById(String id) {
+        User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Document not found with ID: " + id));
+
+        List<Association> associations = associationRepository.findByUserId(existingUser.getId());
+
+        // Filter associations where approved is true
+        List<String> approvedSchoolIds = associations.stream()
+                .filter(Association::isApproved)
+                .map(Association::getSchoolId)
+                .collect(Collectors.toList());
+
+        // Retrieve School objects for approved schoolIds
+        List<School> approvedSchools = approvedSchoolIds.stream()
+                .map(schoolId -> schoolService.getSchoolById(schoolId))
+                .collect(Collectors.toList());
+
+        // Verify the password using BCrypt
+        return new UserResponse(existingUser, approvedSchools);
     }
 
     public User getUserByUsername(String username) {
