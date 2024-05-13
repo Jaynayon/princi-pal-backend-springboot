@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.ErrorMessage;
+import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
 import com.it332.principal.Models.UserCredentials;
@@ -38,15 +39,16 @@ public class UserController {
     @PostMapping("")
     public ResponseEntity<Object> createUser(@RequestBody User user) {
         // User newUser = userService.createUser(user);
-        // // String token = userService.generateToken(newUser.getId()); // Generate JWT token
+        // // String token = userService.generateToken(newUser.getId()); // Generate JWT
+        // token
 
         // // Set the token as a cookie in the response
         // // HttpHeaders headers = new HttpHeaders();
         // // headers.add(HttpHeaders.SET_COOKIE, createJwtCookie(token).toString());
 
         // return ResponseEntity.status(HttpStatus.CREATED)
-        //         //.headers(headers)
-        //         .body(newUser);
+        // //.headers(headers)
+        // .body(newUser);
         ErrorMessage err = new ErrorMessage("");
         try {
             User newUser = userService.createUser(user); // Corrected method invocation
@@ -79,17 +81,16 @@ public class UserController {
 
     @PostMapping("/exists")
     public ResponseEntity<Boolean> checkIfUserExists(@RequestBody UserCredentials credentials) {
-    String emailOrUsername = credentials.getEmailOrUsername();
-    boolean exists = userService.checkIfUserExists(emailOrUsername);
-    return ResponseEntity.ok(exists);
+        String emailOrUsername = credentials.getEmailOrUsername();
+        boolean exists = userService.checkIfUserExists(emailOrUsername);
+        return ResponseEntity.ok(exists);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getUserById(@Valid @PathVariable String id) {
         ErrorMessage err = new ErrorMessage("");
         try {
-            User user = userService.getUserById(id);
+            UserResponse user = userService.getUserById(id);
             if (user != null) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
@@ -174,6 +175,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred");
         }
     }
+
     private ResponseCookie createJwtCookie(String token) {
         return ResponseCookie.from("jwt", token)
                 // .httpOnly(true) // Make the cookie accessible only via HTTP (not accessible
