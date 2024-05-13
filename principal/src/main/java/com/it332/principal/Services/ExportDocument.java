@@ -17,7 +17,7 @@ import java.util.List;
 import java.io.ByteArrayOutputStream;
 
 @Service
-public class ExcelService {
+public class ExportDocument {
 
     @Autowired
     LRService lrService;
