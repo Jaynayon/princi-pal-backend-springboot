@@ -58,6 +58,14 @@ public class AssociationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
     }
 
+    @PostMapping("/approve")
+    public ResponseEntity<Association> approveUserToAssociation(@RequestBody AssociationIdRequest association) {
+        // Assuming the association object contains the necessary information to invite
+        // a user
+        Association updatedAssociation = associationService.approveUserToAssociation(association);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
+    }
+
     // @PutMapping("/update")
     // public ResponseEntity<Association> updateAssociation(@PathVariable String id,
     // @RequestBody Association association){

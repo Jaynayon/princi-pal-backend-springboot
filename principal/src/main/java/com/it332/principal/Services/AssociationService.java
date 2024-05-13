@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
@@ -48,7 +49,7 @@ public class AssociationService {
     // }
 
     public void deleteAssociation(String userId, String schoolId) {
-        Association association = associationRepository.findByUserIdAndSchoolId(userId, schoolId);
+        Association association = associationRepository.findBySchoolIdAndUserId(userId, schoolId);
 
         if (association != null) {
             associationRepository.delete(association);
@@ -75,7 +76,7 @@ public class AssociationService {
     public Association inviteUserToAssociation(AssociationIdRequest association) {
         // Check if user or school exists
         School existSchool = schoolService.getSchoolById(association.getSchoolId());
-        User existUser = userService.getUserById(association.getUserId());
+        UserResponse existUser = userService.getUserById(association.getUserId());
 
         // Check if the association already exists for the given schoolId and userId
         Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
@@ -112,6 +113,39 @@ public class AssociationService {
 
         // Save and return the new association
         return associationRepository.save(newAssociation);
+    }
 
+    public Association approveUserToAssociation(AssociationIdRequest association) {
+        // Check if user or school exists
+        Association updatedAssociation = new Association();
+        School existSchool = schoolService.getSchoolById(association.getSchoolId());
+        UserResponse existUser = userService.getUserById(association.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existSchool.getId(), existUser.getId());
+
+        if (existingAssociation != null) {
+            // If the association already exists and is approved, no need to invite again
+            if (existingAssociation.isApproved()) {
+                // Return the existing association without modification
+                return existingAssociation;
+            } else {
+                // If the association exists but is not approved, update invitation status to
+                // true
+                // existingAssociation.setInvitation(true);
+                // Remove fields that are confidential
+                existingAssociation.setApproved(true);
+                // existingAssociation.setAdmin(false);
+
+                // Save the updated association
+                updatedAssociation = associationRepository.save(existingAssociation);
+            }
+        } else {
+            throw new NotFoundException("Association not found");
+        }
+
+        // Save and return the new association
+        return updatedAssociation;
     }
 }
