@@ -1,6 +1,7 @@
 package com.it332.principal.Controllers;
 
 import com.it332.principal.DTO.DocumentsPatch;
+import com.it332.principal.DTO.DocumentsRequest;
 import com.it332.principal.DTO.DocumentsResponse;
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Models.Documents;
@@ -25,7 +26,7 @@ public class DocumentsController {
 
     // Endpoint to create a new document
     @PostMapping("/create")
-    public ResponseEntity<Object> createDocument(@RequestBody @Valid Documents document) {
+    public ResponseEntity<Object> createDocument(@RequestBody @Valid DocumentsRequest document) {
         ErrorMessage err = new ErrorMessage("");
         try {
             DocumentsResponse savedDocument = documentsService.saveDocument(document);

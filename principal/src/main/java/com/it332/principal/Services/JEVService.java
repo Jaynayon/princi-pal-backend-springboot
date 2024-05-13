@@ -12,6 +12,7 @@ import com.it332.principal.Security.NotFoundException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -153,4 +154,11 @@ public class JEVService {
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentAmount(lr.getDocumentsId());
     }
+
+    @Transactional
+    public void deleteByDocumentsId(String documentsId) {
+        List<JEV> lrList = jevRepository.findByDocumentsId(documentsId);
+        jevRepository.deleteAll(lrList);
+    }
+
 }
