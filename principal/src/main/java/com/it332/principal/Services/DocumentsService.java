@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.DocumentsPatch;
+import com.it332.principal.DTO.DocumentsRequest;
 import com.it332.principal.DTO.DocumentsResponse;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.School;
@@ -25,7 +26,7 @@ public class DocumentsService {
     @Autowired
     public JEVService jevService;
 
-    public DocumentsResponse saveDocument(Documents document) {
+    public DocumentsResponse saveDocument(DocumentsRequest document) {
         // Check if school exists
         School existingSchool = schoolService.getSchoolById(document.getSchoolId());
 
@@ -38,7 +39,7 @@ public class DocumentsService {
         }
 
         // Save the new document
-        Documents newDoc = documentRepository.save(document);
+        Documents newDoc = documentRepository.save(new Documents(document));
 
         // Initialize JEV's in new document
         jevService.initializeJEV(newDoc.getId());
@@ -96,6 +97,9 @@ public class DocumentsService {
 
     public void deleteDocumentById(String id) {
         Documents document = getDocumentById(id);
+
+        // Delete initialized jev's
+        jevService.deleteByDocumentsId(document.getId());
 
         documentRepository.delete(document);
     }

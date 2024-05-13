@@ -3,6 +3,8 @@ package com.it332.principal.Models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.it332.principal.DTO.DocumentsRequest;
+
 import javax.validation.constraints.*;
 
 //@Data and @AllArgsConstructor to i think create getters and setters
@@ -41,6 +43,18 @@ public class Documents {
     public Documents() {
     }
 
+    public Documents(DocumentsRequest doc) {
+        setSchoolId(doc.getSchoolId());
+        setMonth(doc.getMonth());
+        setYear(doc.getYear());
+        setBudget(doc.getBudget());
+        setBudgetLimit(doc.getBudgetLimit());
+        setBudgetExceeded(false);
+        setSds(doc.getSds());
+        setClaimant(doc.getClaimant());
+        setHeadAccounting(doc.getHeadAccounting());
+    }
+
     public Documents(String schoolId, @NotBlank String month, @NotBlank String year) {
         this.schoolId = schoolId;
         this.month = month;
@@ -49,9 +63,9 @@ public class Documents {
         this.budgetLimit = 0.0;
         this.cashAdvance = 0.0;
         this.budgetExceeded = false;
-        this.sds = "";
-        this.claimant = "";
-        this.headAccounting = "";
+        setSds("");
+        setClaimant("");
+        setHeadAccounting("");
     }
 
     public Documents(String schoolId, @NotBlank String month, @NotBlank String year,
@@ -66,9 +80,9 @@ public class Documents {
         this.budgetLimit = budgetLimit;
         this.cashAdvance = cashAdvance;
         this.budgetExceeded = budgetExceeded;
-        this.sds = sds;
-        this.claimant = claimant;
-        this.headAccounting = headAccounting;
+        setSds(sds);
+        setClaimant(claimant);
+        setHeadAccounting(headAccounting);
     }
 
     public String getId() {
@@ -140,7 +154,10 @@ public class Documents {
     }
 
     public void setSds(String sds) {
-        this.sds = sds;
+        if (sds == null) {
+            this.sds = "";
+        } else
+            this.sds = sds;
     }
 
     public String getClaimant() {
@@ -148,7 +165,10 @@ public class Documents {
     }
 
     public void setClaimant(String claimant) {
-        this.claimant = claimant;
+        if (claimant == null) {
+            this.claimant = "";
+        } else
+            this.claimant = claimant;
     }
 
     public String getHeadAccounting() {
@@ -156,7 +176,10 @@ public class Documents {
     }
 
     public void setHeadAccounting(String headAccounting) {
-        this.headAccounting = headAccounting;
+        if (headAccounting == null) {
+            this.headAccounting = "";
+        } else
+            this.headAccounting = headAccounting;
     }
 
 }
