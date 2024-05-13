@@ -1,8 +1,10 @@
 package com.it332.principal.Services;
 
+import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.LR;
+import com.it332.principal.Models.Uacs;
 import com.it332.principal.Repository.DocumentsRepository;
 import com.it332.principal.Repository.LRRepository;
 import com.it332.principal.Security.NotFoundException;
@@ -11,7 +13,11 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LRService {
@@ -25,19 +31,23 @@ public class LRService {
     @Autowired
     private DocumentsService documentsService;
 
+    @Autowired
+    private UacsService uacsService;
+
     Documents existingDocument;
 
-    public LR saveLR(LR lr) {
+    public LR saveLR(LRRequest lr) {
         // Validate LR fields if needed before saving (e.g., check for required fields)
         existingDocument = documentsService.getDocumentById(lr.getDocumentsId());
+        Uacs existingUacs = uacsService.getUacsByCode(lr.getObjectCode());
 
-        // Save the LR
-        LR savedLR = lrRepository.save(lr);
+        // Save the LR first
+        LR newLr = lrRepository.save(new LR(lr, existingUacs.getCode()));
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentAmount(lr.getDocumentsId());
 
-        return savedLR;
+        return newLr;
     }
 
     public void updateDocumentAmount(String id) {
@@ -67,21 +77,25 @@ public class LRService {
     }
 
     public List<LR> getAllLRs() {
+        // List<LR> lrList = lrRepository.findAll();
         return lrRepository.findAll();
     }
 
     // Method to retrieve all LR documents with the same documentsId
     public List<LRResponse> getAllLRsByDocumentsId(String documentsId) {
         existingDocument = documentsService.getDocumentById(documentsId);
+        List<LR> lrList = lrRepository.findByDocumentsIdOrderByDateAsc(documentsId);
 
         if (existingDocument == null) {
             throw new NotFoundException("LR not found with ID: " + documentsId);
         }
 
-        return lrRepository.findByDocumentsId(documentsId);
+        return lrList.stream()
+                .map(LRResponse::new) // Map each LR to LRResponse using constructor
+                .collect(Collectors.toList());
     }
 
-    public LR updateLR(String id, LR updatedLR) {
+    public LR updateLR(String id, LRRequest updatedLR) {
         LR lr = getLRById(id);
 
         // Update LR fields based on the provided updatedLR object
@@ -96,6 +110,16 @@ public class LRService {
         }
         if (updatedLR.getAmount() != 0) {
             lr.setAmount(updatedLR.getAmount());
+        }
+        if (updatedLR.getObjectCode() != null) {
+            Uacs existingUacs = uacsService.getUacsByCode(updatedLR.getObjectCode());
+            lr.setObjectCode(existingUacs.getCode());
+        }
+        if (updatedLR.getPayee() != null) {
+            lr.setPayee(updatedLR.getPayee());
+        }
+        if (updatedLR.getNatureOfPayment() != null) {
+            lr.setNatureOfPayment(updatedLR.getNatureOfPayment());
         }
 
         LR newLR = lrRepository.save(lr);

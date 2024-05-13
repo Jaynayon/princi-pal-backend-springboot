@@ -1,10 +1,12 @@
 package com.it332.principal.Controllers;
 
 import com.it332.principal.DTO.ErrorMessage;
-import com.it332.principal.DTO.LRRequest;
+import com.it332.principal.DTO.JEVRequest;
+import com.it332.principal.DTO.JEVResponse;
 import com.it332.principal.DTO.LRResponse;
-import com.it332.principal.Models.LR;
+import com.it332.principal.Models.JEV;
 import com.it332.principal.Security.NotFoundException;
+import com.it332.principal.Services.JEVService;
 import com.it332.principal.Services.LRService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,31 +18,29 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/lr")
-public class LRController {
+@RequestMapping("/jev")
+public class JEVController {
 
     @Autowired
-    private LRService lrService;
+    private JEVService jevService;
 
     ErrorMessage err = new ErrorMessage("");
 
     // Endpoint to create a new LR document
     @PostMapping("/create")
-    public ResponseEntity<Object> createLR(@RequestBody @Valid LRRequest lr) {
+    public ResponseEntity<Object> createJEV(@RequestBody @Valid JEVRequest jev) {
         try {
-            // Debugging: Print LRRequest details for inspection
-            System.out.println("Received LRRequest: " + lr.getDate());
 
-            LR savedLR = lrService.saveLR(lr);
+            JEV savedLR = jevService.saveJEV(jev);
             return new ResponseEntity<>(savedLR, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
-            err.setMessage("Failed to create LR: " + e.getMessage());
+            err.setMessage("Failed to create JEV: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(err);
         } catch (NotFoundException e) {
             // This exception is thrown when a no school is detected
-            err.setMessage("Failed to get LR: " + e.getMessage());
+            err.setMessage("Failed to get JEV: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(err);
         } catch (Exception e) {
@@ -55,15 +55,15 @@ public class LRController {
     // Endpoint to retrieve all LR documents
     @GetMapping("/all")
     public ResponseEntity<Object> getAllLRs() {
-        List<LR> lrList = lrService.getAllLRs();
-        return new ResponseEntity<>(lrList, HttpStatus.OK);
+        List<JEV> jevList = jevService.getAllJEVs();
+        return new ResponseEntity<>(jevList, HttpStatus.OK);
     }
 
     @GetMapping("/documents/{documentsId}")
     public ResponseEntity<Object> getAllLRsByDocumentsId(@PathVariable String documentsId) {
         try {
-            List<LRResponse> lrList = lrService.getAllLRsByDocumentsId(documentsId);
-            return new ResponseEntity<>(lrList, HttpStatus.OK);
+            List<JEVResponse> jevList = jevService.getAllJEVsByDocumentsId(documentsId);
+            return new ResponseEntity<>(jevList, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
             err.setMessage("Failed to get LR: " + e.getMessage());
@@ -87,7 +87,7 @@ public class LRController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> getLRById(@PathVariable String id) {
         try {
-            LR lr = lrService.getLRById(id);
+            JEV lr = jevService.getJEVById(id);
             return new ResponseEntity<>(lr, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
@@ -110,9 +110,9 @@ public class LRController {
 
     // Endpoint to update an existing LR document
     @PatchMapping("/{id}")
-    public ResponseEntity<Object> updateLR(@PathVariable String id, @RequestBody @Valid LRRequest updatedLR) {
+    public ResponseEntity<Object> updateLR(@PathVariable String id, @RequestBody @Valid JEVRequest updatedLR) {
         try {
-            LR updatedEntity = lrService.updateLR(id, updatedLR);
+            JEV updatedEntity = jevService.updateJEV(id, updatedLR);
             return ResponseEntity.ok(updatedEntity);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
@@ -137,7 +137,7 @@ public class LRController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteLR(@PathVariable String id) {
         try {
-            lrService.deleteLRById(id);
+            jevService.deleteJEVById(id);
             return ResponseEntity.noContent().build(); // Return 204 No Content on successful deletion
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected

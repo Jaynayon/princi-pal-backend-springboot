@@ -1,6 +1,7 @@
 package com.it332.principal.Controllers;
 
 import com.it332.principal.DTO.DocumentsPatch;
+import com.it332.principal.DTO.DocumentsRequest;
 import com.it332.principal.DTO.DocumentsResponse;
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Models.Documents;
@@ -16,6 +17,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/documents")
 public class DocumentsController {
 
@@ -24,7 +26,7 @@ public class DocumentsController {
 
     // Endpoint to create a new document
     @PostMapping("/create")
-    public ResponseEntity<Object> createDocument(@RequestBody @Valid Documents document) {
+    public ResponseEntity<Object> createDocument(@RequestBody @Valid DocumentsRequest document) {
         ErrorMessage err = new ErrorMessage("");
         try {
             DocumentsResponse savedDocument = documentsService.saveDocument(document);
@@ -48,7 +50,7 @@ public class DocumentsController {
         }
     }
 
-    @GetMapping("/school/{school}/lrs/{year}/{month}")
+    @GetMapping("/school/{school}/{year}/{month}")
     public ResponseEntity<Object> getDocumentBySchoolYearMonth(@PathVariable String school,
             @PathVariable String year,
             @PathVariable String month) throws Exception {

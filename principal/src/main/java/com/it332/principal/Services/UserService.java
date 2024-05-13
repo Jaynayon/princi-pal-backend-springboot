@@ -1,5 +1,8 @@
 package com.it332.principal.Services;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,8 +56,38 @@ public class UserService {
         return false; // User not found
     }
 
+    public User getUserByEmailUsername(String emailOrUsername) {
+        // Find user by email or username
+        User userByEmail = userRepository.findByEmail(emailOrUsername);
+        User userByUsername = userRepository.findByUsername(emailOrUsername);
+        User user;
+
+        if (userByEmail != null || userByUsername != null) {
+            if (userByEmail != null) {
+                user = getUserByEmail(emailOrUsername);
+            } else {
+                user = getUserByUsername(emailOrUsername);
+            }
+
+            // Verify the password using BCrypt
+            return user;
+        }
+
+        throw new NotFoundException("User not found with email/username: " + emailOrUsername);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new NotFoundException("User not found with email: " + email);
+        }
+
+        return user;
     }
 
     public User getUserById(String id) {
@@ -66,12 +99,51 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public User updateUser(User user) {
-        return userRepository.save(user);
+    public void updateUser(String userId, User updateUser) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Update only the fields that are present in updateUser
+            if (updateUser.getFname() != null) {
+                user.setFname(updateUser.getFname());
+            }
+            if (updateUser.getMname() != null) {
+                user.setMname(updateUser.getMname());
+            }
+            if (updateUser.getLname() != null) {
+                user.setLname(updateUser.getLname());
+            }
+            if (updateUser.getUsername() != null) {
+                user.setUsername(updateUser.getUsername());
+            }
+            if (updateUser.getEmail() != null) {
+                user.setEmail(updateUser.getEmail());
+            }
+            if (updateUser.getPassword() != null) {
+                String encodedPassword = passwordEncoder.encode(updateUser.getPassword());
+                user.setPassword(encodedPassword);
+            }
+            if (updateUser.getPosition() != null) {
+                user.setPosition(updateUser.getPosition());
+            }
+            if (updateUser.getAvatar() != null) {
+                user.setAvatar(updateUser.getAvatar());
+            }
+
+            userRepository.save(user); // Save the updated user object
+        } else {
+            throw new NotFoundException("User not found with ID: " + userId);
+        }
     }
 
-    public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
+    public void deleteUserById(String userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            userRepository.deleteById(userId);
+        } else {
+            throw new NotFoundException("User not found with ID: " + userId);
+        }
     }
 
     public boolean checkIfUserExists(String emailOrUsername) {

@@ -1,6 +1,8 @@
 package com.it332.principal.Controllers;
 
+import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Models.User;
+import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -22,40 +24,42 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest) {
-        String emailOrUsername = loginRequest.getEmailOrUsername();
-        String password = loginRequest.getPassword();
+    public ResponseEntity<Object> loginUser(@RequestBody LoginRequest loginRequest) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String emailOrUsername = loginRequest.getEmailOrUsername();
+            String password = loginRequest.getPassword();
 
-        boolean isValid = userService.validateUser(emailOrUsername, password);
-
-        LoginResponse respo = new LoginResponse();
-
-        if (isValid) {
-            // Attempt to retrieve user by email or username
-            User user = userService.getUserByEmail(emailOrUsername);
-            if (user == null) {
-                user = userService.getUserByUsername(emailOrUsername);
-            }
-
-            if (user != null) {
-                String userId = user.getId();
+            if (userService.validateUser(emailOrUsername, password)) {
+                String userId = userService.getUserByEmailUsername(emailOrUsername).getId();
                 String token = userService.generateToken(userId);
 
                 // Set the token as a cookie in the response
                 HttpHeaders headers = new HttpHeaders();
                 headers.add(HttpHeaders.SET_COOKIE, createJwtCookie(token).toString());
 
-                respo.setIsMatch(isValid);
-
-                return ResponseEntity.status(HttpStatus.CREATED)
+                return ResponseEntity.status(HttpStatus.OK)
                         .headers(headers)
-                        .body(respo);
-
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(respo);
+                        .body(new LoginResponse(true));
             }
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(respo);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED) // Unauthorized
+                    .body(new LoginResponse(false));
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
         }
     }
 
