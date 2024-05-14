@@ -2,17 +2,23 @@ package com.it332.principal.Controllers;
 
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Models.User;
+import com.it332.principal.Security.JwtTokenService;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UserService;
+
+import io.jsonwebtoken.Claims;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,6 +28,21 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtTokenService jwtTokenService;
+
+    @GetMapping("/verify/")
+    public ResponseEntity<?> verifyTokenAndTransform(@RequestParam("token") String token) {
+        try {
+            Claims claims = jwtTokenService.verifyTokenAndTransform(token);
+            // Token is valid, return decoded claims
+            return ResponseEntity.ok(claims);
+        } catch (IllegalArgumentException e) {
+            // Invalid token
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication denied");
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<Object> loginUser(@RequestBody LoginRequest loginRequest) {
