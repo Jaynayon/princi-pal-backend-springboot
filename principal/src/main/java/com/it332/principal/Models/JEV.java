@@ -8,10 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.it332.principal.DTO.JEVRequest;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-@AllArgsConstructor
 @Document(collection = "JEV")
 public class JEV {
     @Id

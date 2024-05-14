@@ -19,13 +19,13 @@ import java.io.IOException;
 public class ExportController {
 
     @Autowired
-    private ExportDocument excelService;
+    private ExportDocument exportService;
 
     @PostMapping("/downloadExcel")
     public ResponseEntity<byte[]> downloadExcel(@RequestBody ExcelRequest request) {
         try {
             // Generate Excel file content as byte array
-            byte[] excelBytes = excelService.generateLRData(request);
+            byte[] excelBytes = exportService.generateData(request);
 
             // Set filename for download
             HttpHeaders headers = new HttpHeaders();
