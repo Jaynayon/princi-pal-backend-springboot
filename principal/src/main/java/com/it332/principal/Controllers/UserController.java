@@ -37,36 +37,38 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("")
-    public ResponseEntity<Object> createUser(@RequestBody User user) {
-        ErrorMessage err = new ErrorMessage("");
-    
-        try {
-            // Check if the user is trying to create a Super Administrator position
-            if ("Super administrator".equalsIgnoreCase(user.getPosition())) {
-                err.setMessage("Creation of Super Administrator position is not allowed.");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(err);
-            }
-    
-            User newUser = userService.createUser(user); // Corrected method invocation
-            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            // This exception is thrown when a duplicate school name is detected
-            err.setMessage("Failed to create user: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(err);
-        } catch (NotFoundException e) {
-            err.setMessage("Position not found: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(err);
-        } catch (Exception e) {
-            // Catching any other unexpected exceptions
-            e.printStackTrace();
-            err.setMessage("Internal server error occurred");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+public ResponseEntity<Object> createUser(@RequestBody User user) {
+    ErrorMessage err = new ErrorMessage("");
+
+    try {
+        // Check if the user is trying to create a Super Administrator or Principal position
+        String position = user.getPosition().toLowerCase();
+        if ("super administrator".equals(position) || "principal".equals(position)) {
+            err.setMessage("Creation of '" + position + "' position is not allowed.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(err);
         }
+
+        User newUser = userService.createUser(user); // Corrected method invocation
+        return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+    } catch (IllegalArgumentException e) {
+        // This exception is thrown when a duplicate school name is detected
+        err.setMessage("Failed to create user: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(err);
+    } catch (NotFoundException e) {
+        err.setMessage("Position not found: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(err);
+    } catch (Exception e) {
+        // Catching any other unexpected exceptions
+        e.printStackTrace();
+        err.setMessage("Internal server error occurred");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(err);
     }
+}
+
     
 
     @PostMapping("/validate")
