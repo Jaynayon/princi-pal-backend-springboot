@@ -1,6 +1,5 @@
 package com.it332.principal.Controllers;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
 import java.util.List;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.DTO.UserAdminRequest;
 import com.it332.principal.DTO.UserResponse;
-import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
 import com.it332.principal.Models.UserCredentials;
 import com.it332.principal.Security.NotFoundException;
@@ -204,16 +202,19 @@ public class UserController {
         }
     }
 
-    private ResponseCookie createJwtCookie(String token) {
-        return ResponseCookie.from("jwt", token)
-                // .httpOnly(true) // Make the cookie accessible only via HTTP (not accessible
-                // via JavaScript)
-                .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds = 1 day)
-                .sameSite("Lax")
-                .secure(false)
-                .path("/") // Set the cookie path to root ("/") so that it's accessible across the entire
-                           // domain
-                .build();
-    }
+    // private ResponseCookie createJwtCookie(String token) {
+    // return ResponseCookie.from("jwt", token)
+    // // .httpOnly(true) // Make the cookie accessible only via HTTP (not
+    // accessible
+    // // via JavaScript)
+    // .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds
+    // = 1 day)
+    // .sameSite("Lax")
+    // .secure(false)
+    // .path("/") // Set the cookie path to root ("/") so that it's accessible
+    // across the entire
+    // // domain
+    // .build();
+    // }
 
 }
