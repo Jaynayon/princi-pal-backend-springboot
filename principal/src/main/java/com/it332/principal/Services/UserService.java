@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.it332.principal.DTO.UserAdminRequest;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Position;
@@ -55,6 +56,26 @@ public class UserService {
         // insert position name to user
         user.setPosition(exist.getName());
         return userRepository.save(user);
+    }
+
+    // Create a new user as an admin: for creation of principal
+    public User createUser(UserAdminRequest user) {
+        // Check if user requesting is admin
+        UserResponse admin = getUserById(user.getAdminId());
+
+        if (admin.getPosition() != "Super administrator") {
+            throw new IllegalArgumentException("Cannot process this request: Insufficient privilledge");
+        }
+
+        // Check if position is existent
+        Position exist = positionService.getPositionByName(user.getPosition());
+
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        // insert position name to user
+        user.setPosition(exist.getName());
+        return userRepository.save(new User(user));
     }
 
     public boolean validateUser(String emailOrUsername, String password) {

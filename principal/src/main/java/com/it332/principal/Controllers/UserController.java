@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.ErrorMessage;
+import com.it332.principal.DTO.UserAdminRequest;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
@@ -36,10 +37,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("")
+    @PostMapping("/create")
     public ResponseEntity<Object> createUser(@RequestBody User user) {
         ErrorMessage err = new ErrorMessage("");
-    
+
         try {
             // Check if the user is trying to create a Super Administrator position
             if ("Super administrator".equalsIgnoreCase(user.getPosition())) {
@@ -47,7 +48,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(err);
             }
-    
+
             User newUser = userService.createUser(user); // Corrected method invocation
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
@@ -67,7 +68,30 @@ public class UserController {
                     .body(err);
         }
     }
-    
+
+    @PostMapping("/create/principal")
+    public ResponseEntity<Object> createPrincipal(@RequestBody UserAdminRequest user) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            User newUser = userService.createUser(user); // Corrected method invocation
+            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to create user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Position not found: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
 
     @PostMapping("/validate")
     public ResponseEntity<String> validateUser(@RequestBody UserCredentials credentials) {

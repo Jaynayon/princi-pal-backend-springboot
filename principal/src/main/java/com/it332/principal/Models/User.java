@@ -3,6 +3,8 @@ package com.it332.principal.Models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.it332.principal.DTO.UserAdminRequest;
+
 @Document(collection = "users")
 public class User {
     @Id
@@ -18,6 +20,16 @@ public class User {
     private String avatar = "Blue"; // default value
 
     public User() {
+    }
+
+    public User(UserAdminRequest user) {
+        this.fname = user.getFname();
+        this.mname = user.getMname();
+        this.lname = user.getLname();
+        this.username = user.getUsername();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.position = user.getPosition();
     }
 
     // Constructor with essential fields
