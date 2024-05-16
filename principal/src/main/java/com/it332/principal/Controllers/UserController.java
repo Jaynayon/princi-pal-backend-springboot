@@ -58,6 +58,10 @@ public class UserController {
             err.setMessage("Failed to create user: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Position not found: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
         } catch (Exception e) {
             // Catching any other unexpected exceptions
             e.printStackTrace();

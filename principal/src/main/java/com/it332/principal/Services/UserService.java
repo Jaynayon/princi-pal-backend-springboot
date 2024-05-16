@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
+import com.it332.principal.Models.Position;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
 import com.it332.principal.Repository.AssociationRepository;
@@ -32,6 +33,9 @@ public class UserService {
     private SchoolService schoolService;
 
     @Autowired
+    private PositionService positionService;
+
+    @Autowired
     private JwtUtil jwtUtil; // Inject your JwtUtil for token management
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -42,8 +46,14 @@ public class UserService {
 
     @Transactional
     public User createUser(User user) {
+        // Check if position is existent
+        Position exist = positionService.getPositionByName(user.getPosition());
+
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
+
+        // insert position name to user
+        user.setPosition(exist.getName());
         return userRepository.save(user);
     }
 
