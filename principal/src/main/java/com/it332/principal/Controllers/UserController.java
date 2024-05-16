@@ -38,19 +38,16 @@ public class UserController {
 
     @PostMapping("")
     public ResponseEntity<Object> createUser(@RequestBody User user) {
-        // User newUser = userService.createUser(user);
-        // // String token = userService.generateToken(newUser.getId()); // Generate JWT
-        // token
-
-        // // Set the token as a cookie in the response
-        // // HttpHeaders headers = new HttpHeaders();
-        // // headers.add(HttpHeaders.SET_COOKIE, createJwtCookie(token).toString());
-
-        // return ResponseEntity.status(HttpStatus.CREATED)
-        // //.headers(headers)
-        // .body(newUser);
         ErrorMessage err = new ErrorMessage("");
+    
         try {
+            // Check if the user is trying to create a Super Administrator position
+            if ("Super administrator".equalsIgnoreCase(user.getPosition())) {
+                err.setMessage("Creation of Super Administrator position is not allowed.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(err);
+            }
+    
             User newUser = userService.createUser(user); // Corrected method invocation
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
@@ -70,6 +67,7 @@ public class UserController {
                     .body(err);
         }
     }
+    
 
     @PostMapping("/validate")
     public ResponseEntity<String> validateUser(@RequestBody UserCredentials credentials) {
