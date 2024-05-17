@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/authenticate")
-public class AuthController {
+public class AuthenticationController {
 
     @Autowired
     private UserService userService;
