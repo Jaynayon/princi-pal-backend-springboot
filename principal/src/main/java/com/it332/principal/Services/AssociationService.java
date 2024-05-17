@@ -74,7 +74,7 @@ public class AssociationService {
     public Association inviteUserToAssociation(AssociationIdRequest association) {
         // Check if user or school exists
         School existSchool = schoolService.getSchoolById(association.getSchoolId());
-        UserResponse existUser = userService.getUserById(association.getUserId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
 
         // Check if the association already exists for the given schoolId and userId
         Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
@@ -117,7 +117,7 @@ public class AssociationService {
         // Check if user or school exists
         Association updatedAssociation = new Association();
         School existSchool = schoolService.getSchoolById(association.getSchoolId());
-        UserResponse existUser = userService.getUserById(association.getUserId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
 
         // Check if the association already exists for the given schoolId and userId
         Association existingAssociation = associationRepository.findBySchoolIdAndUserId(

@@ -61,10 +61,10 @@ public class UserService {
     // Create a new user as an admin: for creation of principal
     public User createUser(UserAdminRequest user) {
         // Check if user requesting is admin
-        UserResponse admin = getUserById(user.getAdminId());
-
-        if (admin.getPosition() != "Super administrator") {
-            throw new IllegalArgumentException("Cannot process this request: Insufficient privilledge");
+        User admin = getUserById(user.getAdminId());
+        String position = admin.getPosition();
+        if (!position.equals("Super administrator")) {
+            throw new IllegalArgumentException("Cannot process this request: Insufficient priviledge");
         }
 
         // Check if position is existent
@@ -145,9 +145,9 @@ public class UserService {
         return user;
     }
 
-    public UserResponse getUserById(String id) {
+    public UserResponse getUserAssociationsById(String id) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Document not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
 
         List<Association> associations = associationRepository.findByUserId(existingUser.getId());
 
@@ -164,6 +164,11 @@ public class UserService {
 
         // Verify the password using BCrypt
         return new UserResponse(existingUser, approvedSchools);
+    }
+
+    public User getUserById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
     }
 
     public User getUserByUsername(String username) {

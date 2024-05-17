@@ -114,7 +114,7 @@ public class UserController {
     public ResponseEntity<Object> getUserById(@Valid @PathVariable String id) {
         ErrorMessage err = new ErrorMessage("");
         try {
-            UserResponse user = userService.getUserById(id);
+            UserResponse user = userService.getUserAssociationsById(id);
             if (user != null) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
