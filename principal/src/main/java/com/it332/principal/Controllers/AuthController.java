@@ -1,7 +1,6 @@
 package com.it332.principal.Controllers;
 
 import com.it332.principal.DTO.ErrorMessage;
-import com.it332.principal.Models.User;
 import com.it332.principal.Security.JwtTokenService;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UserService;

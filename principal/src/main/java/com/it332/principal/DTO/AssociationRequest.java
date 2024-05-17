@@ -1,7 +1,5 @@
 package com.it332.principal.DTO;
 
-import com.it332.principal.Models.User;
-
 public class AssociationRequest {
     private String school;
     private String user;
