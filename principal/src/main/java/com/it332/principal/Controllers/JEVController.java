@@ -3,11 +3,9 @@ package com.it332.principal.Controllers;
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.DTO.JEVRequest;
 import com.it332.principal.DTO.JEVResponse;
-import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.JEV;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.JEVService;
-import com.it332.principal.Services.LRService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -110,7 +108,7 @@ public class JEVController {
 
     // Endpoint to update an existing LR document
     @PatchMapping("/{id}")
-    public ResponseEntity<Object> updateLR(@PathVariable String id, @RequestBody @Valid JEVRequest updatedLR) {
+    public ResponseEntity<Object> updateJEV(@PathVariable String id, @RequestBody @Valid JEVRequest updatedLR) {
         try {
             JEV updatedEntity = jevService.updateJEV(id, updatedLR);
             return ResponseEntity.ok(updatedEntity);
@@ -135,7 +133,7 @@ public class JEVController {
 
     // Endpoint to delete an LR document by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteLR(@PathVariable String id) {
+    public ResponseEntity<Object> deleteJEV(@PathVariable String id) {
         try {
             jevService.deleteJEVById(id);
             return ResponseEntity.noContent().build(); // Return 204 No Content on successful deletion
