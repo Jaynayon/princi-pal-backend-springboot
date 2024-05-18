@@ -93,7 +93,7 @@ public class SchoolController {
                 throw new IllegalArgumentException("Name is required");
             }
 
-            School school = schoolService.getSchoolByName(name);
+            School school = schoolService.getSchoolByNameOrFullName(name);
             if (school != null) {
                 return new ResponseEntity<>(school, HttpStatus.OK);
             } else {

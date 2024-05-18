@@ -31,11 +31,34 @@ public class SchoolService {
     }
 
     public School getSchoolByName(String name) {
-        return schoolRepository.findByName(name);
+        School byName = schoolRepository.findByName(name);
+        if (byName == null) {
+            throw new NotFoundException("School not found with name: " + name);
+        }
+        return byName;
     }
 
     public School getSchoolByFullName(String fullName) {
-        return schoolRepository.findByFullName(fullName);
+        School byFullName = schoolRepository.findByFullName(fullName);
+        if (byFullName == null) {
+            throw new NotFoundException("School not found with name: " + fullName);
+        }
+        return byFullName;
+    }
+
+    public School getSchoolByNameOrFullName(String name) {
+        try {
+            // First, try to get the school by name
+            return getSchoolByName(name);
+        } catch (NotFoundException e) {
+            // If not found by name, try to get the school by full name
+            try {
+                return getSchoolByFullName(name);
+            } catch (NotFoundException ex) {
+                // If neither found, rethrow the original NotFoundException
+                throw new NotFoundException("School not found with name or full name: " + name);
+            }
+        }
     }
 
     public List<School> getAllSchools() {
