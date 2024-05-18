@@ -1,13 +1,18 @@
 package com.it332.principal.Services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.it332.principal.Models.Association;
 import com.it332.principal.Models.School;
+import com.it332.principal.Models.User;
+import com.it332.principal.Repository.AssociationRepository;
 import com.it332.principal.Repository.SchoolRepository;
+import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.NotFoundException;
 
 @Service
@@ -15,6 +20,12 @@ public class SchoolService {
 
     @Autowired
     private SchoolRepository schoolRepository;
+
+    @Autowired
+    private AssociationRepository associationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public School createSchool(School school) {
         School existingName = schoolRepository.findByName(school.getName());
@@ -28,6 +39,32 @@ public class SchoolService {
         }
 
         return schoolRepository.save(school);
+    }
+
+    public User isPrincipalPresent(String schoolId) {
+        // Get user associations for school
+        List<User> users = getUsersBySchoolId(schoolId);
+
+        for (User user : users) {
+            // User user = userService.getUserById(association.getUserId());
+            if ("Principal".equals(user.getPosition())) {
+                return user;
+            }
+        }
+
+        return null;
+    }
+
+    public List<User> getUsersBySchoolId(String schoolId) {
+        List<Association> association = associationRepository.findBySchoolId(schoolId);
+
+        // Extract userIds from associations
+        List<String> userIds = association.stream()
+                .map(Association::getUserId)
+                .distinct() // Ensure no duplicate user IDs
+                .collect(Collectors.toList());
+
+        return userRepository.findAllById(userIds);
     }
 
     public School getSchoolByName(String name) {
