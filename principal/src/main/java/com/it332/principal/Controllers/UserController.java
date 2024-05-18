@@ -1,6 +1,7 @@
 package com.it332.principal.Controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -115,6 +116,40 @@ public class UserController {
         ErrorMessage err = new ErrorMessage("");
         try {
             UserResponse user = userService.getUserAssociationsById(id);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @PostMapping("/schools")
+    public ResponseEntity<Object> getUserById(@RequestBody Map<String, String> requestBody) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String emailOrUsername = requestBody.get("emailOrUsername");
+            if (emailOrUsername == null || emailOrUsername.isEmpty()) {
+                throw new IllegalArgumentException("emailOrUsername is required");
+            }
+
+            UserResponse user = userService.getUserByEmailUsername(emailOrUsername);
             if (user != null) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
