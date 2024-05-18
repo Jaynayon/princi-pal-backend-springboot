@@ -46,6 +46,24 @@ public class AssociationService {
     // return associationRepository.save(association);
     // }
 
+    // public Boolean checkPrincipalAssociation(String schoolId) {
+    // // Get user associations for school
+    // List<User> users = schoolService.getUsersBySchoolId(schoolId);
+
+    // for (User user : users) {
+    // //User user = userService.getUserById(association.getUserId());
+    // if ("Principal".equals(user.getPosition())) {
+    // return true;
+    // }
+    // }
+
+    // return false;
+    // }
+
+    // public List<Association> getBySchoolId(String schoolId) {
+    // return associationRepository.findBySchoolId(schoolId);
+    // }
+
     public void deleteAssociation(String userId, String schoolId) {
         Association association = associationRepository.findBySchoolIdAndUserId(userId, schoolId);
 
