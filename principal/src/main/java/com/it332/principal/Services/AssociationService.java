@@ -89,6 +89,50 @@ public class AssociationService {
         throw new UnsupportedOperationException("Method 'searchMembers' is not yet implemented");
     }
 
+    // This service is for inserting a user, preferrably a principal, directly to
+    // the school/association
+    public Association insertUserToAssociation(AssociationIdRequest association) {
+        // Check if user or school exists
+        School existSchool = schoolService.getSchoolById(association.getSchoolId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existSchool.getId(), existUser.getId());
+
+        if (existingAssociation != null) {
+            // If the association already exists and is approved, no need to invite again
+            if (existingAssociation.isApproved()) {
+                // Return the existing association without modification
+                return existingAssociation;
+            } else {
+                // If the association exists but is not approved, update invitation status to
+                // true
+                existingAssociation.setInvitation(false);
+                // Remove fields that are confidential
+                existingAssociation.setApproved(true);
+                existingAssociation.setAdmin(true);
+
+                // Save the updated association
+                return associationRepository.save(existingAssociation);
+            }
+        }
+        // If the association doesn't exist, create a new one without setting invitation
+        // status
+        Association newAssociation = new Association();
+
+        newAssociation.setSchoolId(existSchool.getId());
+        newAssociation.setUserId(existUser.getId());
+
+        // Remove fields that are confidential
+        newAssociation.setInvitation(false);
+        newAssociation.setApproved(true);
+        newAssociation.setAdmin(true);
+
+        // Save and return the new association
+        return associationRepository.save(newAssociation);
+    }
+
     public Association inviteUserToAssociation(AssociationIdRequest association) {
         // Check if user or school exists
         School existSchool = schoolService.getSchoolById(association.getSchoolId());

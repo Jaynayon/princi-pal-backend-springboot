@@ -1,6 +1,5 @@
 package com.it332.principal.Models;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.data.annotation.Id;
