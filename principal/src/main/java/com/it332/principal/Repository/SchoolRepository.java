@@ -6,4 +6,6 @@ import com.it332.principal.Models.School;
 
 public interface SchoolRepository extends MongoRepository<School, String> {
     School findByName(String name);
+
+    School findByFullName(String fullName);
 }

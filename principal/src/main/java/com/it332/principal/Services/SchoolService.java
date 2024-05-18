@@ -17,16 +17,25 @@ public class SchoolService {
     private SchoolRepository schoolRepository;
 
     public School createSchool(School school) {
-        School existingSchool = schoolRepository.findByName(school.getName());
+        School existingName = schoolRepository.findByName(school.getName());
+        School existingFullName = schoolRepository.findByFullName(school.getFullName());
 
-        if (existingSchool != null) {
-            throw new IllegalArgumentException("School with name " + school.getName() + " already exists");
+        if (existingName != null || existingFullName != null) {
+            if (existingName != null) {
+                throw new IllegalArgumentException("School with name " + school.getName() + " already exists");
+            }
+            throw new IllegalArgumentException("School with full name " + school.getFullName() + " already exists");
         }
+
         return schoolRepository.save(school);
     }
 
     public School getSchoolByName(String name) {
         return schoolRepository.findByName(name);
+    }
+
+    public School getSchoolByFullName(String fullName) {
+        return schoolRepository.findByFullName(fullName);
     }
 
     public List<School> getAllSchools() {
@@ -48,13 +57,24 @@ public class SchoolService {
         School existingSchool = getSchoolById(id);
 
         // Check if school name is already taken
-        School nameAlreadyExists = schoolRepository.findByName(updatedSchool.getName());
+        School existingName = getSchoolByName(updatedSchool.getName());
+        School existingFullName = getSchoolByFullName(updatedSchool.getFullName());
 
-        if (nameAlreadyExists != null) {
-            throw new IllegalArgumentException("School with name " + updatedSchool.getName() + " already exists");
+        if (existingName != null || existingFullName != null) {
+            if (existingName != null) {
+                throw new IllegalArgumentException("School with name " + updatedSchool.getName() + " already exists");
+            } else if (existingFullName != null) {
+                throw new IllegalArgumentException(
+                        "School with full name " + updatedSchool.getFullName() + " already exists");
+            }
         }
 
-        existingSchool.setName(updatedSchool.getName());
+        if (updatedSchool.getName() != null) {
+            existingSchool.setName(updatedSchool.getName());
+        }
+        if (updatedSchool.getFullName() != null) {
+            existingSchool.setFullName(updatedSchool.getFullName());
+        }
 
         return schoolRepository.save(existingSchool);
     }
