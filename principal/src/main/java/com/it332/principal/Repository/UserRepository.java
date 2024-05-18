@@ -1,5 +1,7 @@
 package com.it332.principal.Repository;
 
+import java.util.List;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.it332.principal.Models.User;
@@ -10,4 +12,5 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     User findByUsername(String username);
 
+    List<User> findAllById(Iterable<String> ids);
 }
