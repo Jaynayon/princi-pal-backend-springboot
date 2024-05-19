@@ -112,7 +112,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getUserById(@Valid @PathVariable String id) {
+    public ResponseEntity<Object> getUserByEmailUsername(@Valid @PathVariable String id) {
         ErrorMessage err = new ErrorMessage("");
         try {
             UserResponse user = userService.getUserAssociationsById(id);
