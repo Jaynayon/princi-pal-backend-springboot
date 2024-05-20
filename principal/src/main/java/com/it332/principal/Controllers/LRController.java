@@ -61,8 +61,8 @@ public class LRController {
 
     // Endpoint to retrieve all LR documents
     @GetMapping("/keyword/{keyword}")
-    public ResponseEntity<Object> searchLr(@PathVariable String keyword) {
-        List<LR> lrList = lrService.getLRByKeyword(keyword);
+    public ResponseEntity<Object> getRecords(@PathVariable String details) {
+        List<LR> lrList = lrService.getLRByKeyword(details);
         return new ResponseEntity<>(lrList, HttpStatus.OK);
     }
 
