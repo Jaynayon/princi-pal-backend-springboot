@@ -58,7 +58,7 @@ public class JEVController {
     }
 
     @GetMapping("/documents/{documentsId}")
-    public ResponseEntity<Object> getAllLRsByDocumentsId(@PathVariable String documentsId) {
+    public ResponseEntity<Object> getAllJEVsByDocumentsId(@PathVariable String documentsId) {
         try {
             List<JEVResponse> jevList = jevService.getAllJEVsByDocumentsId(documentsId);
             return new ResponseEntity<>(jevList, HttpStatus.OK);
