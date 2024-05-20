@@ -29,7 +29,7 @@ public class PositionService {
         Position existPos = positionRepository.findByName(name);
 
         if (existPos == null) {
-            throw new NotFoundException("Position not found with ID: " + name);
+            throw new NotFoundException("Position not found with name: " + name);
         }
         return existPos;
     }

@@ -17,15 +17,18 @@ import java.util.List;
 import java.io.ByteArrayOutputStream;
 
 @Service
-public class ExcelService {
+public class ExportDocument {
 
     @Autowired
     LRService lrService;
 
     @Autowired
+    JEVService jevService;
+
+    @Autowired
     DocumentsService documentsService;
 
-    public byte[] generateLRData(ExcelRequest request) throws IOException {
+    public byte[] generateData(ExcelRequest request) throws IOException {
         // Data to write
         List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(request.getDocumentId());
         DocumentsResponse document = documentsService.getDocumentBySchoolYearMonth(

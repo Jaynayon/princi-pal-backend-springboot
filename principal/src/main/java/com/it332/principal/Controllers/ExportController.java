@@ -3,14 +3,12 @@ package com.it332.principal.Controllers;
 import com.it332.principal.DTO.ExcelRequest;
 //import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Security.NotFoundException;
-import com.it332.principal.Services.ExcelService;
+import com.it332.principal.Services.ExportDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,16 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 @RestController
-public class ExcelController {
+public class ExportController {
 
     @Autowired
-    private ExcelService excelService;
+    private ExportDocument exportService;
 
     @PostMapping("/downloadExcel")
     public ResponseEntity<byte[]> downloadExcel(@RequestBody ExcelRequest request) {
         try {
             // Generate Excel file content as byte array
-            byte[] excelBytes = excelService.generateLRData(request);
+            byte[] excelBytes = exportService.generateData(request);
 
             // Set filename for download
             HttpHeaders headers = new HttpHeaders();

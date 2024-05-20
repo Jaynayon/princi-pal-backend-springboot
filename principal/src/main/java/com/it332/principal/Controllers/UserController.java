@@ -1,9 +1,7 @@
 package com.it332.principal.Controllers;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -21,7 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.ErrorMessage;
-import com.it332.principal.Models.School;
+import com.it332.principal.DTO.UserAdminRequest;
+import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.User;
 import com.it332.principal.Models.UserCredentials;
 import com.it332.principal.Security.NotFoundException;
@@ -35,18 +34,42 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("")
+    @PostMapping("/create")
     public ResponseEntity<Object> createUser(@RequestBody User user) {
-        // User newUser = userService.createUser(user);
-        // // String token = userService.generateToken(newUser.getId()); // Generate JWT token
+        ErrorMessage err = new ErrorMessage("");
 
-        // // Set the token as a cookie in the response
-        // // HttpHeaders headers = new HttpHeaders();
-        // // headers.add(HttpHeaders.SET_COOKIE, createJwtCookie(token).toString());
+        try {
+            // Check if the user is trying to create a Super Administrator or Principal
+            // position
+            String position = user.getPosition().toLowerCase();
+            if ("super administrator".equals(position) || "principal".equals(position)) {
+                err.setMessage("Creation of '" + position + "' position is not allowed.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(err);
+            }
+            User newUser = userService.createUser(user); // Corrected method invocation
+            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
 
-        // return ResponseEntity.status(HttpStatus.CREATED)
-        //         //.headers(headers)
-        //         .body(newUser);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to create user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Position not found: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @PostMapping("/create/principal")
+    public ResponseEntity<Object> createPrincipal(@RequestBody UserAdminRequest user) {
         ErrorMessage err = new ErrorMessage("");
         try {
             User newUser = userService.createUser(user); // Corrected method invocation
@@ -55,6 +78,10 @@ public class UserController {
             // This exception is thrown when a duplicate school name is detected
             err.setMessage("Failed to create user: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Position not found: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(err);
         } catch (Exception e) {
             // Catching any other unexpected exceptions
@@ -79,17 +106,50 @@ public class UserController {
 
     @PostMapping("/exists")
     public ResponseEntity<Boolean> checkIfUserExists(@RequestBody UserCredentials credentials) {
-    String emailOrUsername = credentials.getEmailOrUsername();
-    boolean exists = userService.checkIfUserExists(emailOrUsername);
-    return ResponseEntity.ok(exists);
+        String emailOrUsername = credentials.getEmailOrUsername();
+        boolean exists = userService.checkIfUserExists(emailOrUsername);
+        return ResponseEntity.ok(exists);
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getUserById(@Valid @PathVariable String id) {
+    public ResponseEntity<Object> getUserByEmailUsername(@Valid @PathVariable String id) {
         ErrorMessage err = new ErrorMessage("");
         try {
-            User user = userService.getUserById(id);
+            UserResponse user = userService.getUserAssociationsById(id);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @PostMapping("/schools")
+    public ResponseEntity<Object> getUserById(@RequestBody Map<String, String> requestBody) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String emailOrUsername = requestBody.get("emailOrUsername");
+            if (emailOrUsername == null || emailOrUsername.isEmpty()) {
+                throw new IllegalArgumentException("emailOrUsername is required");
+            }
+
+            UserResponse user = userService.getUserByEmailUsername(emailOrUsername);
             if (user != null) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
@@ -174,16 +234,20 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred");
         }
     }
-    private ResponseCookie createJwtCookie(String token) {
-        return ResponseCookie.from("jwt", token)
-                // .httpOnly(true) // Make the cookie accessible only via HTTP (not accessible
-                // via JavaScript)
-                .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds = 1 day)
-                .sameSite("Lax")
-                .secure(false)
-                .path("/") // Set the cookie path to root ("/") so that it's accessible across the entire
-                           // domain
-                .build();
-    }
+
+    // private ResponseCookie createJwtCookie(String token) {
+    // return ResponseCookie.from("jwt", token)
+    // // .httpOnly(true) // Make the cookie accessible only via HTTP (not
+    // accessible
+    // // via JavaScript)
+    // .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds
+    // = 1 day)
+    // .sameSite("Lax")
+    // .secure(false)
+    // .path("/") // Set the cookie path to root ("/") so that it's accessible
+    // across the entire
+    // // domain
+    // .build();
+    // }
 
 }

@@ -8,7 +8,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.LRResponse;
-import com.it332.principal.Models.LR;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +25,7 @@ public class ExcelServiceCopy {
         List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(id);
 
         // School name for output file naming
-        String schoolName = "Jaclupan";
+        // String schoolName = "Jaclupan";
 
         // Load template workbook from the classpath
         ClassPathResource resource = new ClassPathResource("Templates/LR-2024.xlsx");

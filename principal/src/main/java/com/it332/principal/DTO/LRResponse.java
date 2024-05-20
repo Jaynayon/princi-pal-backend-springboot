@@ -1,10 +1,5 @@
 package com.it332.principal.DTO;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.it332.principal.Models.LR;
 
 import lombok.AllArgsConstructor;

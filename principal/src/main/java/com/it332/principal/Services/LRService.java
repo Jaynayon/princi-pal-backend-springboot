@@ -13,9 +13,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,6 +46,40 @@ public class LRService {
         updateDocumentAmount(lr.getDocumentsId());
 
         return newLr;
+    }
+
+    public List<LR> getLRByKeyword(String keyword) {
+        // Placeholder list to store filtered LR objects
+        List<LR> filteredLRList = new ArrayList<>();
+
+        // Assuming LR objects are retrieved from a data source (e.g., database)
+        List<LR> allLRs = getAllLRs(); // Example method to get all LR objects
+
+        // Iterate through all LR objects to filter by keyword
+        for (LR lr : allLRs) {
+            // Check if the LR object's details contain the keyword (case-insensitive)
+            if (lrMatchesKeyword(lr, keyword)) {
+                filteredLRList.add(lr); // Add matching LR object to the result list
+            }
+        }
+
+        return filteredLRList;
+    }
+
+    // Helper method to check if an LR object matches the keyword
+    private boolean lrMatchesKeyword(LR lr, String keyword) {
+        // Assuming LR details such as payee, particulars, etc., are checked for keyword
+        // match
+        String payee = lr.getPayee();
+        String particulars = lr.getParticulars();
+
+        // Convert details and keyword to lowercase for case-insensitive comparison
+        payee = payee.toLowerCase();
+        particulars = particulars.toLowerCase();
+        keyword = keyword.toLowerCase();
+
+        // Check if any detail contains the keyword
+        return payee.contains(keyword) || particulars.contains(keyword);
     }
 
     public void updateDocumentAmount(String id) {

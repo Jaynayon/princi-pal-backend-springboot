@@ -14,7 +14,7 @@ public class TokenVerificationController {
     @Autowired
     private JwtTokenService jwtTokenService;
 
-    @GetMapping("/verify/")
+    @GetMapping("/verifys/")
     public ResponseEntity<?> verifyTokenAndTransform(@RequestParam("token") String token) {
         try {
             Claims claims = jwtTokenService.verifyTokenAndTransform(token);

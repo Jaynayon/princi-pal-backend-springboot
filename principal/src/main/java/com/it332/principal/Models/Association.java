@@ -1,34 +1,50 @@
 package com.it332.principal.Models;
 
+import org.springframework.data.annotation.Id;
+
 public class Association {
-    private String school;
-    private String user;
+    @Id
+    private String id;
+    private String userId;
+    private String schoolId;
     private boolean approved = false;
     private boolean invitation = false;
     private boolean admin = false;
 
-    public Association(String school, String user, boolean approved, boolean invitation, boolean admin) {
-        this.school = school;
-        this.user = user;
+    public Association() {
+    }
+
+    public Association(String id, String userId, String schoolId, boolean approved, boolean invitation, boolean admin) {
+        this.id = id;
+        this.userId = userId;
+        this.schoolId = schoolId;
         this.approved = approved;
         this.invitation = invitation;
         this.admin = admin;
     }
 
-    public String getSchool() {
-        return school;
+    public String getId() {
+        return id;
     }
 
-    public void setSchool(String school) {
-        this.school = school;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getUser() {
-        return user;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getSchoolId() {
+        return schoolId;
+    }
+
+    public void setSchoolId(String schoolId) {
+        this.schoolId = schoolId;
     }
 
     public boolean isApproved() {

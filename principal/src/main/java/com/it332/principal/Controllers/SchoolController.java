@@ -1,6 +1,7 @@
 package com.it332.principal.Controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Models.School;
+import com.it332.principal.Models.User;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.SchoolService;
 
@@ -76,6 +78,130 @@ public class SchoolController {
                     .body(err);
         } catch (Exception e) {
             // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @PostMapping("/name")
+    public ResponseEntity<Object> getSchoolByName(@RequestBody Map<String, String> requestBody) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String name = requestBody.get("name");
+            if (name == null || name.isEmpty()) {
+                throw new IllegalArgumentException("Name is required");
+            }
+
+            School school = schoolService.getSchoolByNameOrFullName(name);
+            if (school != null) {
+                return new ResponseEntity<>(school, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            err.setMessage("Failed to get school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Failed to get school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<Object> getUsersBySchoolId(@RequestBody Map<String, String> requestBody) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String schoolId = requestBody.get("schoolId");
+            if (schoolId == null || schoolId.isEmpty()) {
+                throw new IllegalArgumentException("School Id is required");
+            }
+
+            List<User> school = schoolService.getUsersBySchoolId(schoolId);
+            if (school != null) {
+                return new ResponseEntity<>(school, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            err.setMessage("Failed to get school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Failed to get school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @PostMapping("/users/principal")
+    public ResponseEntity<Object> getPrincipalBySchoolId(@RequestBody Map<String, String> requestBody) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String schoolId = requestBody.get("schoolId");
+            if (schoolId == null || schoolId.isEmpty()) {
+                throw new IllegalArgumentException("School Id is required");
+            }
+
+            User user = schoolService.isPrincipalPresent(schoolId);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @PostMapping("/fullname")
+    public ResponseEntity<Object> getSchoolByFullName(@RequestBody Map<String, String> requestBody) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String fullName = requestBody.get("fullName");
+            if (fullName == null || fullName.isEmpty()) {
+                throw new IllegalArgumentException("Full name is required");
+            }
+
+            School school = schoolService.getSchoolByFullName(fullName);
+            if (school != null) {
+                return new ResponseEntity<>(school, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            err.setMessage("Failed to get school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Failed to get school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
             e.printStackTrace();
             err.setMessage("Internal server error occurred");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

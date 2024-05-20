@@ -1,15 +1,12 @@
-package com.it332.principal.Models;
+package com.it332.principal.DTO;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.List;
 
-import com.it332.principal.DTO.UserAdminRequest;
+import com.it332.principal.Models.School;
+import com.it332.principal.Models.User;
 
-@Document(collection = "users")
-public class User {
-    @Id
+public class UserResponse {
     private String id;
-
     private String fname;
     private String mname;
     private String lname;
@@ -18,23 +15,14 @@ public class User {
     private String password;
     private String position;
     private String avatar = "Blue"; // default value
+    private List<School> schools;
 
-    public User() {
+    public UserResponse() {
     }
 
-    public User(UserAdminRequest user) {
-        this.fname = user.getFname();
-        this.mname = user.getMname();
-        this.lname = user.getLname();
-        this.username = user.getUsername();
-        this.email = user.getEmail();
-        this.password = user.getPassword();
-        this.position = user.getPosition();
-    }
-
-    // Constructor with essential fields
-    public User(String fname, String mname, String lname, String username, String email, String password,
-            String position) {
+    public UserResponse(String id, String fname, String mname, String lname, String username, String email,
+            String password, String position, String avatar) {
+        this.id = id;
         this.fname = fname;
         this.mname = mname;
         this.lname = lname;
@@ -42,6 +30,20 @@ public class User {
         this.email = email;
         this.password = password;
         this.position = position;
+        this.avatar = avatar;
+    }
+
+    public UserResponse(User user, List<School> schools) {
+        this.id = user.getId();
+        this.fname = user.getFname();
+        this.mname = user.getMname();
+        this.lname = user.getLname();
+        this.username = user.getUsername();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.position = user.getPosition();
+        this.avatar = user.getAvatar();
+        this.schools = schools;
     }
 
     public String getId() {
@@ -114,6 +116,14 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public List<School> getSchools() {
+        return schools;
+    }
+
+    public void setSchools(List<School> schools) {
+        this.schools = schools;
     }
 
 }
