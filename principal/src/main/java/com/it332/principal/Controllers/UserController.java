@@ -235,6 +235,20 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<Object> updateUserPassword(@PathVariable String id, @RequestBody Map<String, String> passwords) {
+        String newPassword = passwords.get("newPassword");
+
+        try {
+            userService.updateUserPassword(id, newPassword);
+            return ResponseEntity.ok().body("Password updated successfully");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Failed to update password: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred");
+        }
+    }
+
     // private ResponseCookie createJwtCookie(String token) {
     // return ResponseCookie.from("jwt", token)
     // // .httpOnly(true) // Make the cookie accessible only via HTTP (not
