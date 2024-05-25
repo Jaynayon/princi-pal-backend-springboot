@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,13 +72,17 @@ public class AssociationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
     }
 
-    // @PutMapping("/update")
-    // public ResponseEntity<Association> updateAssociation(@PathVariable String id,
-    // @RequestBody Association association){
-    // Association updateAssociation = associationService.updateAssociation(id,
-    // association);
-    // return ResponseEntity.ok(updateAssociation);
-    // }
+    @PatchMapping("/promote")
+    public ResponseEntity<Association> promoteAssociation(@RequestBody AssociationIdRequest association) {
+        Association updateAssociation = associationService.promoteAssociation(association);
+        return ResponseEntity.ok(updateAssociation);
+    }
+
+    @PatchMapping("/demote")
+    public ResponseEntity<Association> demoteAssociation(@RequestBody AssociationIdRequest association) {
+        Association updateAssociation = associationService.demoteAssociation(association);
+        return ResponseEntity.ok(updateAssociation);
+    }
 
     @DeleteMapping("/{userId}/{schoolId}")
     public ResponseEntity<?> deleteAssociation(@PathVariable String userId, @PathVariable String schoolId) {

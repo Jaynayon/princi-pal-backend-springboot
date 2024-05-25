@@ -208,4 +208,34 @@ public class AssociationService {
         // Save and return the new association
         return updatedAssociation;
     }
+
+    public Association promoteAssociation(AssociationIdRequest association) {
+        // Check if user or school exists
+        School existSchool = schoolService.getSchoolById(association.getSchoolId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existSchool.getId(), existUser.getId());
+
+        if (!existingAssociation.isAdmin()) {
+            existingAssociation.setAdmin(true);
+        }
+        return associationRepository.save(existingAssociation);
+    }
+
+    public Association demoteAssociation(AssociationIdRequest association) {
+        // Check if user or school exists
+        School existSchool = schoolService.getSchoolById(association.getSchoolId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existSchool.getId(), existUser.getId());
+
+        if (existingAssociation.isAdmin()) {
+            existingAssociation.setAdmin(false);
+        }
+        return associationRepository.save(existingAssociation);
+    }
 }
