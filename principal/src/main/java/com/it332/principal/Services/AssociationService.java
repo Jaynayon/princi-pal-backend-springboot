@@ -33,6 +33,15 @@ public class AssociationService {
                 .orElseThrow(() -> new NotFoundException("Association not found with User ID: " + userId));
     }
 
+    public Association getAssociationByUserIdAndSchoolId(AssociationIdRequest association) {
+        // Check if user or school exists
+        School existSchool = schoolService.getSchoolById(association.getSchoolId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        return associationRepository.findBySchoolIdAndUserId(existSchool.getId(), existUser.getId());
+    }
+
     public Association createAssociation(Association association) {
         return associationRepository.save(association);
     }
