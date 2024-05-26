@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.School;
@@ -40,6 +41,16 @@ public class AssociationService {
 
         // Check if the association already exists for the given schoolId and userId
         return associationRepository.findBySchoolIdAndUserId(existSchool.getId(), existUser.getId());
+    }
+
+    public UserAssociation getUserAssocation(AssociationIdRequest association) {
+        // Get user association
+        Association existingAssociation = getAssociationByUserIdAndSchoolId(association);
+
+        // Get user
+        User existingUser = userService.getUserById(association.getUserId());
+
+        return new UserAssociation(existingUser, existingAssociation);
     }
 
     public Association createAssociation(Association association) {

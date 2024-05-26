@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Services.AssociationService;
 
@@ -45,6 +46,12 @@ public class AssociationController {
     @PostMapping("/create")
     public ResponseEntity<Association> createAssociation(@RequestBody Association association) {
         Association createdAssociation = associationService.createAssociation(association);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
+    }
+
+    @PostMapping("/user")
+    public ResponseEntity<UserAssociation> getUserAssociation(@RequestBody AssociationIdRequest association) {
+        UserAssociation createdAssociation = associationService.getUserAssocation(association);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
     }
 
