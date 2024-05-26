@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.ErrorMessage;
+import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
 import com.it332.principal.Security.NotFoundException;
@@ -125,7 +126,7 @@ public class SchoolController {
                 throw new IllegalArgumentException("School Id is required");
             }
 
-            List<User> school = schoolService.getUsersBySchoolId(schoolId);
+            List<UserAssociation> school = schoolService.getUsersBySchoolId(schoolId);
             if (school != null) {
                 return new ResponseEntity<>(school, HttpStatus.OK);
             } else {
@@ -156,7 +157,7 @@ public class SchoolController {
                 throw new IllegalArgumentException("School Id is required");
             }
 
-            User user = schoolService.isPrincipalPresent(schoolId);
+            UserAssociation user = schoolService.isPrincipalPresent(schoolId);
             if (user != null) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
