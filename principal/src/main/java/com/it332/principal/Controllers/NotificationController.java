@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Notification;
 import com.it332.principal.Services.NotificationService;
 
@@ -64,4 +63,3 @@ public class NotificationController {
         return ResponseEntity.ok().body(rejectedNotification);
     }
 }
-

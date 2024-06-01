@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.Models.School;
-import com.it332.principal.Models.User;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.SchoolService;
 

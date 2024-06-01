@@ -6,8 +6,6 @@ import com.it332.principal.Security.JwtTokenService;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UserService;
 
-import io.jsonwebtoken.Claims;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

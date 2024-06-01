@@ -2,7 +2,6 @@ package com.it332.principal.Controllers;
 
 import com.it332.principal.Models.User;
 import com.it332.principal.Security.JwtTokenService;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
