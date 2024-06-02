@@ -228,4 +228,16 @@ public class UserService {
 
         return userByEmail != null || userByUsername != null;
     }
+
+    public void updateUserPassword(String userId, String newPassword) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword);
+            userRepository.save(user);
+        } else {
+            throw new NotFoundException("User not found with ID: " + userId);
+        }
+    }
 }

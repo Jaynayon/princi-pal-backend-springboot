@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
@@ -41,11 +42,11 @@ public class SchoolService {
         return schoolRepository.save(school);
     }
 
-    public User isPrincipalPresent(String schoolId) {
+    public UserAssociation isPrincipalPresent(String schoolId) {
         // Get user associations for school
-        List<User> users = getUsersBySchoolId(schoolId);
+        List<UserAssociation> users = getUsersBySchoolId(schoolId);
 
-        for (User user : users) {
+        for (UserAssociation user : users) {
             // User user = userService.getUserById(association.getUserId());
             if ("Principal".equals(user.getPosition())) {
                 return user;
@@ -55,7 +56,7 @@ public class SchoolService {
         return null;
     }
 
-    public List<User> getUsersBySchoolId(String schoolId) {
+    public List<UserAssociation> getUsersBySchoolId(String schoolId) {
         List<Association> association = associationRepository.findBySchoolId(schoolId);
 
         // Extract userIds from associations
@@ -64,7 +65,26 @@ public class SchoolService {
                 .distinct() // Ensure no duplicate user IDs
                 .collect(Collectors.toList());
 
-        return userRepository.findAllById(userIds);
+        // Get all users in school
+        List<User> schoolUsers = userRepository.findAllById(userIds);
+
+        // Map each user to their respective association to create
+        // UserAssociation DTOs
+        List<UserAssociation> userAssociations = schoolUsers.stream()
+                .map(user -> {
+                    // Find the corresponding association for the user
+                    Association assoc = association.stream()
+                            .filter(a -> a.getUserId().equals(user.getId()))
+                            .findFirst()
+                            .orElseThrow(
+                                    () -> new RuntimeException("Association not found for user ID: " + user.getId()));
+
+                    // Create and return UserAssociation DTO
+                    return new UserAssociation(user, assoc);
+                })
+                .collect(Collectors.toList());
+
+        return userAssociations;
     }
 
     public School getSchoolByName(String name) {

@@ -26,7 +26,7 @@ public class LRController {
 
     // Endpoint to create a new LR document
     @PostMapping("/create")
-    public ResponseEntity<Object> createLR(@RequestBody @Valid LRRequest lr) {
+    public ResponseEntity<Object> saveRecord(@RequestBody @Valid LRRequest lr) {
         try {
             // Debugging: Print LRRequest details for inspection
             System.out.println("Received LRRequest: " + lr.getDate());
@@ -61,8 +61,8 @@ public class LRController {
 
     // Endpoint to retrieve all LR documents
     @GetMapping("/keyword/{keyword}")
-    public ResponseEntity<Object> searchLr(@PathVariable String keyword) {
-        List<LR> lrList = lrService.getLRByKeyword(keyword);
+    public ResponseEntity<Object> getRecords(@PathVariable String details) {
+        List<LR> lrList = lrService.getLRByKeyword(details);
         return new ResponseEntity<>(lrList, HttpStatus.OK);
     }
 

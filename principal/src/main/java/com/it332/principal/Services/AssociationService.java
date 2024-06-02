@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.School;
@@ -31,6 +32,25 @@ public class AssociationService {
     public Association getAssociationById(String userId) {
         return associationRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Association not found with User ID: " + userId));
+    }
+
+    public Association getAssociationByUserIdAndSchoolId(AssociationIdRequest association) {
+        // Check if user or school exists
+        School existSchool = schoolService.getSchoolById(association.getSchoolId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        return associationRepository.findBySchoolIdAndUserId(existSchool.getId(), existUser.getId());
+    }
+
+    public UserAssociation getUserAssocation(AssociationIdRequest association) {
+        // Get user association
+        Association existingAssociation = getAssociationByUserIdAndSchoolId(association);
+
+        // Get user
+        User existingUser = userService.getUserById(association.getUserId());
+
+        return new UserAssociation(existingUser, existingAssociation);
     }
 
     public Association createAssociation(Association association) {
@@ -207,5 +227,35 @@ public class AssociationService {
 
         // Save and return the new association
         return updatedAssociation;
+    }
+
+    public Association promoteAssociation(AssociationIdRequest association) {
+        // Check if user or school exists
+        School existSchool = schoolService.getSchoolById(association.getSchoolId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existSchool.getId(), existUser.getId());
+
+        if (!existingAssociation.isAdmin()) {
+            existingAssociation.setAdmin(true);
+        }
+        return associationRepository.save(existingAssociation);
+    }
+
+    public Association demoteAssociation(AssociationIdRequest association) {
+        // Check if user or school exists
+        School existSchool = schoolService.getSchoolById(association.getSchoolId());
+        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existSchool.getId(), existUser.getId());
+
+        if (existingAssociation.isAdmin()) {
+            existingAssociation.setAdmin(false);
+        }
+        return associationRepository.save(existingAssociation);
     }
 }
