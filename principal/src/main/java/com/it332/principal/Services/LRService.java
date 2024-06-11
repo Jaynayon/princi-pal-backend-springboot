@@ -3,11 +3,9 @@ package com.it332.principal.Services;
 import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.Documents;
-import com.it332.principal.Models.JEV;
 import com.it332.principal.Models.LR;
 import com.it332.principal.Models.Uacs;
 import com.it332.principal.Repository.DocumentsRepository;
-import com.it332.principal.Repository.JEVRepository;
 import com.it332.principal.Repository.LRRepository;
 import com.it332.principal.Security.NotFoundException;
 

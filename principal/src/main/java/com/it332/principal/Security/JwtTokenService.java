@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.Models.User;
-import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Services.UserService;
 
 @Service
