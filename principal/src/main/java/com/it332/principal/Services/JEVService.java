@@ -65,6 +65,19 @@ public class JEVService {
         }
     }
 
+    public void updateJEVAmount(String documentsId, String code, Float amount) {
+        JEV existingJEV = jevRepository.findByDocumentsIdAndUacs_Code(documentsId, code);
+
+        // Check if the JEV exists and the amount is not null
+        if (existingJEV != null && amount != null) {
+            // Sum the existing amount with the new amount
+            float newTotalAmount = (existingJEV.getAmount() != null ? existingJEV.getAmount() : 0) + amount;
+            existingJEV.setAmount(newTotalAmount);
+        }
+
+        jevRepository.save(existingJEV);
+    }
+
     public Documents getDocumentById(String id) {
         // Validate the format of the provided ID
         if (!ObjectId.isValid(id)) {

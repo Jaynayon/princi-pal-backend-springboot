@@ -3,9 +3,11 @@ package com.it332.principal.Services;
 import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.Documents;
+import com.it332.principal.Models.JEV;
 import com.it332.principal.Models.LR;
 import com.it332.principal.Models.Uacs;
 import com.it332.principal.Repository.DocumentsRepository;
+import com.it332.principal.Repository.JEVRepository;
 import com.it332.principal.Repository.LRRepository;
 import com.it332.principal.Security.NotFoundException;
 
@@ -32,6 +34,9 @@ public class LRService {
     @Autowired
     private UacsService uacsService;
 
+    @Autowired
+    private JEVService jevService;
+
     Documents existingDocument;
 
     public LR saveLR(LRRequest lr) {
@@ -44,6 +49,10 @@ public class LRService {
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentAmount(lr.getDocumentsId());
+
+        // Update the selected UACS code
+        jevService.updateJEVAmount(lr.getDocumentsId(), existingUacs.getCode(),
+                Float.parseFloat(lr.getAmount() + ""));
 
         return newLr;
     }
@@ -83,6 +92,22 @@ public class LRService {
     }
 
     public void updateDocumentAmount(String id) {
+        // Find all LR objects with the specified documentId
+        existingDocument = documentsService.getDocumentById(id);
+        List<LRResponse> lrList = getAllLRsByDocumentsId(id);
+
+        // Calculate the sum of amounts from the LR list
+        double totalAmount = lrList.stream()
+                .mapToDouble(LRResponse::getAmount)
+                .sum();
+        // Update the Documents amount property with the calculated total amount
+        existingDocument.setBudget(totalAmount);
+
+        // Save new sum
+        documentsRepository.save(existingDocument);
+    }
+
+    public void updateJEVAmount(String id) {
         // Find all LR objects with the specified documentId
         existingDocument = documentsService.getDocumentById(id);
         List<LRResponse> lrList = getAllLRsByDocumentsId(id);
