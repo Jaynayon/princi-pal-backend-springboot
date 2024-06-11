@@ -46,7 +46,7 @@ public class LRService {
         LR newLr = lrRepository.save(new LR(lr, existingUacs.getCode()));
 
         // Update the associated Document's budget based on the saved LR's amount
-        updateDocumentAmount(lr.getDocumentsId());
+        updateDocumentSumAmount(lr.getDocumentsId());
 
         // Update the selected UACS code
         jevService.updateJEVAmount(lr.getDocumentsId(), existingUacs.getCode(),
@@ -89,7 +89,7 @@ public class LRService {
         return payee.contains(keyword) || particulars.contains(keyword);
     }
 
-    public void updateDocumentAmount(String id) {
+    public void updateDocumentSumAmount(String id) {
         // Find all LR objects with the specified documentId
         existingDocument = documentsService.getDocumentById(id);
         List<LRResponse> lrList = getAllLRsByDocumentsId(id);
@@ -180,7 +180,7 @@ public class LRService {
         LR newLR = lrRepository.save(lr);
 
         // Update the associated Document's budget based on the saved LR's amount
-        updateDocumentAmount(lr.getDocumentsId());
+        updateDocumentSumAmount(lr.getDocumentsId());
 
         return newLR;
     }
@@ -191,6 +191,6 @@ public class LRService {
         lrRepository.delete(lr);
 
         // Update the associated Document's budget based on the saved LR's amount
-        updateDocumentAmount(lr.getDocumentsId());
+        updateDocumentSumAmount(lr.getDocumentsId());
     }
 }
