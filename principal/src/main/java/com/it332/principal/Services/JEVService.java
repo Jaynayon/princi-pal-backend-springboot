@@ -174,7 +174,7 @@ public class JEVService {
         JEV newJEV = jevRepository.save(jev);
 
         // Update the associated Document's budget based on the saved LR's amount
-        updateDocumentAmount(jev.getDocumentsId());
+        // updateDocumentAmount(jev.getDocumentsId());
 
         return newJEV;
     }

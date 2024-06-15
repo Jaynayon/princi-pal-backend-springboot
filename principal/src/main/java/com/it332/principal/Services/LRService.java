@@ -180,7 +180,7 @@ public class LRService {
         LR newLR = lrRepository.save(lr);
 
         // Update the associated Document's budget based on the saved LR's amount
-        updateDocumentSumAmount(lr.getDocumentsId());
+        // updateDocumentSumAmount(lr.getDocumentsId());
 
         return newLR;
     }
