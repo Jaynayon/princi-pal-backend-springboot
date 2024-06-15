@@ -1,7 +1,9 @@
 package com.it332.principal.Models;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document(collection = "Association")
 public class Association {
     @Id
     private String id;
