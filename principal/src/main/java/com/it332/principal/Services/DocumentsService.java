@@ -91,6 +91,9 @@ public class DocumentsService {
         if (updatedSchool.getHeadAccounting() != null) {
             document.setHeadAccounting(updatedSchool.getHeadAccounting());
         }
+        if (updatedSchool.getCashAdvance() != null) {
+            document.setCashAdvance(updatedSchool.getCashAdvance());
+        }
 
         return documentRepository.save(document);
     }
