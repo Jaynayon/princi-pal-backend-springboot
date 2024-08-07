@@ -4,9 +4,11 @@ import com.it332.principal.DTO.JEVRequest;
 import com.it332.principal.DTO.JEVResponse;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.JEV;
+import com.it332.principal.Models.LR;
 import com.it332.principal.Models.Uacs;
 import com.it332.principal.Repository.DocumentsRepository;
 import com.it332.principal.Repository.JEVRepository;
+import com.it332.principal.Repository.LRRepository;
 import com.it332.principal.Security.NotFoundException;
 
 import org.bson.types.ObjectId;
@@ -26,8 +28,8 @@ public class JEVService {
     @Autowired
     private DocumentsRepository documentsRepository;
 
-    // @Autowired
-    // private DocumentsService documentsService;
+    @Autowired
+    private LRRepository lrRepository;
 
     @Autowired
     private UacsService uacsService;
@@ -63,6 +65,19 @@ public class JEVService {
         for (Uacs uacs : allUacs) {
             saveJEV(new JEVRequest(uacs.getCode(), documentId));
         }
+    }
+
+    public void updateJEVAmount(String documentsId, String code, Float amount) {
+        JEV existingJEV = jevRepository.findByDocumentsIdAndUacs_Code(documentsId, code);
+
+        // Check if the JEV exists and the amount is not null
+        if (existingJEV != null && amount != null) {
+            // Sum the existing amount with the new amount
+            float newTotalAmount = (existingJEV.getAmount() != null ? existingJEV.getAmount() : 0) + amount;
+            existingJEV.setAmount(newTotalAmount);
+        }
+
+        jevRepository.save(existingJEV);
     }
 
     public Documents getDocumentById(String id) {
@@ -114,17 +129,35 @@ public class JEVService {
 
     // Method to retrieve all LR documents with the same documentsId
     public List<JEVResponse> getAllJEVsByDocumentsId(String documentsId) {
+        // Get if documents exists
         existingDocument = getDocumentById(documentsId);
-        List<JEV> lrList = jevRepository.findByDocumentsId(documentsId);
 
-        if (existingDocument == null) {
-            throw new NotFoundException("LR not found with ID: " + documentsId);
+        // Fetch LR and JEV lists by documentsId
+        List<LR> lrList = lrRepository.findByDocumentsIdOrderByDateAsc(documentsId);
+        List<JEV> jevList = jevRepository.findByDocumentsId(documentsId);
+
+        // Iterate over each JEV to update its amount
+        for (JEV jev : jevList) {
+            String code = jev.getUacs().getCode(); // Get the UACS code of the JEV
+
+            // Initialize the sum for this JEV's code
+            float sum = 0.0f;
+
+            // Sum all LR amounts that have the same objectCode as the JEV's UACS code
+            for (LR lr : lrList) {
+                if (lr.getObjectCode().equals(code)) { // Use .equals() for string comparison
+                    sum += lr.getAmount(); // Accumulate the amount from matching LR entries
+                }
+            }
+
+            // Update the JEV's amount with the computed sum
+            jev.setAmount(sum); // Set the new sum to the JEV's amount
         }
 
-        return lrList.stream()
+        // Filter list to be returned
+        return jevList.stream()
                 .map(JEVResponse::new) // Map each LR to LRResponse using constructor
                 .collect(Collectors.toList());
-        // return lrList;
     }
 
     public JEV updateJEV(String id, JEVRequest updatedJEV) {
@@ -141,7 +174,7 @@ public class JEVService {
         JEV newJEV = jevRepository.save(jev);
 
         // Update the associated Document's budget based on the saved LR's amount
-        updateDocumentAmount(jev.getDocumentsId());
+        // updateDocumentAmount(jev.getDocumentsId());
 
         return newJEV;
     }

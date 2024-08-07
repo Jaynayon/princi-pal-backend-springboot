@@ -6,23 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.it332.principal.Models.Notification;
-import com.it332.principal.Models.Association;
-import com.it332.principal.Models.User;
-import com.it332.principal.Repository.AssociationRepository;
 import com.it332.principal.Repository.NotificationRepository;
 import com.it332.principal.Security.NotFoundException;
 
 @Service
 public class NotificationService {
-    
+
     @Autowired
     private NotificationRepository notificationRepository;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private AssociationService associationService;
 
     public List<Notification> getAllNotifications() {
         return notificationRepository.findAll();
@@ -41,7 +32,7 @@ public class NotificationService {
         List<Notification> notifications = notificationRepository.findByUserId(userId);
         notificationRepository.deleteAll(notifications);
     }
-    
+
     public Notification acceptNotification(String id) {
         Notification notification = getNotificationById(id);
         notification.setAccepted(true);
