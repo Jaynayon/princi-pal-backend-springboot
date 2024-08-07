@@ -39,6 +39,10 @@ public class SchoolService {
             throw new IllegalArgumentException("School with full name " + school.getFullName() + " already exists");
         }
 
+        // Convert properties to uppercases
+        school.setName(school.getName().toUpperCase());
+        school.setFullName(school.getFullName().toUpperCase());
+
         return schoolRepository.save(school);
     }
 
@@ -88,7 +92,7 @@ public class SchoolService {
     }
 
     public School getSchoolByName(String name) {
-        School byName = schoolRepository.findByName(name);
+        School byName = schoolRepository.findByName(name.toUpperCase());
         if (byName == null) {
             throw new NotFoundException("School not found with name: " + name);
         }
@@ -96,7 +100,7 @@ public class SchoolService {
     }
 
     public School getSchoolByFullName(String fullName) {
-        School byFullName = schoolRepository.findByFullName(fullName);
+        School byFullName = schoolRepository.findByFullName(fullName.toUpperCase());
         if (byFullName == null) {
             throw new NotFoundException("School not found with name: " + fullName);
         }
@@ -150,10 +154,10 @@ public class SchoolService {
         }
 
         if (updatedSchool.getName() != null) {
-            existingSchool.setName(updatedSchool.getName());
+            existingSchool.setName(updatedSchool.getName().toUpperCase());
         }
         if (updatedSchool.getFullName() != null) {
-            existingSchool.setFullName(updatedSchool.getFullName());
+            existingSchool.setFullName(updatedSchool.getFullName().toUpperCase());
         }
 
         return schoolRepository.save(existingSchool);
