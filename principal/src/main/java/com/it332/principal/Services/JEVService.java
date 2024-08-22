@@ -80,6 +80,18 @@ public class JEVService {
         jevRepository.save(existingJEV);
     }
 
+    public void updateJEVBudget(String documentsId, String code, Float budget) {
+        JEV existingJEV = jevRepository.findByDocumentsIdAndUacs_Code(documentsId, code);
+
+        // Check if the JEV exists and the amount is not null
+        if (existingJEV != null && budget != null) {
+            // Sum the existing amount with the new amount
+            existingJEV.setBudget(budget);
+        }
+
+        jevRepository.save(existingJEV);
+    }
+
     public Documents getDocumentById(String id) {
         // Validate the format of the provided ID
         if (!ObjectId.isValid(id)) {
@@ -169,6 +181,9 @@ public class JEVService {
         }
         if (updatedJEV.getAmountType() != null) {
             jev.setAmountType(updatedJEV.getAmountType());
+        }
+        if (updatedJEV.getBudget() != null) {
+            jev.setBudget(updatedJEV.getBudget());
         }
 
         JEV newJEV = jevRepository.save(jev);

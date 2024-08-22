@@ -20,10 +20,12 @@ public class JEV {
     private String documentsId;
     private String amountType;
     private Float amount;
+    private Float budget;
 
     public JEV(JEVRequest jev, Uacs uacs) {
         this.uacs = uacs;
         this.documentsId = jev.getDocumentsId();
+        setBudget(jev.getBudget());
         setAmountType(jev.getAmountType());
         setAmount(jev.getAmount());
     }
@@ -76,6 +78,17 @@ public class JEV {
             this.amount = Float.parseFloat("0");
         } else
             this.amount = amount;
+    }
+
+    public Float getBudget() {
+        return budget;
+    }
+
+    public void setBudget(Float budget) {
+        if (budget == null) {
+            this.budget = Float.parseFloat("0");
+        } else
+            this.budget = budget;
     }
 
 }
