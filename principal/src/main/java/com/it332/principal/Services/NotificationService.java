@@ -19,9 +19,9 @@ public class NotificationService {
         return notificationRepository.findAll();
     }
 
-    public Notification getNotificationById(String userId) {
-        return notificationRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Notification not found" + userId));
+    public Notification getNotificationById(String id) {
+        return notificationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Notification not found with id: " + id));
     }
 
     public Notification createNotification(Notification notification) {
@@ -40,11 +40,32 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
-    // Method to reject a notification
     public Notification rejectNotification(String id) {
         Notification notification = getNotificationById(id);
         notification.setAccepted(false); // Ensure acceptance flag is reset
         notification.setRejected(true);
         return notificationRepository.save(notification);
+    }
+
+    public List<Notification> getNotificationsByUserId(String userId) {
+        return notificationRepository.findByUserId(userId);
+    }
+
+    public List<Notification> getNotificationsByUserIdAndReadStatus(String userId, boolean isRead) {
+        return notificationRepository.findByUserIdAndIsRead(userId, isRead);
+    }
+
+    // Method to create a notification if balance exceeds the budget
+    public void checkAndNotify(double balance, double budget, String userId) {
+        if (balance > budget) {
+            Notification notification = new Notification();
+            notification.setUserId(userId);
+            notification.setAssocId(null); // Set if needed
+            notification.setDetails("Your balance of " + balance + " exceeds the budget of " + budget + ".");
+            notification.setRead(false);
+            notification.setAccepted(false);
+            notification.setRejected(false);
+            createNotification(notification);
+        }
     }
 }
