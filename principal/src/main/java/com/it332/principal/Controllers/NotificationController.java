@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.Models.Notification;
 import com.it332.principal.Services.NotificationService;
+import com.it332.principal.Security.NotFoundException;
 
 @RestController
 @RequestMapping("/notifications")
@@ -25,17 +26,19 @@ public class NotificationController {
     private NotificationService notificationService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Notification>> getAllNotification() {
-        List<Notification> notificationOptional = notificationService.getAllNotifications();
-
-        return ResponseEntity.ok().body(notificationOptional);
+    public ResponseEntity<List<Notification>> getAllNotifications() {
+        List<Notification> notifications = notificationService.getAllNotifications();
+        return ResponseEntity.ok().body(notifications);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Notification> getNotificationById(@PathVariable String id) {
-        Notification notificationOptional = notificationService.getNotificationById(id);
-
-        return ResponseEntity.ok().body(notificationOptional);
+        try {
+            Notification notification = notificationService.getNotificationById(id);
+            return ResponseEntity.ok().body(notification);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @PostMapping("/create")
@@ -44,22 +47,36 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNotification);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> clearNotificationById(@PathVariable String id) {
-        notificationService.clearAllNotificationsByUserId(id);
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<?> clearNotificationsByUserId(@PathVariable String userId) {
+        notificationService.clearAllNotificationsByUserId(userId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/accept/{id}")
     public ResponseEntity<Notification> acceptNotification(@PathVariable String id) {
-        Notification acceptedNotification = notificationService.acceptNotification(id);
-        return ResponseEntity.ok().body(acceptedNotification);
+        try {
+            Notification acceptedNotification = notificationService.acceptNotification(id);
+            return ResponseEntity.ok().body(acceptedNotification);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
-    // Endpoint for rejecting a notification
     @PutMapping("/reject/{id}")
     public ResponseEntity<Notification> rejectNotification(@PathVariable String id) {
-        Notification rejectedNotification = notificationService.rejectNotification(id);
-        return ResponseEntity.ok().body(rejectedNotification);
+        try {
+            Notification rejectedNotification = notificationService.rejectNotification(id);
+            return ResponseEntity.ok().body(rejectedNotification);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    // Endpoint to get notifications by user ID
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
+        List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
+        return ResponseEntity.ok().body(notifications);
     }
 }
