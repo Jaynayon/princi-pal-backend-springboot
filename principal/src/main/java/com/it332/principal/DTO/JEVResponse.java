@@ -9,18 +9,20 @@ public class JEVResponse {
     private String documentsId;
     private String amountType;
     private Float amount;
+    private Float budget;
 
     public JEVResponse() {
     }
 
     public JEVResponse(String id, String uacsCode, String uacsName, String documentsId, String amountType,
-            Float amount) {
+            Float amount, Float budget) {
         this.id = id;
         this.uacsCode = uacsCode;
         this.uacsName = uacsName;
         this.documentsId = documentsId;
         this.amountType = amountType;
         this.amount = amount;
+        this.budget = budget;
     }
 
     public JEVResponse(JEV jev) {
@@ -30,6 +32,7 @@ public class JEVResponse {
         setDocumentsId(jev.getDocumentsId());
         setAmountType(jev.getAmountType());
         setAmount(jev.getAmount());
+        setBudget(jev.getBudget());
     }
 
     public String getId() {
@@ -78,6 +81,14 @@ public class JEVResponse {
 
     public void setAmount(Float amount) {
         this.amount = amount;
+    }
+
+    public Float getBudget() {
+        return budget;
+    }
+
+    public void setBudget(Float budget) {
+        this.budget = budget;
     }
 
 }
