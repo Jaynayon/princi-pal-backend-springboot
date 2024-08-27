@@ -65,6 +65,20 @@ public class DocumentsService {
         return documentRepository.findAll();
     }
 
+    public List<Documents> getDocumentsBySchoolYear(String schoolId, String year) {
+        // Check if school exists
+        School existingSchool = schoolService.getSchoolById(schoolId);
+
+        List<Documents> getDocs = documentRepository.findBySchoolIdAndYear(schoolId, year);
+
+        if (getDocs == null) {
+            throw new NotFoundException("No Document with School id " + existingSchool.getId() +
+                    " in " + year);
+        }
+
+        return getDocs;
+    }
+
     public Documents getDocumentById(String id) {
         // Validate the format of the provided ID
         if (!ObjectId.isValid(id)) {
