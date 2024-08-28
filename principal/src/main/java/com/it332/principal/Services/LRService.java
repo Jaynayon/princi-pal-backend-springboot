@@ -98,8 +98,10 @@ public class LRService {
         double totalAmount = lrList.stream()
                 .mapToDouble(LRResponse::getAmount)
                 .sum();
-        // Update the Documents amount property with the calculated total amount
+
+        // Update the document's budget and budgetExceeded status
         existingDocument.setBudget(totalAmount);
+        existingDocument.setBudgetExceeded(totalAmount > existingDocument.getCashAdvance());
 
         // Save new sum
         documentsRepository.save(existingDocument);
