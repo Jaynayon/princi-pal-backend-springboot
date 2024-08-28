@@ -52,8 +52,8 @@ public class JEVService {
         // Save the JEV first
         JEV newJev = jevRepository.save(new JEV(jev, existingUacs));
 
-        // Update the associated Document's budget based on the saved JEV's amount
-        updateDocumentAmount(jev.getDocumentsId());
+        // Update the associated JEV's budgetExceeded status based on JEV's budget
+        // updateJEVAmount(newJev.getDocumentsId());
 
         return newJev;
     }
@@ -67,31 +67,6 @@ public class JEVService {
         }
     }
 
-    public void updateJEVAmount(String documentsId, String code, Float amount) {
-        JEV existingJEV = jevRepository.findByDocumentsIdAndUacs_Code(documentsId, code);
-
-        // Check if the JEV exists and the amount is not null
-        if (existingJEV != null && amount != null) {
-            // Sum the existing amount with the new amount
-            float newTotalAmount = (existingJEV.getAmount() != null ? existingJEV.getAmount() : 0) + amount;
-            existingJEV.setAmount(newTotalAmount);
-        }
-
-        jevRepository.save(existingJEV);
-    }
-
-    public void updateJEVBudget(String documentsId, String code, Float budget) {
-        JEV existingJEV = jevRepository.findByDocumentsIdAndUacs_Code(documentsId, code);
-
-        // Check if the JEV exists and the amount is not null
-        if (existingJEV != null && budget != null) {
-            // Sum the existing amount with the new amount
-            existingJEV.setBudget(budget);
-        }
-
-        jevRepository.save(existingJEV);
-    }
-
     public Documents getDocumentById(String id) {
         // Validate the format of the provided ID
         if (!ObjectId.isValid(id)) {
@@ -103,25 +78,14 @@ public class JEVService {
     }
 
     public JEV findExistingJEV(String documentsId, String uacsCode) {
-        JEV exist = jevRepository.findByDocumentsIdAndUacs_Code(documentsId, uacsCode);
+        Documents existingDoc = getDocumentById(documentsId);
+        JEV exist = jevRepository.findByDocumentsIdAndUacs_Code(existingDoc.getId(), uacsCode);
+
+        if (exist == null) {
+            throw new NotFoundException("JEV not found with ID: " + documentsId + "and code" + uacsCode);
+        }
 
         return exist;
-    }
-
-    public void updateDocumentAmount(String id) {
-        // Find all JEV objects with the specified documentId
-        existingDocument = getDocumentById(id);
-        List<JEVResponse> lrList = getAllJEVsByDocumentsId(id);
-
-        // Calculate the sum of amounts from the LR list
-        double totalAmount = lrList.stream()
-                .mapToDouble(JEVResponse::getAmount)
-                .sum();
-        // Update the Documents amount property with the calculated total amount
-        existingDocument.setCashAdvance(totalAmount);
-
-        // Save new sum
-        documentsRepository.save(existingDocument);
     }
 
     public JEV getJEVById(String id) {
@@ -135,7 +99,6 @@ public class JEVService {
     }
 
     public List<JEV> getAllJEVs() {
-        // List<LR> lrList = lrRepository.findAll();
         return jevRepository.findAll();
     }
 
@@ -172,6 +135,31 @@ public class JEVService {
                 .collect(Collectors.toList());
     }
 
+    public void updateJEVAmount(String documentsId) {
+        existingDocument = getDocumentById(documentsId);
+
+        // Fetch LR and JEV lists by documentsId
+        List<LR> lrList = lrRepository.findByDocumentsIdOrderByDateAsc(documentsId);
+        List<JEV> jevList = jevRepository.findByDocumentsId(documentsId);
+
+        // Iterate over each JEV to update its amount
+        for (JEV jev : jevList) {
+            String code = jev.getUacs().getCode(); // Get the UACS code of the JEV
+
+            // Calculate the sum for this JEV's code
+            float sum = (float) lrList.stream()
+                    .filter(lr -> code.equals(lr.getObjectCode()))
+                    .mapToDouble(LR::getAmount)
+                    .sum();
+
+            // Update the JEV's amount with the computed sum
+            jev.setAmount(sum); // Set the new sum to the JEV's amount
+            jev.setBudgetExceeded(sum > jev.getBudget()); // Set budget exceeded status
+        }
+
+        jevRepository.saveAll(jevList);
+    }
+
     public JEV updateJEV(String id, JEVRequest updatedJEV) {
         JEV jev = getJEVById(id);
 
@@ -188,8 +176,8 @@ public class JEVService {
 
         JEV newJEV = jevRepository.save(jev);
 
-        // Update the associated Document's budget based on the saved LR's amount
-        // updateDocumentAmount(jev.getDocumentsId());
+        // Update the associated JEV's budgetExceeded status based on JEV's budget
+        updateJEVAmount(newJEV.getDocumentsId());
 
         return newJEV;
     }
@@ -200,7 +188,7 @@ public class JEVService {
         jevRepository.delete(lr);
 
         // Update the associated Document's budget based on the saved LR's amount
-        updateDocumentAmount(lr.getDocumentsId());
+        // updateDocumentAmount(lr.getDocumentsId());
     }
 
     @Transactional
