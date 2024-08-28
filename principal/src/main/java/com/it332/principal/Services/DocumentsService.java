@@ -89,6 +89,24 @@ public class DocumentsService {
                 .orElseThrow(() -> new NotFoundException("Document not found with ID: " + id));
     }
 
+    public void updateDocumentBudgetExceeded(String id) {
+        // Find all JEV objects with the specified documentId
+        Documents existingDocument = getDocumentById(id);
+
+        // Safely get the cash advance, or use 0.0 if it's null
+        Double budget = existingDocument.getBudget();
+        double budgetValue = (budget != null) ? budget : 0.0;
+
+        Double cashAdvance = existingDocument.getCashAdvance();
+        double cashAdvanceValue = (cashAdvance != null) ? cashAdvance : 0.0;
+
+        // Update the Documents budgetExceeded status
+        existingDocument.setBudgetExceeded(budgetValue > cashAdvanceValue);
+
+        // Save new sum
+        documentRepository.save(existingDocument);
+    }
+
     public Documents updateDocument(String id, DocumentsPatch updatedSchool) {
         // Check if document exists
         Documents document = getDocumentById(id);
@@ -109,7 +127,11 @@ public class DocumentsService {
             document.setCashAdvance(updatedSchool.getCashAdvance());
         }
 
-        return documentRepository.save(document);
+        Documents newDoc = documentRepository.save(document);
+
+        updateDocumentBudgetExceeded(newDoc.getId());
+
+        return newDoc;
     }
 
     public void deleteDocumentById(String id) {
