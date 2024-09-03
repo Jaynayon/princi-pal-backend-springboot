@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,10 +42,14 @@ public class NotificationController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping("/create") // Correct path to match the class level @RequestMapping
     public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
-        Notification createdNotification = notificationService.createNotification(notification);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdNotification);
+        try {
+            Notification createdNotification = notificationService.createNotification(notification);
+            return new ResponseEntity<>(createdNotification, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/user/{userId}")
@@ -73,7 +78,6 @@ public class NotificationController {
         }
     }
 
-    // Endpoint to get notifications by user ID
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
         List<Notification> notifications = notificationService.getNotificationsByUserId(userId);

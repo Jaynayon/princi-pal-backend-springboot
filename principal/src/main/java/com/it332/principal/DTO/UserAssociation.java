@@ -10,6 +10,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class UserAssociation {
     private String id;
+    private String assocId;
+    private Boolean invited;
     private String email;
     private String fname;
     private String mname;
@@ -19,6 +21,8 @@ public class UserAssociation {
 
     public UserAssociation(User user, Association association) {
         this.id = user.getId();
+        this.assocId = association.getId();
+        this.invited = association.isApproved();
         this.email = user.getEmail();
         this.fname = user.getFname();
         this.mname = user.getMname();
