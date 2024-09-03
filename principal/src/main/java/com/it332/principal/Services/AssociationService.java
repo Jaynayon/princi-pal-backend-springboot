@@ -14,7 +14,7 @@ import com.it332.principal.Repository.AssociationRepository;
 import com.it332.principal.Security.NotFoundException;
 
 @Service
-public class AssociationService {
+public class AssociationService extends Exception {
 
     @Autowired
     private AssociationRepository associationRepository;
@@ -44,16 +44,22 @@ public class AssociationService {
     }
 
     public UserAssociation getUserAssocation(AssociationIdRequest association) {
-        // Get user association
-        Association existingAssociation = getAssociationByUserIdAndSchoolId(association);
+        try {
+            // Get user association
+            Association existingAssociation = getAssociationByUserIdAndSchoolId(association);
 
-        // Get user
-        User existingUser = userService.getUserById(association.getUserId());
+            // Get user
+            User existingUser = userService.getUserById(association.getUserId());
 
-        return new UserAssociation(existingUser, existingAssociation);
+
+            return new UserAssociation(existingUser, existingAssociation);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     public Association createAssociation(Association association) {
+        
         return associationRepository.save(association);
     }
 
