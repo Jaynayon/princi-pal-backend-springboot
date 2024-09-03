@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.Models.Notification;
+import com.it332.principal.Repository.NotificationRepository;
 import com.it332.principal.Services.NotificationService;
 import com.it332.principal.Security.NotFoundException;
 
@@ -25,6 +26,7 @@ public class NotificationController {
 
     @Autowired
     private NotificationService notificationService;
+    private NotificationRepository notificationRepository;
 
     @GetMapping("/all")
     public ResponseEntity<List<Notification>> getAllNotifications() {
@@ -52,11 +54,12 @@ public class NotificationController {
         }
     }
 
-    @DeleteMapping("/user/{userId}")
-    public ResponseEntity<?> clearNotificationsByUserId(@PathVariable String userId) {
-        notificationService.clearAllNotificationsByUserId(userId);
-        return ResponseEntity.noContent().build();
-    }
+    @DeleteMapping("/notifications/user/{userId}")
+    public ResponseEntity<Void> deleteNotificationsByUser(@PathVariable String userId) {
+            notificationRepository.deleteByUserId(userId);
+            return ResponseEntity.noContent().build();
+        }
+
 
     @PutMapping("/accept/{id}")
     public ResponseEntity<Notification> acceptNotification(@PathVariable String id) {

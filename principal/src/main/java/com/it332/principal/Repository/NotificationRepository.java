@@ -20,4 +20,6 @@ public interface NotificationRepository extends MongoRepository<Notification, St
 
     // Optional: Find notifications by association ID if needed
     List<Notification> findByAssocId(String assocId);
+
+    void deleteByUserId(String userId);
 }
