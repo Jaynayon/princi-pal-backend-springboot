@@ -114,36 +114,4 @@ public class Notification {
                 ", budget=" + budget +
                 '}';
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Notification that = (Notification) o;
-
-        if (isRead != that.isRead) return false;
-        if (isAccepted != that.isAccepted) return false;
-        if (isRejected != that.isRejected) return false;
-        if (!id.equals(that.id)) return false;
-        if (!userId.equals(that.userId)) return false;
-        if (!assocId.equals(that.assocId)) return false;
-        if (!details.equals(that.details)) return false;
-        if (balance != null ? !balance.equals(that.balance) : that.balance != null) return false;
-        return budget != null ? budget.equals(that.budget) : that.budget == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + userId.hashCode();
-        result = 31 * result + assocId.hashCode();
-        result = 31 * result + details.hashCode();
-        result = 31 * result + (isRead ? 1 : 0);
-        result = 31 * result + (isAccepted ? 1 : 0);
-        result = 31 * result + (isRejected ? 1 : 0);
-        result = 31 * result + (balance != null ? balance.hashCode() : 0);
-        result = 31 * result + (budget != null ? budget.hashCode() : 0);
-        return result;
-    }
 }
