@@ -3,7 +3,7 @@ package com.it332.principal.Models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "notifications")
+@Document(collection = "Notifications")
 public class Notification {
     @Id
     private String id;
