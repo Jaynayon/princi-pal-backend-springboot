@@ -4,6 +4,7 @@ import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.DTO.HistoryRequest;
 import com.it332.principal.DTO.HistoryResponse;
 import com.it332.principal.Models.History;
+import com.it332.principal.Security.MissingFieldException;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.HistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,11 @@ public class HistoryController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(err);
         } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get History: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (MissingFieldException e) {
             // This exception is thrown when a no school is detected
             err.setMessage("Failed to get History: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

@@ -15,6 +15,7 @@ import com.it332.principal.Models.LR;
 import com.it332.principal.Models.User;
 import com.it332.principal.Repository.HistoryRepository;
 import com.it332.principal.Repository.LRRepository;
+import com.it332.principal.Security.MissingFieldException;
 
 @Service
 public class HistoryService {
@@ -37,6 +38,16 @@ public class HistoryService {
         LR lrExist = getLRById(req.getLrId());
         Documents docExist = documentsService.getDocumentById(req.getDocumentsId());
         User userExist = userService.getUserById(req.getUserId());
+
+        if (req.getFieldName() == null || req.getFieldName().isEmpty()) {
+            throw new MissingFieldException("Field name is missing");
+        }
+        if (req.getOldValue() == null || req.getOldValue().isEmpty()) {
+            throw new MissingFieldException("Old value is missing");
+        }
+        if (req.getNewValue() == null || req.getNewValue().isEmpty()) {
+            throw new MissingFieldException("New value is missing");
+        }
 
         // Check if any of the fetched objects are null
         if (lrExist != null && docExist != null && userExist != null) {
