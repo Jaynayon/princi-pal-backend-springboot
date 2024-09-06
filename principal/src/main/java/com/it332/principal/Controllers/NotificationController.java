@@ -53,11 +53,17 @@ public class NotificationController {
         }
     }
 
-    @DeleteMapping("/notifications/user/{userId}")
-    public ResponseEntity<Void> deleteNotificationsByUser(@PathVariable String userId) {
-        notificationRepository.deleteByUserId(userId);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<Void> deleteNotificationsByUserId(@PathVariable String userId) {
+        try {
+            notificationService.deleteNotificationsByUserId(userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            // Log the exception
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+    
 
     @PutMapping("/accept/{id}")
     public ResponseEntity<Notification> acceptNotification(@PathVariable String id) {

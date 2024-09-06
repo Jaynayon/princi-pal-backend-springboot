@@ -28,9 +28,8 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
-    public void clearAllNotificationsByUserId(String userId) {
-        List<Notification> notifications = notificationRepository.findByUserId(userId);
-        notificationRepository.deleteAll(notifications);
+    public void deleteNotificationsByUserId(String userId) {
+        notificationRepository.deleteByUserId(userId);
     }
 
     public Notification acceptNotification(String id) {
