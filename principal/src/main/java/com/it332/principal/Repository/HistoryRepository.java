@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface HistoryRepository extends MongoRepository<History, String> {
     // Find all UpdateHistory records by lrId
-    List<HistoryResponse> findAllByLrId(String lrId, Sort sort);
+    List<History> findAllByLrId(String lrId, Sort sort);
 
     // Find all UpdateHistory records by documentsId
     List<HistoryResponse> findAllByDocumentsId(String documentsId, Sort sort);

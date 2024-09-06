@@ -33,6 +33,7 @@ public class History {
 
     private boolean created;
     private boolean deleted;
+    private LR lrCopy;
 
     // Default constructor setting the updateDate to the current date and time in
     // the Philippines time zone

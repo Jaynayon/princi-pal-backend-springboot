@@ -1,5 +1,6 @@
 package com.it332.principal.Services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.it332.principal.DTO.UserAdminRequest;
+import com.it332.principal.DTO.UserDetails;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Position;
@@ -173,6 +175,12 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public List<UserDetails> getUsersByIds(Collection<String> userIds) {
+        return userRepository.findAllById(userIds).stream()
+                .map(UserDetails::new) // Convert User to UserDetails
+                .collect(Collectors.toList()); // Collect results into a list
     }
 
     public void updateUser(String userId, User updateUser) {
