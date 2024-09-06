@@ -73,6 +73,52 @@ public class HistoryService {
         return historyRepository.save(history);
     }
 
+    // For create/delete history
+    public History createHistory(LR lr, String userId, boolean createdOrDeleted) {
+        History history = new History();
+        LR lrExist = getLRById(lr.getId());
+        Documents docExist = documentsService.getDocumentById(lr.getDocumentsId());
+        User userExist = userService.getUserById(userId);
+
+        // Check if any of the fetched objects are null
+        if (lrExist != null && docExist != null && userExist != null) {
+            history.setLrId(lrExist.getId());
+            history.setDocumentsId(docExist.getId());
+            history.setUserId(userExist.getId());
+
+            if (createdOrDeleted) {
+                history.setCreated(true);
+            } else {
+                history.setDeleted(true);
+            }
+            history.setLrCopy(lrExist); // Add copy if LR is created/deleted
+        }
+
+        // If all entities are valid, create and save the history
+        return historyRepository.save(history);
+    }
+
+    // For modify history
+    public History createHistory(LR lr, String userId, String fieldName, String oldValue, String newValue) {
+        History history = new History();
+        LR lrExist = getLRById(lr.getId());
+        Documents docExist = documentsService.getDocumentById(lr.getDocumentsId());
+        User userExist = userService.getUserById(userId);
+
+        // Check if any of the fetched objects are null
+        if (lrExist != null && docExist != null && userExist != null) {
+            history.setLrId(lrExist.getId());
+            history.setDocumentsId(docExist.getId());
+            history.setUserId(userExist.getId());
+            history.setFieldName(fieldName);
+            history.setOldValue(oldValue);
+            history.setNewValue(newValue);
+        }
+
+        // If all entities are valid, create and save the history
+        return historyRepository.save(history);
+    }
+
     // Get all History records
     public List<History> getAllHistories() {
         return historyRepository.findAll(Sort.by(Sort.Direction.DESC, "updateDate"));

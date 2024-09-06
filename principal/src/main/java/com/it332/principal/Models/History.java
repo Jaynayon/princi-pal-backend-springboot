@@ -61,6 +61,13 @@ public class History {
         setDeleted(req.isDeleted());
     }
 
+    public History(LR lr) {
+        setLrId(lr.getId());
+        setDocumentsId(lr.getDocumentsId());
+        this.updateDate = getCurrentPHDate(); // Set to current PH date and time
+        setLrCopy(lr);
+    }
+
     // Helper method to get current date and time in PH time zone
     private Date getCurrentPHDate() {
         ZonedDateTime phDateTime = ZonedDateTime.now(ZoneId.of("Asia/Manila"));
