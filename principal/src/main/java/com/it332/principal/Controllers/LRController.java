@@ -141,10 +141,10 @@ public class LRController {
     }
 
     // Endpoint to delete an LR document by ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteLR(@PathVariable String id) {
+    @DeleteMapping("/{id}/user/{userId}")
+    public ResponseEntity<Object> deleteLR(@PathVariable String id, @PathVariable String userId) {
         try {
-            lrService.deleteLRById(id);
+            lrService.deleteLRById(id, userId);
             return ResponseEntity.noContent().build(); // Return 204 No Content on successful deletion
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
