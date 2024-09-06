@@ -104,4 +104,10 @@ public class AssociationController {
         associationService.deleteAssociationById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/apply")
+    public ResponseEntity<Association> applyToSchool(@RequestBody AssociationIdRequest associationRequest) {
+        Association createdAssociation = associationService.applyToSchool(associationRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
+    }
 }

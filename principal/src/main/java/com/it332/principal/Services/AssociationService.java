@@ -264,4 +264,31 @@ public class AssociationService extends Exception {
         }
         return associationRepository.save(existingAssociation);
     }
+
+    public Association applyToSchool(AssociationIdRequest associationRequest) {
+        // Check if the school exists
+        School existingSchool = schoolService.getSchoolById(associationRequest.getSchoolId());
+        // Check if the user exists
+        UserResponse existingUser = userService.getUserAssociationsById(associationRequest.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existingSchool.getId(), existingUser.getId());
+
+        if (existingAssociation != null) {
+            // If the association already exists, return it
+            return existingAssociation;
+        }
+
+        // If the association doesn't exist, create a new one with 'applied' status
+        Association newAssociation = new Association();
+        newAssociation.setSchoolId(existingSchool.getId());
+        newAssociation.setUserId(existingUser.getId());
+        newAssociation.setInvitation(false);
+        newAssociation.setApproved(false);
+        newAssociation.setAdmin(false);
+
+        // Save and return the new association
+        return associationRepository.save(newAssociation);
+    }
 }
