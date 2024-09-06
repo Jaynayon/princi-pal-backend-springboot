@@ -79,7 +79,6 @@ public class HistoryService {
     }
 
     // Get all History by lrId
-    // Get all History by lrId
     public List<HistoryResponse> getHistoryByLrId(String lrId) {
         // Fetch all histories sorted by updateDate
         List<History> lrHistory = historyRepository.findAllByLrId(lrId, Sort.by(Sort.Direction.DESC, "updateDate"));
@@ -105,7 +104,27 @@ public class HistoryService {
 
     // Get all History by documentsId
     public List<HistoryResponse> getHistoryByDocumentsId(String documentsId) {
-        return historyRepository.findAllByDocumentsId(documentsId, Sort.by(Sort.Direction.DESC, "updateDate"));
+        // Fetch all histories sorted by updateDate
+        List<History> lrHistory = historyRepository.findAllByDocumentsId(documentsId,
+                Sort.by(Sort.Direction.DESC, "updateDate"));
+
+        // Extract unique user IDs from the history records
+        Set<String> userIds = lrHistory.stream()
+                .map(History::getUserId)
+                .collect(Collectors.toSet());
+
+        // Fetch all users in one batch based on user IDs
+        Map<String, UserDetails> users = userService.getUsersByIds(userIds).stream()
+                .collect(Collectors.toMap(UserDetails::getId, user -> user));
+
+        // Use Stream API to map histories to responses
+        return lrHistory.stream()
+                .map(history -> {
+                    HistoryResponse hr = new HistoryResponse(history);
+                    hr.setUser(users.get(history.getUserId())); // Set user details
+                    return hr;
+                })
+                .collect(Collectors.toList());
     }
 
     // Delete all History entries by lrId

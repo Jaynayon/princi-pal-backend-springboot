@@ -1,6 +1,5 @@
 package com.it332.principal.Repository;
 
-import com.it332.principal.DTO.HistoryResponse;
 import com.it332.principal.Models.History;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public interface HistoryRepository extends MongoRepository<History, String> {
     List<History> findAllByLrId(String lrId, Sort sort);
 
     // Find all UpdateHistory records by documentsId
-    List<HistoryResponse> findAllByDocumentsId(String documentsId, Sort sort);
+    List<History> findAllByDocumentsId(String documentsId, Sort sort);
 
     // Custom method to delete all records by lrId
     @Transactional
