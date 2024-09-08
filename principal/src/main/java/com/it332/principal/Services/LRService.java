@@ -229,9 +229,6 @@ public class LRService {
     public void deleteLRById(String id, String userId) {
         LR lr = getLRById(id);
 
-        // Update the associated Document's budget based on the saved LR's amount
-        updateDocumentBudget(lr.getDocumentsId());
-
         // Update the selected UACS code
         jevService.updateJEVAmount(lr.getDocumentsId());
 
@@ -239,5 +236,8 @@ public class LRService {
         historyService.createHistory(lr, userId, false);
 
         lrRepository.delete(lr);
+
+        // Update the associated Document's budget based on the saved LR's amount
+        updateDocumentBudget(lr.getDocumentsId());
     }
 }
