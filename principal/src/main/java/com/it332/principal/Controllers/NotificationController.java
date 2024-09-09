@@ -20,7 +20,7 @@ import com.it332.principal.Services.NotificationService;
 import com.it332.principal.Security.NotFoundException;
 
 @RestController
-@RequestMapping("/notifications")
+@RequestMapping("/Notifications")
 public class NotificationController {
 
     @Autowired
@@ -53,16 +53,11 @@ public class NotificationController {
         }
     }
 
-    @DeleteMapping("/user/{userId}")
-    public ResponseEntity<Void> deleteNotificationsByUserId(@PathVariable String userId) {
-        try {
-            notificationService.deleteNotificationsByUserId(userId);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            // Log the exception
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+     // Endpoint to delete notifications for a school
+     @DeleteMapping("/school/{schoolId}")
+     public void deleteNotificationsForSchool(@PathVariable String schoolId) {
+         notificationService.deleteNotificationsBySchool(schoolId);
+     }
     
 
     @PutMapping("/accept/{id}")
@@ -85,9 +80,8 @@ public class NotificationController {
         }
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
-        List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
-        return ResponseEntity.ok().body(notifications);
+    @GetMapping("/school/{schoolId}")
+    public List<Notification> getNotificationsForSchool(@PathVariable String schoolId) {
+        return notificationService.getNotificationsBySchool(schoolId);
     }
 }

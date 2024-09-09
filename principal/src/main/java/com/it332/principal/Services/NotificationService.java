@@ -28,8 +28,9 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
-    public void deleteNotificationsByUserId(String userId) {
-        notificationRepository.deleteByUserId(userId);
+     // Method to delete notifications for a specific school
+     public void deleteNotificationsBySchool(String schoolId) {
+        notificationRepository.deleteBySchoolId(schoolId);
     }
 
     public Notification acceptNotification(String id) {
@@ -52,6 +53,11 @@ public class NotificationService {
 
     public List<Notification> getNotificationsByUserIdAndReadStatus(String userId, boolean isRead) {
         return notificationRepository.findByUserIdAndIsRead(userId, isRead);
+    }
+
+    // Method to get notifications for a specific school
+    public List<Notification> getNotificationsBySchool(String schoolId) {
+        return notificationRepository.findBySchoolId(schoolId);
     }
 
     // Method to create a notification if balance exceeds the budget
