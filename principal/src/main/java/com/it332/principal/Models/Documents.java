@@ -24,15 +24,17 @@ public class Documents {
     private String year;
 
     @Min(value = 0, message = "Budget must be a non-negative number")
-    private Double budget;
+    private Double budget = 0.0;
 
     @Min(value = 0, message = "Budget limit must be a non-negative number")
-    private Double budgetLimit;
+    private Double budgetLimit = 0.0;
 
     @Min(value = 0, message = "Cash advance must be a non-negative number")
-    private Double cashAdvance;
+    private Double cashAdvance = 0.0;
 
     private boolean budgetExceeded;
+
+    private boolean budgetLimitExceeded;
 
     private String sds;
 
@@ -50,6 +52,7 @@ public class Documents {
         setBudget(doc.getBudget());
         setBudgetLimit(doc.getBudgetLimit());
         setBudgetExceeded(false);
+        setBudgetLimitExceeded(false);
         setSds(doc.getSds());
         setClaimant(doc.getClaimant());
         setHeadAccounting(doc.getHeadAccounting());
@@ -63,6 +66,7 @@ public class Documents {
         this.budgetLimit = 0.0;
         this.cashAdvance = 0.0;
         this.budgetExceeded = false;
+        this.budgetLimitExceeded = false;
         setSds("");
         setClaimant("");
         setHeadAccounting("");
@@ -72,7 +76,7 @@ public class Documents {
             @Min(value = 0, message = "Budget must be a non-negative number") Double budget,
             @Min(value = 0, message = "Budget limit must be a non-negative number") Double budgetLimit,
             @Min(value = 0, message = "Cash advance must be a non-negative number") Double cashAdvance,
-            boolean budgetExceeded, String sds, String claimant, String headAccounting) {
+            boolean budgetExceeded, boolean budgetLimitExceeded, String sds, String claimant, String headAccounting) {
         this.schoolId = schoolId;
         this.month = month;
         this.year = year;
@@ -80,6 +84,7 @@ public class Documents {
         this.budgetLimit = budgetLimit;
         this.cashAdvance = cashAdvance;
         this.budgetExceeded = budgetExceeded;
+        this.budgetLimitExceeded = budgetLimitExceeded;
         setSds(sds);
         setClaimant(claimant);
         setHeadAccounting(headAccounting);
@@ -131,6 +136,14 @@ public class Documents {
 
     public void setBudgetLimit(Double budgetLimit) {
         this.budgetLimit = budgetLimit;
+    }
+
+    public boolean isBudgetLimitExceeded() {
+        return budgetLimitExceeded;
+    }
+
+    public void setBudgetLimitExceeded(boolean budgetLimitExceeded) {
+        this.budgetLimitExceeded = budgetLimitExceeded;
     }
 
     public Double getCashAdvance() {

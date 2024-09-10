@@ -100,8 +100,9 @@ public class DocumentsService {
         Double cashAdvance = existingDocument.getCashAdvance();
         double cashAdvanceValue = (cashAdvance != null) ? cashAdvance : 0.0;
 
-        // Update the Documents budgetExceeded status
+        // Update the Documents budgetExceeded and budgetLimitExceeded status
         existingDocument.setBudgetExceeded(budgetValue > cashAdvanceValue);
+        existingDocument.setBudgetLimitExceeded(budgetValue > existingDocument.getBudgetLimit());
 
         // Save new sum
         documentRepository.save(existingDocument);

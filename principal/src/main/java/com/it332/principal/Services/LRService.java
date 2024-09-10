@@ -111,6 +111,7 @@ public class LRService {
         // Update the document's budget and budgetExceeded status
         existingDocument.setBudget(totalAmount);
         existingDocument.setBudgetExceeded(totalAmount > cashAdvanceValue);
+        existingDocument.setBudgetLimitExceeded(totalAmount > existingDocument.getBudgetLimit());
 
         // Save new sum
         documentsRepository.save(existingDocument);
