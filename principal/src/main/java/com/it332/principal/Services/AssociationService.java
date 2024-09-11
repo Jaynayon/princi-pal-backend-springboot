@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.it332.principal.DTO.AssociationEmailRequest;
 import com.it332.principal.DTO.AssociationIdRequest;
 import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.DTO.UserResponse;
@@ -159,7 +160,7 @@ public class AssociationService extends Exception {
         return associationRepository.save(newAssociation);
     }
 
-    public Association inviteUserToAssociation(AssociationIdRequest association) {
+    /*public Association inviteUserToAssociation(AssociationIdRequest association) {
         // Check if user or school exists
         School existSchool = schoolService.getSchoolById(association.getSchoolId());
         UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
@@ -199,9 +200,11 @@ public class AssociationService extends Exception {
 
         // Save and return the new association
         return associationRepository.save(newAssociation);
-    }
+    }*/
+    
 
-    public Association approveUserToAssociation(AssociationIdRequest association) {
+    // old code nga ala nako ge use
+    /*public Association approveUserToAssociation(AssociationIdRequest association) {
         // Check if user or school exists
         Association updatedAssociation = new Association();
         School existSchool = schoolService.getSchoolById(association.getSchoolId());
@@ -233,7 +236,7 @@ public class AssociationService extends Exception {
 
         // Save and return the new association
         return updatedAssociation;
-    }
+    }*/
 
     public Association promoteAssociation(AssociationIdRequest association) {
         // Check if user or school exists
@@ -264,4 +267,133 @@ public class AssociationService extends Exception {
         }
         return associationRepository.save(existingAssociation);
     }
+
+    public Association applyToSchool(AssociationIdRequest associationRequest) {
+        // Check if the school exists
+        School existingSchool = schoolService.getSchoolById(associationRequest.getSchoolId());
+        // Check if the user exists
+        UserResponse existingUser = userService.getUserAssociationsById(associationRequest.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existingSchool.getId(), existingUser.getId());
+
+        if (existingAssociation != null) {
+            // If the association already exists, return it
+            return existingAssociation;
+        }
+
+        // If the association doesn't exist, create a new one with 'applied' status
+        Association newAssociation = new Association();
+        newAssociation.setSchoolId(existingSchool.getId());
+        newAssociation.setUserId(existingUser.getId());
+        newAssociation.setInvitation(false);    
+        newAssociation.setApproved(false);
+        newAssociation.setAdmin(false);
+
+        // Save and return the new association
+        return associationRepository.save(newAssociation);
+    }
+
+    public Association approveUserToAssociation(AssociationIdRequest associationRequest) {
+        // Check if the school exists
+        School existingSchool = schoolService.getSchoolById(associationRequest.getSchoolId());
+    
+        // Check if the user exists
+        UserResponse existingUser = userService.getUserAssociationsById(associationRequest.getUserId());
+    
+        // Check if the association exists where the user has applied but not yet approved or invited
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserIdAndApprovedFalseAndInvitationFalse(
+                existingSchool.getId(), existingUser.getId());
+    
+        // Handle the case where no association exists
+        if (existingAssociation == null) {
+            // If no association exists, throw an exception
+            throw new IllegalStateException("No application found for this user or user already invited/approved.");
+        }
+    
+        // Update the association to mark the user as accepted
+        existingAssociation.setApproved(true);
+    
+        // Save the updated association
+        return associationRepository.save(existingAssociation);
+    }    
+    
+    
+    public List<Association> getApplicationsForSchool(String schoolId) {
+    return associationRepository.findBySchoolIdAndApprovedFalseAndInvitationFalse(schoolId);
+    }
+
+
+    /*public Association inviteUserToAssociation(AssociationIdRequest associationRequest) {
+        // Check if the school exists
+        School existingSchool = schoolService.getSchoolById(associationRequest.getSchoolId());
+
+        // Check if the user exists
+        UserResponse existingUser = userService.getUserAssociationsById(associationRequest.getUserId());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                existingSchool.getId(), existingUser.getId());
+
+        if (existingAssociation != null) {
+            if (!existingAssociation.isInvitation()) {
+                // Update the existing association if it wasn't an invite before
+                existingAssociation.setInvitation(true);
+                return associationRepository.save(existingAssociation);
+            }
+            // Return the existing association if already invited
+            return existingAssociation;
+        }
+
+        // If the association doesn't exist, create a new one with 'invitation' status
+        Association newAssociation = new Association();
+        newAssociation.setSchoolId(existingSchool.getId());
+        newAssociation.setUserId(existingUser.getId());
+        newAssociation.setInvitation(true);  // Set invitation to true
+        newAssociation.setApproved(false);   // Not yet approved
+        newAssociation.setAdmin(false);      // Regular user
+
+        // Save and return the new association
+        Association savedAssociation = associationRepository.save(newAssociation);
+
+        // Optionally send an invitation notification
+        //notificationService.sendInviteNotification(existingUser.getEmail(), existingSchool.getName());
+
+        return savedAssociation;
+    }*/
+
+    public Association inviteUserToAssociation(AssociationEmailRequest associationRequest) {
+        // Validate the input
+        if (associationRequest.getEmail() == null || associationRequest.getSchoolId() == null) {
+            throw new IllegalArgumentException("Email and School ID are required.");
+        }
+
+        User existingUser = userService.getUserByEmail(associationRequest.getEmail());
+    
+        // Check if an association already exists for this user and school
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
+                associationRequest.getSchoolId(), existingUser.getId());
+    
+        if (existingAssociation != null) {
+            // If the user is already invited or associated, return the existing association
+            if (existingAssociation.isInvitation()) {
+                throw new IllegalStateException("User has already been invited.");
+            } else {
+                throw new IllegalStateException("User is already associated with this school.");
+            }
+        }
+    
+        // Create a new association with invitation status
+        Association newAssociation = new Association();
+        newAssociation.setUserId(existingUser.getId());
+        newAssociation.setSchoolId(associationRequest.getSchoolId());
+        newAssociation.setInvitation(true); // Mark as invited
+        newAssociation.setApproved(false);  // Not approved yet
+        newAssociation.setAdmin(false);     // Not an admin by default
+    
+        // Save the new association
+        return associationRepository.save(newAssociation);
+    }    
+
 }

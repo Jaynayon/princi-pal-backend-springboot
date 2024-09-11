@@ -12,6 +12,7 @@ public class Association {
     private boolean approved = false;
     private boolean invitation = false;
     private boolean admin = false;
+    
 
     public Association() {
     }
