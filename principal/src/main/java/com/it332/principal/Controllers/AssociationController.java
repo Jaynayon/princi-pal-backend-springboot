@@ -90,7 +90,7 @@ public class AssociationController {
 
     @DeleteMapping("/{userId}/{schoolId}")
     public ResponseEntity<?> deleteAssociation(@PathVariable String userId, @PathVariable String schoolId) {
-        associationService.deleteAssociation(userId, schoolId);
+        associationService.deleteAssociation(schoolId, userId);
         return ResponseEntity.noContent().build();
     }
 

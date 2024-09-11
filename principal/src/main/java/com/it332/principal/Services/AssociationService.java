@@ -52,7 +52,6 @@ public class AssociationService extends Exception {
             // Get user
             User existingUser = userService.getUserById(association.getUserId());
 
-
             return new UserAssociation(existingUser, existingAssociation);
         } catch (Exception e) {
             throw e;
@@ -60,7 +59,7 @@ public class AssociationService extends Exception {
     }
 
     public Association createAssociation(Association association) {
-        
+
         return associationRepository.save(association);
     }
 
@@ -91,8 +90,8 @@ public class AssociationService extends Exception {
     // return associationRepository.findBySchoolId(schoolId);
     // }
 
-    public void deleteAssociation(String userId, String schoolId) {
-        Association association = associationRepository.findBySchoolIdAndUserId(userId, schoolId);
+    public void deleteAssociation(String schoolId, String userId) {
+        Association association = associationRepository.findBySchoolIdAndUserId(schoolId, userId);
 
         if (association != null) {
             associationRepository.delete(association);

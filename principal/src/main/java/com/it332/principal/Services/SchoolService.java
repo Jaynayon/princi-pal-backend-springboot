@@ -61,7 +61,7 @@ public class SchoolService {
     }
 
     public List<UserAssociation> getUsersBySchoolId(String schoolId) {
-        List<Association> association = associationRepository.findByApprovedTrue();
+        List<Association> association = associationRepository.findBySchoolIdAndApprovedTrue(schoolId);
 
         // Extract userIds from associations
         List<String> userIds = association.stream()

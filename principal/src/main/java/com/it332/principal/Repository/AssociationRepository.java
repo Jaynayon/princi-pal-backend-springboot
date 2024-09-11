@@ -22,7 +22,5 @@ public interface AssociationRepository extends MongoRepository<Association, Stri
     // In your AssociationRepository
     Association findBySchoolIdAndUserIdAndApprovedFalseAndInvitationFalse(String schoolId, String userId);
 
-
-    
-
+    List<Association> findBySchoolIdAndApprovedTrue(String schoolId);
 }

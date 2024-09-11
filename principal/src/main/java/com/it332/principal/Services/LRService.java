@@ -35,6 +35,9 @@ public class LRService {
     @Autowired
     private JEVService jevService;
 
+    @Autowired
+    private HistoryService historyService;
+
     Documents existingDocument;
 
     public LR saveLR(LRRequest lr) {
@@ -50,6 +53,9 @@ public class LRService {
 
         // Update the JEV
         jevService.updateJEVAmount(newLr.getDocumentsId());
+
+        // Create history
+        historyService.createHistory(newLr, lr.getUserId(), true);
 
         return newLr;
     }
@@ -105,6 +111,7 @@ public class LRService {
         // Update the document's budget and budgetExceeded status
         existingDocument.setBudget(totalAmount);
         existingDocument.setBudgetExceeded(totalAmount > cashAdvanceValue);
+        existingDocument.setBudgetLimitExceeded(totalAmount > existingDocument.getBudgetLimit());
 
         // Save new sum
         documentsRepository.save(existingDocument);
@@ -157,28 +164,52 @@ public class LRService {
 
     public LR updateLR(String id, LRRequest updatedLR) {
         LR lr = getLRById(id);
+        String fieldName = "";
+        String oldValue = "";
+        String newValue = "";
 
         // Update LR fields based on the provided updatedLR object
         if (updatedLR.getDate() != null) {
+            fieldName = "date";
+            oldValue = lr.getDate();
+            newValue = updatedLR.getDate().toString();
             lr.setDate(updatedLR.getDate());
         }
         if (updatedLR.getOrsBursNo() != null) {
+            fieldName = "orsBursNo";
+            oldValue = lr.getOrsBursNo();
+            newValue = updatedLR.getOrsBursNo();
             lr.setOrsBursNo(updatedLR.getOrsBursNo());
         }
         if (updatedLR.getParticulars() != null) {
+            fieldName = "particulars";
+            oldValue = lr.getParticulars();
+            newValue = updatedLR.getParticulars();
             lr.setParticulars(updatedLR.getParticulars());
         }
         if (updatedLR.getAmount() != 0) {
+            fieldName = "amount";
+            oldValue = lr.getAmount() + "";
+            newValue = updatedLR.getAmount() + "";
             lr.setAmount(updatedLR.getAmount());
         }
         if (updatedLR.getObjectCode() != null) {
             Uacs existingUacs = uacsService.getUacsByCode(updatedLR.getObjectCode());
+            fieldName = "objectCode";
+            oldValue = lr.getObjectCode();
+            newValue = existingUacs.getCode();
             lr.setObjectCode(existingUacs.getCode());
         }
         if (updatedLR.getPayee() != null) {
+            fieldName = "payee";
+            oldValue = lr.getPayee();
+            newValue = updatedLR.getPayee();
             lr.setPayee(updatedLR.getPayee());
         }
         if (updatedLR.getNatureOfPayment() != null) {
+            fieldName = "natureOfPayment";
+            oldValue = lr.getNatureOfPayment();
+            newValue = updatedLR.getNatureOfPayment();
             lr.setNatureOfPayment(updatedLR.getNatureOfPayment());
         }
 
@@ -186,20 +217,28 @@ public class LRService {
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentBudget(newLR.getDocumentsId());
+
         // Update the selected UACS code
         jevService.updateJEVAmount(newLR.getDocumentsId());
+
+        // Create history
+        historyService.createHistory(newLR, updatedLR.getUserId(), fieldName, oldValue, newValue);
 
         return newLR;
     }
 
-    public void deleteLRById(String id) {
+    public void deleteLRById(String id, String userId) {
         LR lr = getLRById(id);
+
+        // Update the selected UACS code
+        jevService.updateJEVAmount(lr.getDocumentsId());
+
+        // Create History
+        historyService.createHistory(lr, userId, false);
 
         lrRepository.delete(lr);
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentBudget(lr.getDocumentsId());
-        // Update the selected UACS code
-        jevService.updateJEVAmount(lr.getDocumentsId());
     }
 }

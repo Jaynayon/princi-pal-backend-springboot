@@ -1,14 +1,10 @@
 package com.it332.principal.DTO;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class LRRequest {
     private String id;
+    private String userId;
     private String documentsId;
-    private Date date;
+    private String date;
     private String orsBursNo;
     private String particulars;
     private double amount;
@@ -20,9 +16,10 @@ public class LRRequest {
     public LRRequest() {
     }
 
-    public LRRequest(String date, String orsBursNo, String particulars, double amount, String documentId,
+    public LRRequest(String date, String userId, String orsBursNo, String particulars, double amount, String documentId,
             String objectCode, String payee, String natureOfPayment) {
-        setDate(date);
+        this.date = date;
+        this.userId = userId;
         this.documentsId = documentId;
         this.orsBursNo = orsBursNo;
         this.particulars = particulars;
@@ -32,21 +29,11 @@ public class LRRequest {
         this.natureOfPayment = natureOfPayment;
     }
 
-    // Getters and setters
     public void setDate(String date) {
-        try {
-            // Parse input date string into a Date object
-            DateFormat inputFormat = new SimpleDateFormat("MM/dd/yyyy");
-            this.date = inputFormat.parse(date);
-        } catch (ParseException e) {
-            // Handle date parsing errors appropriately
-            // e.printStackTrace();
-            // Catch ParseException and rethrow as a custom runtime exception
-            throw new IllegalArgumentException("Invalid date format. Please provide the date in MM/dd/yyyy format.", e);
-        }
+        this.date = date;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
@@ -72,6 +59,14 @@ public class LRRequest {
 
     public void setNatureOfPayment(String natureOfPayment) {
         this.natureOfPayment = natureOfPayment;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getOrsBursNo() {

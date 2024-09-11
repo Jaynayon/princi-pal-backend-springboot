@@ -25,6 +25,8 @@ public class DocumentsResponse {
 
     private boolean budgetExceeded;
 
+    private boolean budgetLimitExceeded;
+
     private String sds;
 
     private String claimant;
@@ -43,6 +45,7 @@ public class DocumentsResponse {
         setBudgetLimit(document.getBudgetLimit());
         setCashAdvance(document.getCashAdvance());
         setBudgetExceeded(document.isBudgetExceeded());
+        setBudgetLimitExceeded(document.isBudgetLimitExceeded());
         setSds(document.getSds());
         setClaimant(document.getClaimant());
         setHeadAccounting(document.getHeadAccounting());

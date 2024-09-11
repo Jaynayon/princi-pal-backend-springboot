@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,15 +15,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.Models.Notification;
+import com.it332.principal.Repository.NotificationRepository;
 import com.it332.principal.Services.NotificationService;
 import com.it332.principal.Security.NotFoundException;
 
 @RestController
-@RequestMapping("/notifications")
+@RequestMapping("/Notifications")
 public class NotificationController {
 
     @Autowired
     private NotificationService notificationService;
+    private NotificationRepository notificationRepository;
 
     @GetMapping("/all")
     public ResponseEntity<List<Notification>> getAllNotifications() {
@@ -52,11 +53,12 @@ public class NotificationController {
         }
     }
 
-    @DeleteMapping("/user/{userId}")
-    public ResponseEntity<?> clearNotificationsByUserId(@PathVariable String userId) {
-        notificationService.clearAllNotificationsByUserId(userId);
-        return ResponseEntity.noContent().build();
-    }
+     // Endpoint to delete notifications for a school
+     @DeleteMapping("/school/{schoolId}")
+     public void deleteNotificationsForSchool(@PathVariable String schoolId) {
+         notificationService.deleteNotificationsBySchool(schoolId);
+     }
+    
 
     @PutMapping("/accept/{id}")
     public ResponseEntity<Notification> acceptNotification(@PathVariable String id) {
@@ -78,9 +80,8 @@ public class NotificationController {
         }
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
-        List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
-        return ResponseEntity.ok().body(notifications);
+    @GetMapping("/school/{schoolId}")
+    public List<Notification> getNotificationsForSchool(@PathVariable String schoolId) {
+        return notificationService.getNotificationsBySchool(schoolId);
     }
 }

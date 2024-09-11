@@ -3,11 +3,12 @@ package com.it332.principal.Models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "notifications")
+@Document(collection = "Notifications")
 public class Notification {
     @Id
     private String id;
     private String userId;
+    private String schoolId;
     private String assocId;
     private String details;
     private boolean isRead;
@@ -19,9 +20,10 @@ public class Notification {
     public Notification() {
     }
 
-    public Notification(String userId, String assocId, String details, boolean isRead, Double balance, Double budget) {
+    public Notification(String userId, String assocId, String schoolId, String details, boolean isRead, Double balance, Double budget) {
         this.userId = userId;
         this.assocId = assocId;
+        this.schoolId = schoolId;
         this.details = details;
         this.isRead = isRead;
         this.balance = balance;
@@ -50,6 +52,14 @@ public class Notification {
 
     public void setAssocId(String assocId) {
         this.assocId = assocId;
+    }
+
+    public String getSchoolId() {
+        return schoolId;
+    }
+
+    public void setSchoolId(String schoolId) {
+        this.schoolId = schoolId;
     }
 
     public String getDetails() {

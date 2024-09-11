@@ -60,7 +60,7 @@ public class LR {
 
     public LR(LRRequest lr, String objectCode) {
         this.documentsId = lr.getDocumentsId();
-        this.date = lr.getDate(); // Convert string date to Date type
+        setDate(lr.getDate()); // Convert string date to Date type
         this.orsBursNo = lr.getOrsBursNo();
         this.particulars = lr.getParticulars();
         this.amount = lr.getAmount();
