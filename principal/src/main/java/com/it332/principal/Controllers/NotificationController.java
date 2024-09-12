@@ -33,7 +33,7 @@ public class NotificationController {
         return ResponseEntity.ok().body(notifications);
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
         try {
             List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
@@ -53,12 +53,11 @@ public class NotificationController {
         }
     }
 
-     // Endpoint to delete notifications for a school
-     @DeleteMapping("/school/{schoolId}")
-     public void deleteNotificationsForSchool(@PathVariable String schoolId) {
-         notificationService.deleteNotificationsBySchool(schoolId);
-     }
-    
+    // Endpoint to delete notifications for a school
+    @DeleteMapping("/school/{schoolId}")
+    public void deleteNotificationsForSchool(@PathVariable String schoolId) {
+        notificationService.deleteNotificationsBySchool(schoolId);
+    }
 
     @PutMapping("/accept/{id}")
     public ResponseEntity<Notification> acceptNotification(@PathVariable String id) {
