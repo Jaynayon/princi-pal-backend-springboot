@@ -165,18 +165,15 @@ public class AssociationController {
     }*/
 
     @GetMapping("/applications/{schoolId}")
-    public ResponseEntity<List<Association>> getApplicationsForSchool(@PathVariable String schoolId) {
-        // Only return applications where 'invitation' is false
-        List<Association> applications = associationService.getApplicationsForSchool(schoolId)
-            .stream()
-            .filter(association -> !association.isInvitation()) // Ensure it's an application, not an invite
-            .collect(Collectors.toList());
+public ResponseEntity<List<UserAssociation>> getApplicationsForSchool(@PathVariable String schoolId) {
+    // Fetch applications using the updated service method
+    List<UserAssociation> applications = associationService.getApplicationsForSchool(schoolId);
 
-        if (applications.isEmpty()) {
-            return ResponseEntity.noContent().build(); // No applications
-        }
-
-        return ResponseEntity.ok(applications);
+    if (applications.isEmpty()) {
+        return ResponseEntity.noContent().build(); // No applications
     }
+
+    return ResponseEntity.ok(applications);
+}
 
 }

@@ -8,4 +8,5 @@ import lombok.Data;
 public class AssociationEmailRequest {
     private String email;
     private String schoolId;
+    private Boolean admin;
 }

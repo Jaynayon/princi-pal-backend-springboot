@@ -32,4 +32,9 @@ public class UserAssociation {
         this.position = user.getPosition();
         this.admin = association.isAdmin();
     }
+
+    public boolean isInvitation() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isInvitation'");
+    }
 }
