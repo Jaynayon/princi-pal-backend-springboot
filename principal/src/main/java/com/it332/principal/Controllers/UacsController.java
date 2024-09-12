@@ -49,8 +49,8 @@ public class UacsController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Uacs>> getAllUacs() {
-        List<Uacs> allUacs = uacsService.getAllUacs();
+    public ResponseEntity<List<Uacs>> getAllUacsExceptCashAdv() {
+        List<Uacs> allUacs = uacsService.getAllUacsExceptCashAdv();
         return new ResponseEntity<>(allUacs, HttpStatus.OK);
     }
 

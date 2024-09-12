@@ -56,6 +56,11 @@ public class UacsService {
         return uacsRepository.findAll();
     }
 
+    // Find all UACS except those with the specified objectCode
+    public List<Uacs> getAllUacsExceptCashAdv() {
+        return uacsRepository.findByCodeNot("1990101000");
+    }
+
     public Uacs getUacsById(String id) {
         // Validate the format of the provided ID
         if (!ObjectId.isValid(id)) {
