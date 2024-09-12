@@ -126,11 +126,20 @@ public class DocumentsService {
         }
         if (updatedSchool.getCashAdvance() != null) {
             document.setCashAdvance(updatedSchool.getCashAdvance());
+            jevService.updateJEVCashAdvance(document.getId(), "1990101000",
+                    updatedSchool.getCashAdvance().floatValue());
         }
 
         Documents newDoc = documentRepository.save(document);
 
         updateDocumentBudgetExceeded(newDoc.getId());
+
+        // if (updatedSchool.getCashAdvance() != null) {
+        // System.out.println(newDoc.getCashAdvance().floatValue());
+        // // Set JEV Advances to Operating Expenses
+        // jevService.updateJEVCashAdvance(newDoc.getId(), "1990101000",
+        // newDoc.getCashAdvance().floatValue());
+        // }
 
         return newDoc;
     }

@@ -115,6 +115,11 @@ public class JEVService {
         for (JEV jev : jevList) {
             String code = jev.getUacs().getCode(); // Get the UACS code of the JEV
 
+            // Exclude Cash Advance from the total
+            if (code.equals("1990101000")) {
+                continue;
+            }
+
             // Initialize the sum for this JEV's code
             float sum = 0.0f;
 
@@ -146,6 +151,11 @@ public class JEVService {
         for (JEV jev : jevList) {
             String code = jev.getUacs().getCode(); // Get the UACS code of the JEV
 
+            // Exclude Cash Advance from the total
+            if (code.equals("1990101000")) {
+                continue;
+            }
+
             // Calculate the sum for this JEV's code
             float sum = (float) lrList.stream()
                     .filter(lr -> code.equals(lr.getObjectCode()))
@@ -158,6 +168,19 @@ public class JEVService {
         }
 
         jevRepository.saveAll(jevList);
+    }
+
+    public void updateJEVCashAdvance(String documentsId, String uacsCode, Float amount) {
+        JEV jev = findExistingJEV(documentsId, uacsCode);
+        if (jev == null) {
+            throw new NotFoundException("JEV not found for the given document ID and UACS code.");
+        }
+
+        // Update amount
+        jev.setAmount(amount);
+
+        // Save the updated JEV
+        jevRepository.save(jev);
     }
 
     public JEV updateJEV(String id, JEVRequest updatedJEV) {
