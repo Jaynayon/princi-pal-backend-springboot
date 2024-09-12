@@ -33,11 +33,11 @@ public class NotificationController {
         return ResponseEntity.ok().body(notifications);
     }
 
-    @GetMapping("user/{id}")
-    public ResponseEntity<Notification> getNotificationById(@PathVariable String id) {
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
         try {
-            Notification notification = notificationService.getNotificationById(id);
-            return ResponseEntity.ok().body(notification);
+            List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
+            return ResponseEntity.ok().body(notifications);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
