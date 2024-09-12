@@ -33,7 +33,7 @@ public class NotificationController {
         return ResponseEntity.ok().body(notifications);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("user/{id}")
     public ResponseEntity<Notification> getNotificationById(@PathVariable String id) {
         try {
             Notification notification = notificationService.getNotificationById(id);
