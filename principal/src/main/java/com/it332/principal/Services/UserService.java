@@ -221,6 +221,21 @@ public class UserService {
         }
     }
 
+    public void updateUserAvatar(String userId, String avatar) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            if (avatar != null) {
+                user.setAvatar(avatar);
+            }
+
+            userRepository.save(user); // Save the updated user object
+        } else {
+            throw new NotFoundException("User not found with ID: " + userId);
+        }
+    }
+
     public void deleteUserById(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
