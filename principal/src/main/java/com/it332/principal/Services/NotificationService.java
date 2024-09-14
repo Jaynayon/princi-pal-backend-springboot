@@ -73,14 +73,12 @@ public class NotificationService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating notification", e);
         }
     }
+    
 
     public List<Notification> getNotificationsByUserId(String userId) {
         return notificationRepository.findByUserId(userId);
     }
 
-    public List<Notification> getNotificationsByUserIdAndReadStatus(String userId, boolean isRead) {
-        return notificationRepository.findByUserIdAndIsRead(userId, isRead);
-    }
 
     // Method to get notifications for a specific school
     public List<Notification> getNotificationsBySchool(String schoolId) {
@@ -94,7 +92,6 @@ public class NotificationService {
             notification.setUserId(userId);
             notification.setAssocId(null); // Set if needed
             notification.setDetails("Your balance of " + balance + " exceeds the budget of " + budget + ".");
-            notification.setRead(false);
             notification.setAccepted(false);
             notification.setRejected(false);
             createNotification(notification);

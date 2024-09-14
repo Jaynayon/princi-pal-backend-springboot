@@ -319,6 +319,25 @@ public class AssociationService extends Exception {
         return updatedAssociation;
     }
     
+    public void deleteAssociation(String notificationId) {
+        // Validate and fetch the notification
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + notificationId));
+        
+        // Extract the assocId from the notification
+        String assocId = notification.getAssocId();
+        
+        if (assocId == null || assocId.isEmpty()) {
+            throw new IllegalStateException("Association ID is missing from the notification.");
+        }
+        
+        // Fetch the existing association
+        Association existingAssociation = associationRepository.findById(assocId)
+            .orElseThrow(() -> new IllegalStateException("No association found for assocId: " + assocId));
+        
+        // Delete the association
+        associationRepository.delete(existingAssociation);
+    }
     
     
 

@@ -80,6 +80,18 @@ public class NotificationController {
         this.associationService = associationService;
     }
 
+    @PutMapping("/accept/{id}")
+    public ResponseEntity<Notification> approveNotification(@PathVariable String id) {
+        try {
+            Notification updatedNotification = notificationService.acceptNotification(id);
+            return ResponseEntity.ok(updatedNotification);
+        } catch (ResponseStatusException e) {
+            return new ResponseEntity<>(null, e.getStatusCode());
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     @PutMapping("/reject/{id}")
     public ResponseEntity<Notification> rejectNotification(@PathVariable("id") String id) {

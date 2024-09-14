@@ -11,7 +11,6 @@ public class Notification {
     private String schoolId;
     private String assocId;
     private String details;
-    private boolean isRead;
     private boolean isAccepted;
     private boolean isRejected;
     private Double balance;
@@ -21,12 +20,11 @@ public class Notification {
     public Notification() {
     }
 
-    public Notification(String userId, String assocId, String schoolId, String details, boolean isRead, Double balance, Double budget) {
+    public Notification(String userId, String assocId, String schoolId, String details, Double balance, Double budget) {
         this.userId = userId;
         this.assocId = assocId;
         this.schoolId = schoolId;
         this.details = details;
-        this.isRead = isRead;
         this.balance = balance;
         this.budget = budget;
     }
@@ -69,14 +67,6 @@ public class Notification {
 
     public void setDetails(String details) {
         this.details = details;
-    }
-
-    public boolean isRead() {
-        return isRead;
-    }
-
-    public void setRead(boolean read) {
-        isRead = read;
     }
 
     public boolean isAccepted() {
@@ -126,7 +116,6 @@ public class Notification {
                 ", userId='" + userId + '\'' +
                 ", assocId='" + assocId + '\'' +
                 ", details='" + details + '\'' +
-                ", isRead=" + isRead +
                 ", isAccepted=" + isAccepted +
                 ", isRejected=" + isRejected +
                 ", balance=" + balance +

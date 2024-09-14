@@ -120,6 +120,20 @@ public class AssociationController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/delete/{notificationId}")
+    public ResponseEntity<String> deleteAssociation(@PathVariable String notificationId) {
+        try {
+            // Call the service method to delete the association
+            associationService.deleteAssociation(notificationId);
+
+            // Return a success response
+            return ResponseEntity.ok("Association related to notification ID " + notificationId + " has been deleted.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            // Return a bad request response if there's an error with the request
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/apply")
     public ResponseEntity<Association> applyToSchool(@RequestBody AssociationIdRequest associationRequest) {
         Association createdAssociation = associationService.applyToSchool(associationRequest);
