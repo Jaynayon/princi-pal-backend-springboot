@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+
+import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Notification;
 import com.it332.principal.Repository.NotificationRepository;
+import com.it332.principal.Services.AssociationService;
 import com.it332.principal.Services.NotificationService;
 import com.it332.principal.Security.NotFoundException;
 
@@ -25,8 +29,14 @@ public class NotificationController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
     private NotificationRepository notificationRepository;
 
+    @Autowired
+    private AssociationService associationService;
+
+    
     @GetMapping("/all")
     public ResponseEntity<List<Notification>> getAllNotifications() {
         List<Notification> notifications = notificationService.getAllNotifications();
@@ -43,15 +53,22 @@ public class NotificationController {
         }
     }
 
-    @PostMapping("/create") // Correct path to match the class level @RequestMapping
+    @PostMapping("/create")
     public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
         try {
+            // Check if the notification is an invitation
+            boolean isInvitation = notification.getDetails().toLowerCase().contains("invited");
+            
+            // Set the button flag based on whether it's an invitation
+            notification.setHasButtons(isInvitation);
+    
             Notification createdNotification = notificationService.createNotification(notification);
             return new ResponseEntity<>(createdNotification, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
 
     // Endpoint to delete notifications for a school
     @DeleteMapping("/school/{schoolId}")
@@ -59,23 +76,22 @@ public class NotificationController {
         notificationService.deleteNotificationsBySchool(schoolId);
     }
 
-    @PutMapping("/accept/{id}")
-    public ResponseEntity<Notification> acceptNotification(@PathVariable String id) {
-        try {
-            Notification acceptedNotification = notificationService.acceptNotification(id);
-            return ResponseEntity.ok().body(acceptedNotification);
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    public NotificationController(AssociationService associationService) {
+        this.associationService = associationService;
     }
 
+
     @PutMapping("/reject/{id}")
-    public ResponseEntity<Notification> rejectNotification(@PathVariable String id) {
+    public ResponseEntity<Notification> rejectNotification(@PathVariable("id") String id) {
         try {
-            Notification rejectedNotification = notificationService.rejectNotification(id);
-            return ResponseEntity.ok().body(rejectedNotification);
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            Notification notification = notificationService.rejectNotification(id);
+            return new ResponseEntity<>(notification, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            // Return the error response with status code directly
+            return new ResponseEntity<>(null, e.getStatusCode());
+        } catch (Exception e) {
+            // Return a generic error response for unexpected issues
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

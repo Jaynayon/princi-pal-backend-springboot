@@ -11,9 +11,11 @@ import com.it332.principal.DTO.AssociationIdRequest;
 import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
+import com.it332.principal.Models.Notification;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
 import com.it332.principal.Repository.AssociationRepository;
+import com.it332.principal.Repository.NotificationRepository;
 import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.NotFoundException;
 
@@ -31,6 +33,9 @@ public class AssociationService extends Exception {
     
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     public List<Association> getAllAssociations() {
         return associationRepository.findAll();
@@ -287,6 +292,37 @@ public class AssociationService extends Exception {
         // Save the updated association
         return associationRepository.save(existingAssociation);
     }    
+
+    public Association approveInvitation(String notificationId) {
+        // Validate and fetch the notification
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + notificationId));
+        
+        // Extract the assocId from the notification
+        String assocId = notification.getAssocId();
+        
+        if (assocId == null || assocId.isEmpty()) {
+            throw new IllegalStateException("Association ID is missing from the notification.");
+        }
+        
+        // Fetch the existing association
+        Association existingAssociation = associationRepository.findById(assocId)
+            .orElseThrow(() -> new IllegalStateException("No association found for assocId: " + assocId));
+        
+        // Update the association status and save
+        existingAssociation.setApproved(true);
+        Association updatedAssociation = associationRepository.save(existingAssociation);
+        
+        // You might need to add logic to handle user association here.
+        // Example: addUserToAssociation(userId, updatedAssociation);
+        
+        return updatedAssociation;
+    }
+    
+    
+    
+
+     
     
     
     /*public List<Association> getApplicationsForSchool(String schoolId) {
@@ -349,5 +385,9 @@ public class AssociationService extends Exception {
     
         return associationRepository.save(newAssociation);
     }    
+
+    public List<Association> getAssociationsByUserId(String userId) {
+        return associationRepository.findByUserId(userId);
+    }
 
 }

@@ -16,6 +16,7 @@ public class Notification {
     private boolean isRejected;
     private Double balance;
     private Double budget;
+    private Boolean hasButtons;
 
     public Notification() {
     }
@@ -108,6 +109,14 @@ public class Notification {
 
     public void setBudget(Double budget) {
         this.budget = budget;
+    }
+
+    public Boolean getHasButtons() {
+        return hasButtons;
+    }
+
+    public void setHasButtons(Boolean hasButtons) {
+        this.hasButtons = hasButtons;
     }
 
     @Override

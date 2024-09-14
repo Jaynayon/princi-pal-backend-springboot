@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,6 +75,25 @@ public class AssociationController {
         // a user
         Association updatedAssociation = associationService.approveUserToAssociation(association);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
+    }
+
+    @PostMapping("/approve/{notificationId}")
+    public ResponseEntity<?> approveInvitation(
+            @PathVariable String notificationId) {
+        try {
+            // Call the service to approve the invitation
+            Association updatedAssociation = associationService.approveInvitation(notificationId);
+            return ResponseEntity.ok(updatedAssociation);
+        } catch (IllegalArgumentException e) {
+            // Return a bad request response with a specific error message
+            return ResponseEntity.badRequest().body("Invalid notification ID: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            // Return a bad request response with a specific error message
+            return ResponseEntity.badRequest().body("Invalid association state: " + e.getMessage());
+        } catch (Exception e) {
+            // Handle unexpected exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Server error: " + e.getMessage());
+        }
     }
 
     @PatchMapping("/promote")
@@ -174,6 +194,15 @@ public ResponseEntity<List<UserAssociation>> getApplicationsForSchool(@PathVaria
     }
 
     return ResponseEntity.ok(applications);
+}
+
+@GetMapping("/user/{userId}")
+public ResponseEntity<List<Association>> getAssociationsByUserId(@PathVariable String userId) {
+    List<Association> associations = associationService.getAssociationsByUserId(userId);
+    if (associations.isEmpty()) {
+        return ResponseEntity.noContent().build();  // No associations found for this user
+    }
+    return ResponseEntity.ok(associations);
 }
 
 }
