@@ -71,17 +71,25 @@ public class NotificationService {
 
     public Notification acceptNotification(String id) {
         try {
+            // Retrieve the notification by ID
             Notification notification = getNotificationById(id);
             if (notification == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found");
             }
+    
+            // Update notification fields
             notification.setAccepted(true);
             notification.setRejected(false); // Ensure rejection flag is reset
+            notification.setHasButtons(false); // Disable the button
+            notification.setDetails("You accepted the invitation to join the association");
+    
+            // Save the updated notification
             return notificationRepository.save(notification);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating notification", e);
         }
     }
+    
 
     public Notification rejectNotification(String id) {
         try {
