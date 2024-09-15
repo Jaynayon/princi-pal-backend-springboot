@@ -70,12 +70,6 @@ public class NotificationController {
     }
     
 
-    // Endpoint to delete notifications for a school
-    @DeleteMapping("/school/{schoolId}")
-    public void deleteNotificationsForSchool(@PathVariable String schoolId) {
-        notificationService.deleteNotificationsBySchool(schoolId);
-    }
-
     public NotificationController(AssociationService associationService) {
         this.associationService = associationService;
     }
@@ -111,4 +105,57 @@ public class NotificationController {
     public List<Notification> getNotificationsForSchool(@PathVariable String schoolId) {
         return notificationService.getNotificationsBySchool(schoolId);
     }
+
+    @GetMapping("/{userId}/associations")
+    public ResponseEntity<List<Notification>> getNotificationsByUserAssociations(@PathVariable String userId) {
+        // Fetch notifications through user's associations
+        List<Notification> notifications = notificationService.getNotificationsByUserAssociations(userId);
+        
+        if (notifications.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(notifications);
+    }
+
+    @GetMapping("/user/{userId}/all")
+    public ResponseEntity<List<Notification>> getNotificationsByUserIdThroughAssociations(
+            @PathVariable String userId) {
+        try {
+            List<Notification> notifications = notificationService.getNotificationsByUserIdThroughAssociations(userId);
+            return ResponseEntity.ok(notifications);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<String> deleteNotificationsByUser(@PathVariable String userId) {
+        try {
+            // Call the service method to delete notifications
+            notificationService.deleteNotificationsByUser(userId);
+
+            // Return a success response
+            return ResponseEntity.ok("Notifications for user ID " + userId + " have been deleted.");
+        } catch (RuntimeException e) {
+            // Return a bad request response if there's an error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error clearing notifications: " + e.getMessage());
+        }
+    }
+
+     // Endpoint to delete a notification based on the notificationId
+     @DeleteMapping("/{notificationId}")
+     public ResponseEntity<String> deleteNotification(@PathVariable String notificationId) {
+         try {
+             // Call the service method to delete the notification
+             notificationService.deleteNotification(notificationId);
+ 
+             // Return a success response
+             return ResponseEntity.ok("Notification with ID " + notificationId + " has been deleted.");
+         } catch (IllegalArgumentException e) {
+             // Return a bad request response if there's an error
+             return ResponseEntity.badRequest().body(e.getMessage());
+         }
+     }
 }
