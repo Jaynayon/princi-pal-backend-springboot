@@ -3,7 +3,12 @@ package com.it332.principal.Controllers;
 import com.it332.principal.DTO.ExcelRequest;
 //import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.Security.NotFoundException;
+import com.it332.principal.Services.ExportCDRService;
 import com.it332.principal.Services.ExportDocument;
+import com.it332.principal.Services.ExportJEVService;
+import com.it332.principal.Services.ExportLRService;
+import com.it332.principal.Services.ExportRCDService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -25,6 +28,18 @@ public class ExportController {
 
     @Autowired
     private ExportDocument exportService;
+
+    @Autowired
+    private ExportLRService exportLRService;
+
+    @Autowired
+    private ExportJEVService exportJEVService;
+
+    @Autowired
+    private ExportCDRService exportCDRService;
+
+    @Autowired
+    private ExportRCDService exportRCDService;
 
     @PostMapping("/downloadExcel")
     public ResponseEntity<byte[]> downloadExcel(@RequestBody ExcelRequest request) {
@@ -70,13 +85,14 @@ public class ExportController {
             ZipOutputStream zipOut = new ZipOutputStream(byteArrayOutputStream);
 
             // List of files to be zipped
-            List<String> filenames = Arrays.asList("JEV.xlsx", "LR.xlsx", "CDR.xlsx", "RCD.xlsx");
+            // List<String> filenames = Arrays.asList("JEV.xlsx", "LR.xlsx", "CDR.xlsx",
+            // "RCD.xlsx");
 
             // Generate each Excel file
-            byte[] jevBytes = exportService.generateData(request);
-            byte[] lrBytes = exportService.generateLRData(request);
-            byte[] cdrBytes = exportService.generateCDRData(request);
-            byte[] rcdBytes = exportService.generateRCDData(request);
+            byte[] jevBytes = exportJEVService.generateJEVData(request);
+            byte[] lrBytes = exportLRService.generateLRData(request);
+            byte[] cdrBytes = exportCDRService.generateCDRData(request);
+            byte[] rcdBytes = exportRCDService.generateRCDData(request);
 
             // Zip each file
             addToZip("JEV.xlsx", jevBytes, zipOut);

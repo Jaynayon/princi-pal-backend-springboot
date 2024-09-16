@@ -1,13 +1,15 @@
 package com.it332.principal.Services;
 
 import org.apache.poi.ss.usermodel.*;
-//import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import com.it332.principal.DTO.DocumentsResponse;
+import com.it332.principal.DTO.ExcelRequest;
 import com.it332.principal.DTO.LRResponse;
+import com.it332.principal.Models.School;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,27 +17,51 @@ import java.util.List;
 import java.io.ByteArrayOutputStream;
 
 @Service
-public class ExcelServiceCopy {
+public class ExportLRService {
 
     @Autowired
     LRService lrService;
 
-    public byte[] generateLRData(String id) throws IOException {
-        // Data to write
-        List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(id);
+    @Autowired
+    DocumentsService documentsService;
 
-        // School name for output file naming
-        // String schoolName = "Jaclupan";
+    @Autowired
+    SchoolService schoolService;
+
+    public byte[] generateLRData(ExcelRequest request) throws IOException {
+        // Data to write
+        School school = schoolService.getSchoolById(request.getSchoolId());
+        List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(request.getDocumentId());
+        DocumentsResponse document = documentsService.getDocumentBySchoolYearMonth(
+                request.getSchoolId(),
+                request.getYear(),
+                request.getMonth());
 
         // Load template workbook from the classpath
         ClassPathResource resource = new ClassPathResource("Templates/LR-2024.xlsx");
+
+        // LR Automation
         try (InputStream inputStream = resource.getInputStream()) {
             Workbook workbook = new XSSFWorkbook(inputStream);
+
+            // Rename the sheet
+            // Formats sheet name to ex: JAN'24
+            workbook.setSheetName(0, formatMonthYear(
+                    request.getMonth(),
+                    request.getYear()));
+
             Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
 
-            setPeopleCells(sheet, workbook, "John Hammock", 96, 1);
+            // Set Entity Name
+            setEntityNameCells(sheet, workbook, school.getFullName(), 7, 1);
 
-            setPeopleCells(sheet, workbook, "John Davello Verture", 96, 3);
+            // Set Cash Advance Cell
+            setCashAdvCells(sheet, workbook, document.getCashAdvance(), 90, 4);
+
+            // Claimant, SDS, and Head Accounting cells
+            setPeopleCells(sheet, workbook, document.getClaimant(), 96, 1);
+            setPeopleCells(sheet, workbook, document.getSds(), 96, 3);
+            setPeopleCells(sheet, workbook, document.getHeadAccounting(), 96, 4);
 
             int rowIndex = 12; // Start from row 13 (zero-based index)
 
@@ -104,46 +130,80 @@ public class ExcelServiceCopy {
                 rowIndex++;
             }
 
-            /*
-             * // Update formula in cell E89 to sum values in column E from E12 to E88
-             * CellReference formulaCellRef = new CellReference("E89");
-             * Row formulaRow = sheet.getRow(formulaCellRef.getRow());
-             * Cell formulaCell = formulaRow.getCell(formulaCellRef.getCol());
-             * formulaCell.setCellFormula("SUM(E12:E" + (rowIndex) + ")");
-             */
-
             // Force recalculation of all formulas in the workbook
             workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
 
-            // Get the absolute path to the project's root directory
-            // String projectRootPath = System.getProperty("user.dir");
-
-            // // Define the output directory path within the project's resources
-            // String outputDirectoryPath = projectRootPath + "/src/main/resources/Output/";
-
-            // // Create the output directory if it doesn't exist
-            // File outputDirectory = new File(outputDirectoryPath);
-            // if (!outputDirectory.exists()) {
-            // outputDirectory.mkdirs();
-            // }
-            // // Define the absolute output file path
-            // String outputFilePath = outputDirectoryPath + schoolName + "_LR-2024.xlsx";
-
-            // // Save the workbook to the output file
-            // try (FileOutputStream fileOut = new FileOutputStream(outputFilePath)) {
-            // workbook.write(fileOut);
-            // }
-
-            // System.out.println("Values written to Excel file: " + outputFilePath);
-            // workbook.close();
+            // Assuming 'workbook' is your XSSFWorkbook object and 'sheet' is your target
+            // sheet
+            String sheetName = workbook.getSheetName(0); // Get sheet name (assuming first sheet)
+            // Set print area (adjust row and column indices)
+            workbook.setPrintArea(workbook.getSheetIndex(sheetName), 0, 4, 2, 100);
 
             // Write workbook to ByteArrayOutputStream
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
+
             // workbook.close();
             return outputStream.toByteArray(); // Return the byte array
-
         }
+    }
+
+    public void setEntityNameCells(Sheet sheet, Workbook workbook, String name, int rowNo, int colNo) {
+        // Find the specific cell to alter (B96)
+        Row customRow = sheet.getRow(rowNo - 1); // Row index 95 (zero-based) is row 96 in Excel
+        Cell cell = customRow.getCell(colNo); // Cell B96
+
+        // Set value to "John Doe"
+        cell.setCellValue("Entity Name: " + name);
+
+        // Create a new CellStyle for this specific cell
+        CellStyle cellStyle = workbook.createCellStyle();
+        Font customFont = workbook.createFont();
+
+        customFont.setFontName("Century Gothic");
+        customFont.setFontHeightInPoints((short) 24);
+        customFont.setColor(IndexedColors.BLACK.getIndex());
+        customFont.setBold(true);
+        cellStyle.setFont(customFont);
+
+        // Set alignment to centered
+        cellStyle.setBorderLeft(BorderStyle.MEDIUM);
+
+        // Apply the new CellStyle to cell B96
+        cell.setCellStyle(cellStyle);
+    }
+
+    public void setCashAdvCells(Sheet sheet, Workbook workbook, Double amount, int rowNo, int colNo) {
+        // Find the specific cell to alter (B96)
+        Row customRow = sheet.getRow(rowNo - 1); // Row index 95 (zero-based) is row 96 in Excel
+        Cell cell = customRow.getCell(colNo); // Cell B96
+
+        // Create a DataFormat object from the workbook
+        DataFormat format = workbook.createDataFormat();
+
+        // Set value to "John Doe"
+        cell.setCellValue(amount);
+
+        // Create a new CellStyle for this specific cell
+        CellStyle cellStyle = workbook.createCellStyle();
+        Font customFont = workbook.createFont();
+        cellStyle.setDataFormat(format.getFormat("#,##0.00"));
+        customFont.setFontName("Century Gothic");
+        customFont.setFontHeightInPoints((short) 16);
+        customFont.setColor(IndexedColors.BLACK.getIndex());
+        customFont.setBold(true);
+        cellStyle.setFont(customFont);
+
+        // Set alignment to centered
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setAlignment(HorizontalAlignment.RIGHT);
+        cellStyle.setBorderLeft(BorderStyle.MEDIUM);
+        cellStyle.setBorderRight(BorderStyle.MEDIUM);
+        cellStyle.setBorderTop(BorderStyle.MEDIUM);
+        cellStyle.setBorderBottom(BorderStyle.MEDIUM);
+
+        // Apply the new CellStyle to cell B96
+        cell.setCellStyle(cellStyle);
     }
 
     public void setPeopleCells(Sheet sheet, Workbook workbook, String name, int rowNo, int colNo) {
@@ -167,9 +227,22 @@ public class ExcelServiceCopy {
         // Set alignment to centered
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         cellStyle.setBorderLeft(BorderStyle.MEDIUM);
+        cellStyle.setBorderRight(BorderStyle.MEDIUM);
 
         // Apply the new CellStyle to cell B96
         cell.setCellStyle(cellStyle);
+    }
 
+    public String formatMonthYear(String month, String year) {
+        // Convert month to uppercase and get the first three letters
+        String monthAbbreviation = month.substring(0, 3).toUpperCase();
+
+        // Get the last two characters of the year
+        String yearAbbreviation = year.substring(year.length() - 2);
+
+        // Concatenate the formatted month and year
+        String formatted = monthAbbreviation + "'" + yearAbbreviation;
+
+        return formatted;
     }
 }
