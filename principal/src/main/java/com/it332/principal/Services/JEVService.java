@@ -164,7 +164,7 @@ public class JEVService {
 
             // Update the JEV's amount with the computed sum
             jev.setAmount(sum); // Set the new sum to the JEV's amount
-            jev.setBudgetExceeded(sum > jev.getBudget()); // Set budget exceeded status
+            jev.setBudgetExceeded(sum > jev.getBudget() && jev.getBudget() > 0); // Set budget exceeded status
         }
 
         jevRepository.saveAll(jevList);
