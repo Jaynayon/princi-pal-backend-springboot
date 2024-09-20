@@ -4,6 +4,7 @@ import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.LR;
+import com.it332.principal.Models.LRJEV;
 import com.it332.principal.Models.Uacs;
 import com.it332.principal.Repository.DocumentsRepository;
 import com.it332.principal.Repository.LRRepository;
@@ -14,7 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,9 +55,6 @@ public class LRService {
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentBudget(newLr.getDocumentsId());
-
-        // Update the JEV
-        jevService.updateJEVAmount(newLr.getDocumentsId());
 
         // Create history
         historyService.createHistory(newLr, lr.getUserId(), true);
@@ -117,21 +119,48 @@ public class LRService {
         documentsRepository.save(existingDocument);
     }
 
-    // public void updateDocumentBudget(String id) {
-    // // Find all LR objects with the specified documentId
-    // existingDocument = documentsService.getDocumentById(id);
-    // List<LRResponse> lrList = getAllLRsByDocumentsId(id);
+    public List<LRJEV> getJEVByDocumentsId(String documentsId) {
+        existingDocument = documentsService.getDocumentById(documentsId);
+        List<LRResponse> docLr = getAllLRsByDocumentsId(documentsId);
+        List<LRJEV> jevs = new ArrayList<>();
 
-    // // Calculate the sum of amounts from the LR list
-    // double totalAmount = lrList.stream()
-    // .mapToDouble(LRResponse::getAmount)
-    // .sum();
-    // // Update the Documents amount property with the calculated total amount
-    // existingDocument.setBudget(totalAmount);
+        // Use a Set to collect unique objectCodes, avoiding duplicates
+        Set<String> uniqueObjectCodes = new HashSet<>();
+        for (LRResponse lr : docLr) {
+            uniqueObjectCodes.add(lr.getObjectCode());
+        }
 
-    // // Save new sum
-    // documentsRepository.save(existingDocument);
-    // }
+        // Create a map to quickly find the LRJEV object by UACS code
+        Map<String, LRJEV> jevMap = new HashMap<>();
+
+        // Create LRJEV object per unique object code and store in the map
+        for (String code : uniqueObjectCodes) {
+            Uacs existingUacs = uacsService.getUacsByCode(code);
+            LRJEV jev = new LRJEV(existingUacs);
+            jevs.add(jev);
+            jevMap.put(code, jev); // Add to the map for quick lookup
+        }
+
+        // Add the special case for the cash advance
+        LRJEV cashAdvanceJev = new LRJEV(uacsService.getUacsByCode("1990101000"));
+        jevs.add(cashAdvanceJev);
+        jevMap.put("1990101000", cashAdvanceJev);
+
+        // Update amounts efficiently by directly accessing the corresponding LRJEV from
+        // the map
+        for (LRResponse lr : docLr) {
+            LRJEV jev = jevMap.get(lr.getObjectCode());
+            if (jev != null) {
+                jev.setAmount(jev.getAmount() + lr.getAmount());
+                jev.setBudgetExceeded(jev.getAmount() > jev.getBudget());
+            }
+        }
+
+        // Set the cash advance amount explicitly after the loop
+        cashAdvanceJev.setAmount(existingDocument.getCashAdvance());
+
+        return jevs;
+    }
 
     public LR getLRById(String id) {
         // Validate the format of the provided ID
@@ -217,9 +246,6 @@ public class LRService {
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentBudget(newLR.getDocumentsId());
-
-        // Update the selected UACS code
-        jevService.updateJEVAmount(newLR.getDocumentsId());
 
         // Create history
         historyService.createHistory(newLR, updatedLR.getUserId(), fieldName, oldValue, newValue);

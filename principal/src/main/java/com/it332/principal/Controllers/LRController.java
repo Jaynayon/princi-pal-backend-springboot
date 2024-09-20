@@ -4,6 +4,7 @@ import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.LR;
+import com.it332.principal.Models.LRJEV;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.LRService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,30 @@ public class LRController {
     public ResponseEntity<Object> getAllLRsByDocumentsId(@PathVariable String documentsId) {
         try {
             List<LRResponse> lrList = lrService.getAllLRsByDocumentsId(documentsId);
+            return new ResponseEntity<>(lrList, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate document is detected
+            err.setMessage("Failed to get LR JEV: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get LR JEV: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @GetMapping("/jev/documents/{documentsId}")
+    public ResponseEntity<Object> getAllJEVsByDocumentsId(@PathVariable String documentsId) {
+        try {
+            List<LRJEV> lrList = lrService.getJEVByDocumentsId(documentsId);
             return new ResponseEntity<>(lrList, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.DocumentsResponse;
 import com.it332.principal.DTO.ExcelRequest;
-import com.it332.principal.DTO.JEVResponse;
+import com.it332.principal.Models.LRJEV;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
 
@@ -23,7 +23,7 @@ public class ExportJEVService {
     UserService userService;
 
     @Autowired
-    JEVService jevService;
+    LRService lrService;
 
     @Autowired
     DocumentsService documentsService;
@@ -40,7 +40,9 @@ public class ExportJEVService {
                 request.getSchoolId(),
                 request.getYear(),
                 request.getMonth());
-        List<JEVResponse> dataToWrite = jevService.getAllJEVsByDocumentsId(document.getId());
+        // List<JEVResponse> dataToWrite =
+        // jevService.getAllJEVsByDocumentsId(document.getId());
+        List<LRJEV> dataToWrite = lrService.getJEVByDocumentsId(request.getDocumentId());
         User user = userService.getUserById(request.getUserId());
 
         // Load template workbook from the classpath
@@ -125,7 +127,7 @@ public class ExportJEVService {
             }
 
             // Write values to specific cells and apply the correct cell styles
-            for (JEVResponse data : dataToWrite) {
+            for (LRJEV data : dataToWrite) {
                 Row row = sheet.createRow(rowIndex);
 
                 // Populate cells and apply styles
