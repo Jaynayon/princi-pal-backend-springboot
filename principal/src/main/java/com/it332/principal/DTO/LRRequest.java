@@ -11,13 +11,14 @@ public class LRRequest {
     private String objectCode;
     private String payee;
     private String natureOfPayment;
+    private boolean approved = true;
 
     // Constructor
     public LRRequest() {
     }
 
     public LRRequest(String date, String userId, String orsBursNo, String particulars, double amount, String documentId,
-            String objectCode, String payee, String natureOfPayment) {
+            String objectCode, String payee, String natureOfPayment, boolean approved) {
         this.date = date;
         this.userId = userId;
         this.documentsId = documentId;
@@ -27,6 +28,7 @@ public class LRRequest {
         this.objectCode = objectCode;
         this.payee = payee;
         this.natureOfPayment = natureOfPayment;
+        this.approved = approved;
     }
 
     public void setDate(String date) {
@@ -35,6 +37,14 @@ public class LRRequest {
 
     public String getDate() {
         return date;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 
     public String getObjectCode() {

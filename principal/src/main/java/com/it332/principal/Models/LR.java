@@ -29,13 +29,14 @@ public class LR {
     private String objectCode;
     private String payee;
     private String natureOfPayment;
+    private boolean approved = true;
 
     // Constructor
     public LR() {
     }
 
     public LR(Date date, String orsBursNo, String particulars, double amount, String documentsId,
-            String objectCode, String payee, String natureOfPayment) {
+            String objectCode, String payee, String natureOfPayment, boolean approved) {
         this.documentsId = documentsId;
         this.date = date; // Directly assign the date
         this.orsBursNo = orsBursNo;
@@ -44,11 +45,12 @@ public class LR {
         this.objectCode = objectCode;
         this.payee = payee;
         this.natureOfPayment = natureOfPayment;
+        this.approved = approved;
     }
 
     // Overload constructor without ObjectCode
     public LR(Date date, String orsBursNo, String particulars, double amount, String documentsId, String payee,
-            String natureOfPayment) {
+            String natureOfPayment, boolean approved) {
         this.documentsId = documentsId;
         this.date = date; // Directly assign the date
         this.orsBursNo = orsBursNo;
@@ -56,6 +58,7 @@ public class LR {
         this.amount = amount;
         this.payee = payee;
         this.natureOfPayment = natureOfPayment;
+        this.approved = approved;
     }
 
     public LR(LRRequest lr, String objectCode) {
@@ -67,6 +70,15 @@ public class LR {
         this.objectCode = objectCode;
         this.payee = lr.getPayee();
         this.natureOfPayment = lr.getNatureOfPayment();
+        this.approved = lr.isApproved();
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 
     // Getters and setters
