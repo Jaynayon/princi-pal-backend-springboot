@@ -13,6 +13,7 @@ import com.it332.principal.Repository.DocumentsRepository;
 import com.it332.principal.Security.NotFoundException;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class DocumentsService {
@@ -45,6 +46,45 @@ public class DocumentsService {
         jevService.initializeJEV(newDoc.getId());
 
         return new DocumentsResponse(existingSchool, newDoc);
+    }
+
+    public DocumentsResponse initializeDocuments(DocumentsRequest document) {
+        // Check if the school exists
+        School existingSchool = schoolService.getSchoolById(document.getSchoolId());
+        List<Documents> yearDocuments = new ArrayList<>();
+        Documents documentRequest = new Documents();
+
+        // Array of month names
+        String[] months = { "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December" };
+
+        // Loop through all months from January to December
+        for (String month : months) {
+            // Check if a document for this month and year already exists
+            Documents existingDoc = documentRepository.findBySchoolIdAndYearAndMonth(
+                    existingSchool.getId(), document.getYear(), month);
+
+            if (existingDoc != null) {
+                continue; // Skip if document already exist
+            }
+
+            // Create a new document for each month
+            Documents newDoc = new Documents(document);
+            newDoc.setMonth(month); // Set the month
+            newDoc.setCashAdvance(document.getAnnualBudget() / 12);
+
+            // Store requested month Document
+            if (document.getMonth().equals(month)) {
+                documentRequest = newDoc;
+            }
+
+            // Add the new document to year documents
+            yearDocuments.add(newDoc);
+        }
+
+        documentRepository.saveAll(yearDocuments);
+
+        return new DocumentsResponse(existingSchool, documentRequest);
     }
 
     public DocumentsResponse getDocumentBySchoolYearMonth(String schoolId, String year, String month) {
@@ -147,8 +187,8 @@ public class DocumentsService {
     public void deleteDocumentById(String id) {
         Documents document = getDocumentById(id);
 
-        // Delete initialized jev's
-        jevService.deleteByDocumentsId(document.getId());
+        // Delete initialized jev's (obsolete logic)
+        // jevService.deleteByDocumentsId(document.getId());
 
         documentRepository.delete(document);
     }
