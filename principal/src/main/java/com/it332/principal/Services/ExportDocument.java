@@ -200,7 +200,7 @@ public class ExportDocument {
     public byte[] generateCDRData(ExcelRequest request) throws IOException {
         // Data to write
         School school = schoolService.getSchoolById(request.getSchoolId());
-        List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(request.getDocumentId());
+        List<LRResponse> dataToWrite = lrService.getAllApprovedLRsByDocumentsId(request.getDocumentId());
         DocumentsResponse document = documentsService.getDocumentBySchoolYearMonth(
                 request.getSchoolId(),
                 request.getYear(),
@@ -379,7 +379,7 @@ public class ExportDocument {
     public byte[] generateRCDData(ExcelRequest request) throws IOException {
         // Data to write
         School school = schoolService.getSchoolById(request.getSchoolId());
-        List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(request.getDocumentId());
+        List<LRResponse> dataToWrite = lrService.getAllApprovedLRsByDocumentsId(request.getDocumentId());
         DocumentsResponse document = documentsService.getDocumentBySchoolYearMonth(
                 request.getSchoolId(),
                 request.getYear(),
@@ -514,7 +514,7 @@ public class ExportDocument {
     public byte[] generateLRData(ExcelRequest request) throws IOException {
         // Data to write
         School school = schoolService.getSchoolById(request.getSchoolId());
-        List<LRResponse> dataToWrite = lrService.getAllLRsByDocumentsId(request.getDocumentId());
+        List<LRResponse> dataToWrite = lrService.getAllApprovedLRsByDocumentsId(request.getDocumentId());
         DocumentsResponse document = documentsService.getDocumentBySchoolYearMonth(
                 request.getSchoolId(),
                 request.getYear(),

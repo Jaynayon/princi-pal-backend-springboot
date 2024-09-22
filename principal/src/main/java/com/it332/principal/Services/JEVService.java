@@ -108,7 +108,7 @@ public class JEVService {
         existingDocument = getDocumentById(documentsId);
 
         // Fetch LR and JEV lists by documentsId
-        List<LR> lrList = lrRepository.findByDocumentsIdOrderByDateAsc(documentsId);
+        List<LR> lrList = lrRepository.findByApprovedTrueAndDocumentsIdOrderByDateAsc(documentsId);
         List<JEV> jevList = jevRepository.findByDocumentsId(documentsId);
 
         // Iterate over each JEV to update its amount
@@ -144,7 +144,7 @@ public class JEVService {
         existingDocument = getDocumentById(documentsId);
 
         // Fetch LR and JEV lists by documentsId
-        List<LR> lrList = lrRepository.findByDocumentsIdOrderByDateAsc(documentsId);
+        List<LR> lrList = lrRepository.findByApprovedTrueAndDocumentsIdOrderByDateAsc(documentsId);
         List<JEV> jevList = jevRepository.findByDocumentsId(documentsId);
 
         // Iterate over each JEV to update its amount
