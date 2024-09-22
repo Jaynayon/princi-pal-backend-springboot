@@ -10,7 +10,9 @@ import com.it332.principal.Models.LR;
 
 public interface LRRepository extends MongoRepository<LR, String> {
     // Define custom query methods here if needed
-    List<LR> findByDocumentsIdOrderByDateAsc(String documentsId);
+    List<LR> findByApprovedTrueAndDocumentsIdOrderByDateAsc(String documentsId);
+
+    List<LR> findByApprovedFalseAndDocumentsIdOrderByDateAsc(String documentsId);
 
     List<LRResponse> findByDocumentsIdOrderByDateDesc(String documentsId);
 

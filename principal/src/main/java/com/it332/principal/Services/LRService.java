@@ -99,7 +99,7 @@ public class LRService {
     public void updateDocumentBudget(String id) {
         // Find all LR objects with the specified documentId
         existingDocument = documentsService.getDocumentById(id);
-        List<LRResponse> lrList = getAllLRsByDocumentsId(id);
+        List<LRResponse> lrList = getAllApprovedLRsByDocumentsId(id);
 
         // Calculate the sum of amounts from the LR list
         double totalAmount = lrList.stream()
@@ -121,7 +121,7 @@ public class LRService {
 
     public List<LRJEV> getJEVByDocumentsId(String documentsId) {
         existingDocument = documentsService.getDocumentById(documentsId);
-        List<LRResponse> docLr = getAllLRsByDocumentsId(documentsId);
+        List<LRResponse> docLr = getAllApprovedLRsByDocumentsId(documentsId);
         List<LRJEV> jevs = new ArrayList<>();
 
         // Use a Set to collect unique objectCodes, avoiding duplicates
@@ -178,9 +178,23 @@ public class LRService {
     }
 
     // Method to retrieve all LR documents with the same documentsId
-    public List<LRResponse> getAllLRsByDocumentsId(String documentsId) {
+    public List<LRResponse> getAllApprovedLRsByDocumentsId(String documentsId) {
         existingDocument = documentsService.getDocumentById(documentsId);
-        List<LR> lrList = lrRepository.findByDocumentsIdOrderByDateAsc(documentsId);
+        List<LR> lrList = lrRepository.findByApprovedTrueAndDocumentsIdOrderByDateAsc(documentsId);
+
+        if (existingDocument == null) {
+            throw new NotFoundException("LR not found with ID: " + documentsId);
+        }
+
+        return lrList.stream()
+                .map(LRResponse::new) // Map each LR to LRResponse using constructor
+                .collect(Collectors.toList());
+    }
+
+    // Method to retrieve all LR documents with the same documentsId
+    public List<LRResponse> getAllNotApprovedLRsByDocumentsId(String documentsId) {
+        existingDocument = documentsService.getDocumentById(documentsId);
+        List<LR> lrList = lrRepository.findByApprovedFalseAndDocumentsIdOrderByDateAsc(documentsId);
 
         if (existingDocument == null) {
             throw new NotFoundException("LR not found with ID: " + documentsId);
@@ -240,6 +254,13 @@ public class LRService {
             oldValue = lr.getNatureOfPayment();
             newValue = updatedLR.getNatureOfPayment();
             lr.setNatureOfPayment(updatedLR.getNatureOfPayment());
+        }
+        // Checks if approved payload is true, skips it otherwise
+        if (updatedLR.isApproved()) {
+            // fieldName = "natureOfPayment";
+            // oldValue = lr.getNatureOfPayment();
+            // newValue = updatedLR.getNatureOfPayment();
+            lr.setApproved(updatedLR.isApproved());
         }
 
         LR newLR = lrRepository.save(lr);
