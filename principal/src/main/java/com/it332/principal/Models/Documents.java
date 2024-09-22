@@ -32,6 +32,9 @@ public class Documents {
     @Min(value = 0, message = "Cash advance must be a non-negative number")
     private Double cashAdvance = 0.0;
 
+    @Min(value = 0, message = "Cash advance must be a non-negative number")
+    private Double annualBudget = 0.0;
+
     private boolean budgetExceeded;
 
     private boolean budgetLimitExceeded;
@@ -49,6 +52,7 @@ public class Documents {
         setSchoolId(doc.getSchoolId());
         setMonth(doc.getMonth());
         setYear(doc.getYear());
+        setAnnualBudget(doc.getAnnualBudget());
         setBudget(doc.getBudget());
         setBudgetLimit(doc.getBudgetLimit());
         setBudgetExceeded(false);
@@ -65,6 +69,7 @@ public class Documents {
         this.budget = 0.0;
         this.budgetLimit = 0.0;
         this.cashAdvance = 0.0;
+        this.annualBudget = 0.0;
         this.budgetExceeded = false;
         this.budgetLimitExceeded = false;
         setSds("");
@@ -76,6 +81,7 @@ public class Documents {
             @Min(value = 0, message = "Budget must be a non-negative number") Double budget,
             @Min(value = 0, message = "Budget limit must be a non-negative number") Double budgetLimit,
             @Min(value = 0, message = "Cash advance must be a non-negative number") Double cashAdvance,
+            @Min(value = 0, message = "Annual budget must be a non-negative number") Double annualBudget,
             boolean budgetExceeded, boolean budgetLimitExceeded, String sds, String claimant, String headAccounting) {
         this.schoolId = schoolId;
         this.month = month;
@@ -83,6 +89,7 @@ public class Documents {
         this.budget = budget;
         this.budgetLimit = budgetLimit;
         this.cashAdvance = cashAdvance;
+        this.annualBudget = annualBudget;
         this.budgetExceeded = budgetExceeded;
         this.budgetLimitExceeded = budgetLimitExceeded;
         setSds(sds);
@@ -96,6 +103,14 @@ public class Documents {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Double getAnnualBudget() {
+        return annualBudget;
+    }
+
+    public void setAnnualBudget(Double annualBudget) {
+        this.annualBudget = annualBudget;
     }
 
     public String getSchoolId() {

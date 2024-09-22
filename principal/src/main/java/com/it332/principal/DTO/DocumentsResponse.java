@@ -23,6 +23,8 @@ public class DocumentsResponse {
 
     private Double cashAdvance;
 
+    private Double annualBudget;
+
     private boolean budgetExceeded;
 
     private boolean budgetLimitExceeded;
@@ -44,6 +46,7 @@ public class DocumentsResponse {
         setBudget(document.getBudget());
         setBudgetLimit(document.getBudgetLimit());
         setCashAdvance(document.getCashAdvance());
+        setAnnualBudget(document.getAnnualBudget());
         setBudgetExceeded(document.isBudgetExceeded());
         setBudgetLimitExceeded(document.isBudgetLimitExceeded());
         setSds(document.getSds());
