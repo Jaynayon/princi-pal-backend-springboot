@@ -67,10 +67,34 @@ public class LRController {
         return new ResponseEntity<>(lrList, HttpStatus.OK);
     }
 
-    @GetMapping("/documents/{documentsId}")
-    public ResponseEntity<Object> getAllLRsByDocumentsId(@PathVariable String documentsId) {
+    @GetMapping("/documents/{documentsId}/approved")
+    public ResponseEntity<Object> getAllApprovedLRsByDocumentsId(@PathVariable String documentsId) {
         try {
-            List<LRResponse> lrList = lrService.getAllLRsByDocumentsId(documentsId);
+            List<LRResponse> lrList = lrService.getAllApprovedLRsByDocumentsId(documentsId);
+            return new ResponseEntity<>(lrList, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate document is detected
+            err.setMessage("Failed to get LR JEV: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get LR JEV: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @GetMapping("/documents/{documentsId}/unapproved")
+    public ResponseEntity<Object> getAllNotApprovedLRsByDocumentsId(@PathVariable String documentsId) {
+        try {
+            List<LRResponse> lrList = lrService.getAllNotApprovedLRsByDocumentsId(documentsId);
             return new ResponseEntity<>(lrList, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
