@@ -4,13 +4,13 @@ public class DocumentsRequest {
     private String schoolId;
     private String month;
     private String year;
-    private Double budget;
-    private Double budgetLimit;
-    private Double cashAdvance;
-    private Double annualBudget;
-    private String sds;
-    private String claimant;
-    private String headAccounting;
+    private Double budget = 0.0;
+    private Double budgetLimit = 0.0;
+    private Double cashAdvance = 0.0;
+    private Double annualBudget = 0.0;
+    private String sds = "";
+    private String claimant = "";
+    private String headAccounting = "";
 
     public DocumentsRequest() {
     }
