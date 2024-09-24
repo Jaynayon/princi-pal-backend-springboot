@@ -207,6 +207,7 @@ public class LRService {
 
     public LR updateLR(String id, LRRequest updatedLR) {
         LR lr = getLRById(id);
+        existingDocument = documentsService.getDocumentById(lr.getDocumentsId());
         String fieldName = "";
         String oldValue = "";
         String newValue = "";
@@ -230,12 +231,6 @@ public class LRService {
             newValue = updatedLR.getParticulars();
             lr.setParticulars(updatedLR.getParticulars());
         }
-        if (updatedLR.getAmount() != 0) {
-            fieldName = "amount";
-            oldValue = lr.getAmount() + "";
-            newValue = updatedLR.getAmount() + "";
-            lr.setAmount(updatedLR.getAmount());
-        }
         if (updatedLR.getObjectCode() != null) {
             Uacs existingUacs = uacsService.getUacsByCode(updatedLR.getObjectCode());
             fieldName = "objectCode";
@@ -255,11 +250,28 @@ public class LRService {
             newValue = updatedLR.getNatureOfPayment();
             lr.setNatureOfPayment(updatedLR.getNatureOfPayment());
         }
+        if (updatedLR.getAmount() != 0) {
+            fieldName = "amount";
+            oldValue = lr.getAmount() + "";
+            newValue = updatedLR.getAmount() + "";
+            // LR displayed will always be approved ones
+            if (lr.isApproved()) {
+                // lr amount + total lrs amount > monthly budget
+                if ((updatedLR.getAmount() + (existingDocument.getBudget() - lr.getAmount())) > existingDocument
+                        .getCashAdvance()) {
+                    lr.setApproved(false);
+                } else {
+                    lr.setApproved(true);
+                }
+            }
+            // Cancel / Reject
+            else {
+                lr.setApproved(true);
+            }
+            lr.setAmount(updatedLR.getAmount());
+        }
         // Checks if approved payload is true, skips it otherwise
         if (updatedLR.isApproved()) {
-            // fieldName = "natureOfPayment";
-            // oldValue = lr.getNatureOfPayment();
-            // newValue = updatedLR.getNatureOfPayment();
             lr.setApproved(updatedLR.isApproved());
         }
 

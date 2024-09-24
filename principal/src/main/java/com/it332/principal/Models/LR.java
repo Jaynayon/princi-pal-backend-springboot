@@ -29,7 +29,7 @@ public class LR {
     private String objectCode;
     private String payee;
     private String natureOfPayment;
-    private boolean approved = true;
+    private boolean approved;
 
     // Constructor
     public LR() {

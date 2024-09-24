@@ -11,7 +11,7 @@ public class LRRequest {
     private String objectCode;
     private String payee;
     private String natureOfPayment;
-    private boolean approved = true;
+    private boolean approved;
 
     // Constructor
     public LRRequest() {
