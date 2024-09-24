@@ -70,7 +70,7 @@ public class LR {
         this.objectCode = objectCode;
         this.payee = lr.getPayee();
         this.natureOfPayment = lr.getNatureOfPayment();
-        this.approved = lr.isApproved();
+        this.approved = true; // default
     }
 
     public boolean isApproved() {

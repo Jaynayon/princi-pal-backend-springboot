@@ -51,7 +51,12 @@ public class LRService {
         Uacs existingUacs = uacsService.getUacsByCode(lr.getObjectCode());
 
         // Save the LR first
-        LR newLr = lrRepository.save(new LR(lr, existingUacs.getCode()));
+        LR newLr = new LR(lr, existingUacs.getCode());
+
+        // Check approved
+        newLr.setApproved(lr.getAmount() + existingDocument.getBudget() < existingDocument.getCashAdvance());
+
+        lrRepository.save(newLr);
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentBudget(newLr.getDocumentsId());
@@ -270,7 +275,6 @@ public class LRService {
             }
             lr.setAmount(updatedLR.getAmount());
         }
-        // Checks if approved payload is true, skips it otherwise
         if (updatedLR.isApproved()) {
             lr.setApproved(updatedLR.isApproved());
         }
