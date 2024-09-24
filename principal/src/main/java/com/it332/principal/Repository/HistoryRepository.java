@@ -12,6 +12,8 @@ public interface HistoryRepository extends MongoRepository<History, String> {
     // Find all UpdateHistory records by lrId
     List<History> findAllByLrId(String lrId, Sort sort);
 
+    History findFirstByLrIdOrderByUpdateDateDesc(String lrId);
+
     // Find all UpdateHistory records by documentsId
     List<History> findAllByDocumentsId(String documentsId, Sort sort);
 

@@ -113,6 +113,30 @@ public class HistoryController {
         }
     }
 
+    @GetMapping("/lr/{lrId}/last")
+    public ResponseEntity<Object> getLastHistoryByLrId(@PathVariable String lrId) {
+        try {
+            HistoryResponse historyList = historyService.getLastHistoryByLrId(lrId);
+            return new ResponseEntity<>(historyList, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate document is detected
+            err.setMessage("Failed to get LR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get LR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
     // Endpoint to delete an LR document by ID
     @DeleteMapping("/lr/{lrId}")
     public ResponseEntity<Object> deleteHistoryByLRId(@PathVariable String lrId) {

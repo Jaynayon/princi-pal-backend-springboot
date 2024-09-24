@@ -148,6 +148,26 @@ public class HistoryService {
                 .collect(Collectors.toList());
     }
 
+    // Get the most recent history by lrId
+    public HistoryResponse getLastHistoryByLrId(String lrId) {
+        // Fetch the most recent history (sorted by updateDate in descending order,
+        // limited to 1 result)
+        History lrHistory = historyRepository.findFirstByLrIdOrderByUpdateDateDesc(lrId);
+
+        // If history is null, return null or handle accordingly
+        if (lrHistory == null) {
+            return null;
+        }
+
+        // Fetch the user details for the associated userId
+        UserDetails user = new UserDetails(userService.getUserById(lrHistory.getUserId()));
+
+        // Create and return the response
+        HistoryResponse hr = new HistoryResponse(lrHistory);
+        hr.setUser(user); // Set user details
+        return hr;
+    }
+
     // Get all History by documentsId
     public List<HistoryResponse> getHistoryByDocumentsId(String documentsId) {
         // Fetch all histories sorted by updateDate
