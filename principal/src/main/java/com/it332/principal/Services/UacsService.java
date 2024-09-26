@@ -52,8 +52,23 @@ public class UacsService {
         return entity;
     }
 
+    public Uacs getUacsByCodeOrName(String codeOrName) {
+        Uacs uacs = uacsRepository.findByCode(codeOrName);
+
+        if (uacs == null) {
+            uacs = getUacsByName(codeOrName); // throws an exception if null
+        }
+
+        return uacs;
+    }
+
     public List<Uacs> getAllUacs() {
         return uacsRepository.findAll();
+    }
+
+    // Find all UACS except those with the specified objectCode
+    public List<Uacs> getAllUacsExceptCashAdv() {
+        return uacsRepository.findByCodeNot("1990101000");
     }
 
     public Uacs getUacsById(String id) {

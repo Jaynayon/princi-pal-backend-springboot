@@ -1,6 +1,7 @@
 package com.it332.principal.Controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -49,8 +50,8 @@ public class UacsController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Uacs>> getAllUacs() {
-        List<Uacs> allUacs = uacsService.getAllUacs();
+    public ResponseEntity<List<Uacs>> getAllUacsExceptCashAdv() {
+        List<Uacs> allUacs = uacsService.getAllUacsExceptCashAdv();
         return new ResponseEntity<>(allUacs, HttpStatus.OK);
     }
 
@@ -59,6 +60,36 @@ public class UacsController {
         ErrorMessage err = new ErrorMessage("");
         try {
             Uacs uacs = uacsService.getUacsById(id);
+            if (uacs != null) {
+                return new ResponseEntity<>(uacs, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get school: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @PostMapping("/nameOrCode")
+    public ResponseEntity<Object> getUacsByCodeOrName(@RequestBody Map<String, String> requestBody) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String nameOrCode = requestBody.get("nameOrCode");
+            Uacs uacs = uacsService.getUacsByCodeOrName(nameOrCode);
             if (uacs != null) {
                 return new ResponseEntity<>(uacs, HttpStatus.OK);
             } else {

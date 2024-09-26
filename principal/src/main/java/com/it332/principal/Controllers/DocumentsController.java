@@ -50,6 +50,32 @@ public class DocumentsController {
         }
     }
 
+    // Endpoint to create a new document
+    @PostMapping("/initialize")
+    public ResponseEntity<Object> initializeDocuments(@RequestBody @Valid DocumentsRequest document) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            DocumentsResponse savedDocument = documentsService.initializeDocuments(document);
+            return new ResponseEntity<>(savedDocument, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate document is detected
+            err.setMessage("Failed to create Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
     @GetMapping("/school/{school}/{year}/{month}")
     public ResponseEntity<Object> getDocumentBySchoolYearMonth(@PathVariable String school,
             @PathVariable String year,
@@ -57,6 +83,32 @@ public class DocumentsController {
         ErrorMessage err = new ErrorMessage("");
         try {
             DocumentsResponse document = documentsService.getDocumentBySchoolYearMonth(school, year, month);
+            return new ResponseEntity<>(document, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @GetMapping("/school/{school}/{year}")
+    public ResponseEntity<Object> getDocumentBySchoolYearMonth(@PathVariable String school,
+            @PathVariable String year) throws Exception {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            List<Documents> document = documentsService.getDocumentsBySchoolYear(school, year);
             return new ResponseEntity<>(document, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate school name is detected

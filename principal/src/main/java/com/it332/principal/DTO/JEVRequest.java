@@ -12,14 +12,16 @@ public class JEVRequest {
     private String documentsId;
     private String amountType;
     private Float amount;
+    private Float budget;
 
     public JEVRequest() {
     }
 
     public JEVRequest(@NotBlank @NotNull String objectCode, @NotBlank @NotNull String documentsId, String amountType,
-            Float amount) {
+            Float amount, Float budget) {
         this.objectCode = objectCode;
         this.documentsId = documentsId;
+        setBudget(budget);
         setAmountType(amountType);
         setAmount(amount);
     }
@@ -27,6 +29,7 @@ public class JEVRequest {
     public JEVRequest(@NotBlank @NotNull String objectCode, @NotBlank @NotNull String documentsId) {
         this.objectCode = objectCode;
         this.documentsId = documentsId;
+        setBudget(Float.parseFloat("0"));
         setAmountType("Credit");
         setAmount(Float.parseFloat("0"));
     }
@@ -64,6 +67,14 @@ public class JEVRequest {
 
     public void setAmount(Float amount) {
         this.amount = amount;
+    }
+
+    public Float getBudget() {
+        return budget;
+    }
+
+    public void setBudget(Float budget) {
+        this.budget = budget;
     }
 
 }

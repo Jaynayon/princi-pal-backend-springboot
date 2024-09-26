@@ -236,7 +236,8 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/password")
-    public ResponseEntity<Object> updateUserPassword(@PathVariable String id, @RequestBody Map<String, String> passwords) {
+    public ResponseEntity<Object> updateUserPassword(@PathVariable String id,
+            @RequestBody Map<String, String> passwords) {
         String newPassword = passwords.get("newPassword");
 
         try {
@@ -249,19 +250,19 @@ public class UserController {
         }
     }
 
-    // private ResponseCookie createJwtCookie(String token) {
-    // return ResponseCookie.from("jwt", token)
-    // // .httpOnly(true) // Make the cookie accessible only via HTTP (not
-    // accessible
-    // // via JavaScript)
-    // .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds
-    // = 1 day)
-    // .sameSite("Lax")
-    // .secure(false)
-    // .path("/") // Set the cookie path to root ("/") so that it's accessible
-    // across the entire
-    // // domain
-    // .build();
-    // }
+    @PatchMapping("/{id}/avatar")
+    public ResponseEntity<Object> updateUserAvatar(@PathVariable String id,
+            @RequestBody Map<String, String> requestBody) {
+        try {
+            String avatar = requestBody.get("avatar");
+            userService.updateUserAvatar(id, avatar);
+            String successMessage = "User " + id + " updated successfully";
+            return ResponseEntity.ok().body(successMessage); // User updated successfully
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Failed to update user: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred");
+        }
+    }
 
 }

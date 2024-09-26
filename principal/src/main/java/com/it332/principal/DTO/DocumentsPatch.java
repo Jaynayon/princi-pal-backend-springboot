@@ -13,6 +13,9 @@ public class DocumentsPatch {
     @Min(value = 0, message = "Budget must be a non-negative number")
     private Double budgetLimit;
 
+    @Min(value = 0, message = "Budget must be a non-negative number")
+    private Double cashAdvance;
+
     private String sds;
 
     private String claimant;
@@ -27,6 +30,7 @@ public class DocumentsPatch {
         this.setSds(document.getSds());
         this.setClaimant(document.getClaimant());
         this.setHeadAccounting(document.getHeadAccounting());
+        this.setCashAdvance(document.getCashAdvance());
     }
 
 }

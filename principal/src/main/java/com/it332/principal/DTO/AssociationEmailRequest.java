@@ -5,10 +5,8 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ExcelRequest {
-    private String userId;
+public class AssociationEmailRequest {
+    private String email;
     private String schoolId;
-    private String documentId;
-    private String month;
-    private String year;
+    private Boolean admin;
 }

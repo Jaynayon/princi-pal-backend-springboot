@@ -1,12 +1,12 @@
 package com.it332.principal.Controllers;
 
 import com.it332.principal.DTO.ErrorMessage;
-import com.it332.principal.DTO.LRRequest;
-import com.it332.principal.DTO.LRResponse;
-import com.it332.principal.Models.LR;
-import com.it332.principal.Models.LRJEV;
+import com.it332.principal.DTO.HistoryRequest;
+import com.it332.principal.DTO.HistoryResponse;
+import com.it332.principal.Models.History;
+import com.it332.principal.Security.MissingFieldException;
 import com.it332.principal.Security.NotFoundException;
-import com.it332.principal.Services.LRService;
+import com.it332.principal.Services.HistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,31 +17,36 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/lr")
-public class LRController {
+@RequestMapping("/history")
+public class HistoryController {
 
     @Autowired
-    private LRService lrService;
+    private HistoryService historyService;
 
     ErrorMessage err = new ErrorMessage("");
 
     // Endpoint to create a new LR document
     @PostMapping("/create")
-    public ResponseEntity<Object> saveRecord(@RequestBody @Valid LRRequest lr) {
+    public ResponseEntity<Object> saveHistory(@RequestBody @Valid HistoryRequest req) {
         try {
             // Debugging: Print LRRequest details for inspection
-            System.out.println("Received LRRequest: " + lr.getDate());
+            System.out.println("Received Request: " + req);
 
-            LR savedLR = lrService.saveLR(lr);
-            return new ResponseEntity<>(savedLR, HttpStatus.CREATED);
+            History savedHistory = historyService.createHistory(req);
+            return new ResponseEntity<>(savedHistory, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
-            err.setMessage("Failed to create LR: " + e.getMessage());
+            err.setMessage("Failed to create History: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(err);
         } catch (NotFoundException e) {
             // This exception is thrown when a no school is detected
-            err.setMessage("Failed to get LR: " + e.getMessage());
+            err.setMessage("Failed to get History: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (MissingFieldException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get History: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(err);
         } catch (Exception e) {
@@ -56,70 +61,15 @@ public class LRController {
     // Endpoint to retrieve all LR documents
     @GetMapping("/all")
     public ResponseEntity<Object> getAllLRs() {
-        List<LR> lrList = lrService.getAllLRs();
-        return new ResponseEntity<>(lrList, HttpStatus.OK);
+        List<History> historyList = historyService.getAllHistories();
+        return new ResponseEntity<>(historyList, HttpStatus.OK);
     }
 
-    // Endpoint to retrieve all LR documents
-    @GetMapping("/keyword/{keyword}")
-    public ResponseEntity<Object> getRecords(@PathVariable String details) {
-        List<LR> lrList = lrService.getLRByKeyword(details);
-        return new ResponseEntity<>(lrList, HttpStatus.OK);
-    }
-
-    @GetMapping("/documents/{documentsId}/approved")
-    public ResponseEntity<Object> getAllApprovedLRsByDocumentsId(@PathVariable String documentsId) {
+    @GetMapping("/documents/{documentsId}")
+    public ResponseEntity<Object> getAllHistoryByDocumentsId(@PathVariable String documentsId) {
         try {
-            List<LRResponse> lrList = lrService.getAllApprovedLRsByDocumentsId(documentsId);
-            return new ResponseEntity<>(lrList, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            // This exception is thrown when a duplicate document is detected
-            err.setMessage("Failed to get LR JEV: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(err);
-        } catch (NotFoundException e) {
-            // This exception is thrown when a no school is detected
-            err.setMessage("Failed to get LR JEV: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(err);
-        } catch (Exception e) {
-            // Catching any other unexpected exceptions
-            e.printStackTrace();
-            err.setMessage("Internal server error occurred");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(err);
-        }
-    }
-
-    @GetMapping("/documents/{documentsId}/unapproved")
-    public ResponseEntity<Object> getAllNotApprovedLRsByDocumentsId(@PathVariable String documentsId) {
-        try {
-            List<LRResponse> lrList = lrService.getAllNotApprovedLRsByDocumentsId(documentsId);
-            return new ResponseEntity<>(lrList, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            // This exception is thrown when a duplicate document is detected
-            err.setMessage("Failed to get LR JEV: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(err);
-        } catch (NotFoundException e) {
-            // This exception is thrown when a no school is detected
-            err.setMessage("Failed to get LR JEV: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(err);
-        } catch (Exception e) {
-            // Catching any other unexpected exceptions
-            e.printStackTrace();
-            err.setMessage("Internal server error occurred");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(err);
-        }
-    }
-
-    @GetMapping("/jev/documents/{documentsId}")
-    public ResponseEntity<Object> getAllJEVsByDocumentsId(@PathVariable String documentsId) {
-        try {
-            List<LRJEV> lrList = lrService.getJEVByDocumentsId(documentsId);
-            return new ResponseEntity<>(lrList, HttpStatus.OK);
+            List<HistoryResponse> historyList = historyService.getHistoryByDocumentsId(documentsId);
+            return new ResponseEntity<>(historyList, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
             err.setMessage("Failed to get LR: " + e.getMessage());
@@ -139,12 +89,11 @@ public class LRController {
         }
     }
 
-    // Endpoint to retrieve an LR document by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Object> getLRById(@PathVariable String id) {
+    @GetMapping("/lr/{lrId}")
+    public ResponseEntity<Object> getAllHistoryByLrId(@PathVariable String lrId) {
         try {
-            LR lr = lrService.getLRById(id);
-            return new ResponseEntity<>(lr, HttpStatus.OK);
+            List<HistoryResponse> historyList = historyService.getHistoryByLrId(lrId);
+            return new ResponseEntity<>(historyList, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
             err.setMessage("Failed to get LR: " + e.getMessage());
@@ -164,20 +113,19 @@ public class LRController {
         }
     }
 
-    // Endpoint to update an existing LR document
-    @PatchMapping("/{id}")
-    public ResponseEntity<Object> updateLR(@PathVariable String id, @RequestBody @Valid LRRequest updatedLR) {
+    @GetMapping("/lr/{lrId}/last")
+    public ResponseEntity<Object> getLastHistoryByLrId(@PathVariable String lrId) {
         try {
-            LR updatedEntity = lrService.updateLR(id, updatedLR);
-            return ResponseEntity.ok(updatedEntity);
+            HistoryResponse historyList = historyService.getLastHistoryByLrId(lrId);
+            return new ResponseEntity<>(historyList, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
-            err.setMessage("Failed to patch LR: " + e.getMessage());
+            err.setMessage("Failed to get LR: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(err);
         } catch (NotFoundException e) {
             // This exception is thrown when a no school is detected
-            err.setMessage("Failed to patch LR: " + e.getMessage());
+            err.setMessage("Failed to get LR: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(err);
         } catch (Exception e) {
@@ -190,10 +138,10 @@ public class LRController {
     }
 
     // Endpoint to delete an LR document by ID
-    @DeleteMapping("/{id}/user/{userId}")
-    public ResponseEntity<Object> deleteLR(@PathVariable String id, @PathVariable String userId) {
+    @DeleteMapping("/lr/{lrId}")
+    public ResponseEntity<Object> deleteHistoryByLRId(@PathVariable String lrId) {
         try {
-            lrService.deleteLRById(id, userId);
+            historyService.deleteHistoryByLrId(lrId);
             return ResponseEntity.noContent().build(); // Return 204 No Content on successful deletion
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
@@ -213,4 +161,5 @@ public class LRController {
                     .body(err);
         }
     }
+
 }

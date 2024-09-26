@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.it332.principal.DTO.UserAdminRequest;
 
-@Document(collection = "users")
+@Document(collection = "Users")
 public class User {
     @Id
     private String id;
