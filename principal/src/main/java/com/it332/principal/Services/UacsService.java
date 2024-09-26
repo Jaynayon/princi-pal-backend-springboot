@@ -52,6 +52,16 @@ public class UacsService {
         return entity;
     }
 
+    public Uacs getUacsByCodeOrName(String codeOrName) {
+        Uacs uacs = uacsRepository.findByCode(codeOrName);
+
+        if (uacs == null) {
+            uacs = getUacsByName(codeOrName); // throws an exception if null
+        }
+
+        return uacs;
+    }
+
     public List<Uacs> getAllUacs() {
         return uacsRepository.findAll();
     }
