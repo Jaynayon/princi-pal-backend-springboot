@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin(origins = "https://localhost:3000")
+@CrossOrigin(origins = "https://localhost:3000")
 @RequestMapping("/authenticate")
 public class AuthenticationController {
 
@@ -42,6 +43,7 @@ public class AuthenticationController {
         }
     }
 
+    @CrossOrigin(origins = "https://localhost:3000", allowCredentials = "true")
     @PostMapping("/login")
     public ResponseEntity<Object> loginUser(@RequestBody LoginRequest loginRequest) {
         ErrorMessage err = new ErrorMessage("");
