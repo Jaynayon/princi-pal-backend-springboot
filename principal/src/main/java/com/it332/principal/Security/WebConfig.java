@@ -3,6 +3,7 @@ package com.it332.principal.Security;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.http.HttpHeaders;
 
 @Configuration
 public class WebConfig {
@@ -14,7 +15,8 @@ public class WebConfig {
                                 "https://localhost:3000") // Back & frontend domains
                         .allowCredentials(true) // Allow cookies or credentials
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Define allowed HTTP methods
-                        .allowedHeaders("*"); // Allow all headers
+                        .allowedHeaders("*") // Allow all headers
+                        .exposedHeaders(HttpHeaders.SET_COOKIE);
             }
         };
     }

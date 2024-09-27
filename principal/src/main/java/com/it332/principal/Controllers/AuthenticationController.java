@@ -42,6 +42,7 @@ public class AuthenticationController {
         }
     }
 
+    @CrossOrigin(origins = "https://localhost:3000", allowCredentials = "true")
     @PostMapping("/login")
     public ResponseEntity<Object> loginUser(@RequestBody LoginRequest loginRequest) {
         ErrorMessage err = new ErrorMessage("");
