@@ -88,7 +88,7 @@ public class AuthenticationController {
                 // .httpOnly(true) // Make the cookie accessible only via HTTP (not accessible
                 // via JavaScript)
                 .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds = 1 day)
-                .sameSite("None")
+                .sameSite("Lax")
                 .secure(true)
                 .path("/") // Set the cookie path to root ("/") so that it's accessible across the entire
                            // domain
