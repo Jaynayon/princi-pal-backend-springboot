@@ -49,19 +49,19 @@ public class UserService {
 
     @Transactional
     public User createUser(User user) {
-        // Check if position is existent
-        Position exist = positionService.getPositionByName(user.getPosition());
-
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-
         // special case for creating super admin account
         if (user.getUsername().equals("administrator")) {
             user.setPosition("Super administrator");
         } else {
+            // Check if position is existent
+            Position exist = positionService.getPositionByName(user.getPosition());
             // insert position name to user
             user.setPosition(exist.getName());
         }
+
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
         return userRepository.save(user);
     }
 
