@@ -55,8 +55,13 @@ public class UserService {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
 
-        // insert position name to user
-        user.setPosition(exist.getName());
+        // special case for creating super admin account
+        if (user.getUsername().equals("administrator")) {
+            user.setPosition("Super administrator");
+        } else {
+            // insert position name to user
+            user.setPosition(exist.getName());
+        }
         return userRepository.save(user);
     }
 
