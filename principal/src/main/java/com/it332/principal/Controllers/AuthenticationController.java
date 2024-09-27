@@ -7,9 +7,9 @@ import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
+// import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
+// import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://localhost:3000")
 @RequestMapping("/authenticate")
 public class AuthenticationController {
 
@@ -54,15 +54,17 @@ public class AuthenticationController {
                 String token = userService.generateToken(userId);
 
                 // Set the token as a cookie in the response
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(HttpHeaders.SET_COOKIE, createJwtCookie(token).toString());
+                // HttpHeaders headers = new HttpHeaders();
+                // headers.add(HttpHeaders.SET_COOKIE, createJwtCookie(token).toString());
 
+                // return ResponseEntity.status(HttpStatus.OK)
+                // .headers(headers)
+                // .body(new LoginResponse(true));
                 return ResponseEntity.status(HttpStatus.OK)
-                        .headers(headers)
-                        .body(new LoginResponse(true));
+                        .body(new LoginResponse(true, token));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED) // Unauthorized
-                    .body(new LoginResponse(false));
+                    .body(new LoginResponse());
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate school name is detected
             err.setMessage("Failed to get user: " + e.getMessage());
@@ -82,28 +84,41 @@ public class AuthenticationController {
         }
     }
 
-    private ResponseCookie createJwtCookie(String token) {
-        return ResponseCookie.from("jwt", token)
-                // .httpOnly(true) // Make the cookie accessible only via HTTP (not accessible
-                // via JavaScript)
-                .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds = 1 day)
-                .sameSite("Lax")
-                .secure(false)
-                .path("/") // Set the cookie path to root ("/") so that it's accessible across the entire
-                           // domain
-                .build();
-    }
+    // private ResponseCookie createJwtCookie(String token) {
+    // return ResponseCookie.from("jwt", token)
+    // // .httpOnly(true) // Make the cookie accessible only via HTTP (not
+    // accessible
+    // // via JavaScript)
+    // .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds
+    // = 1 day)
+    // .sameSite("Lax")
+    // .secure(false)
+    // .path("/") // Set the cookie path to root ("/") so that it's accessible
+    // across the entire
+    // // domain
+    // .build();
+    // }
 
     // Class representing login response (isMatch)
     static class LoginResponse {
         private boolean isMatch = false;
+        private String token;
 
         // Constructor
-        public LoginResponse(boolean isMatch) {
+        public LoginResponse(boolean isMatch, String token) {
             this.isMatch = isMatch;
+            this.token = token;
         }
 
         public LoginResponse() {
+        }
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
         }
 
         public boolean getIsMatch() {

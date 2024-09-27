@@ -27,7 +27,7 @@ import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UserService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://localhost:3000")
 @RequestMapping("/users")
 public class UserController {
 

@@ -24,7 +24,7 @@ import com.it332.principal.Models.Association;
 import com.it332.principal.Services.AssociationService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://localhost:3000")
 @RequestMapping("/associations")
 public class AssociationController {
 
@@ -140,30 +140,38 @@ public class AssociationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
     }
 
-    /*@PostMapping("/invite")
-    public ResponseEntity<Association> inviteUserToAssociation(@RequestBody AssociationIdRequest association) {
-        // Assuming the association object contains the necessary information to invite
-        // a user
-        Association updatedAssociation = associationService.inviteUserToAssociation(association);
-        return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
-    }*/
-
+    /*
+     * @PostMapping("/invite")
+     * public ResponseEntity<Association> inviteUserToAssociation(@RequestBody
+     * AssociationIdRequest association) {
+     * // Assuming the association object contains the necessary information to
+     * invite
+     * // a user
+     * Association updatedAssociation =
+     * associationService.inviteUserToAssociation(association);
+     * return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
+     * }
+     */
 
     // working invite
-    /* 
-    @PostMapping("/invite")
-    public ResponseEntity<?> inviteUserToAssociation(@RequestBody AssociationIdRequest association) {
-    try {
-        Association updatedAssociation = associationService.inviteUserToAssociation(association);
-        return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error processing invitation: " + e.getMessage());
-    }
-}*/
+    /*
+     * @PostMapping("/invite")
+     * public ResponseEntity<?> inviteUserToAssociation(@RequestBody
+     * AssociationIdRequest association) {
+     * try {
+     * Association updatedAssociation =
+     * associationService.inviteUserToAssociation(association);
+     * return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
+     * } catch (Exception e) {
+     * return ResponseEntity.status(HttpStatus.BAD_REQUEST).
+     * body("Error processing invitation: " + e.getMessage());
+     * }
+     * }
+     */
 
     @PostMapping("/invite")
     public ResponseEntity<?> inviteUserToAssociation(@RequestBody AssociationEmailRequest associationRequest) {
-        
+
         try {
             // Call the service to invite the user
             Association newAssociation = associationService.inviteUserToAssociation(associationRequest);
@@ -181,42 +189,48 @@ public class AssociationController {
         }
     }
 
-    /*@PostMapping("/accept")
-    public ResponseEntity<?> acceptUserToSchool(@RequestBody AssociationIdRequest associationRequest) {
-        try {
-            // Call the service to accept the user
-            Association acceptedAssociation = associationService.acceptUserToSchool(associationRequest);
-
-            // Return the accepted association with status 200 (OK)
-            return ResponseEntity.ok(acceptedAssociation);
-        } catch (IllegalStateException e) {
-            // Return a conflict if no application is found or the user is already approved/invited
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception e) {
-            // Return an internal server error for unexpected cases
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error accepting user to school.");
-        }
-    }*/
+    /*
+     * @PostMapping("/accept")
+     * public ResponseEntity<?> acceptUserToSchool(@RequestBody AssociationIdRequest
+     * associationRequest) {
+     * try {
+     * // Call the service to accept the user
+     * Association acceptedAssociation =
+     * associationService.acceptUserToSchool(associationRequest);
+     * 
+     * // Return the accepted association with status 200 (OK)
+     * return ResponseEntity.ok(acceptedAssociation);
+     * } catch (IllegalStateException e) {
+     * // Return a conflict if no application is found or the user is already
+     * approved/invited
+     * return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+     * } catch (Exception e) {
+     * // Return an internal server error for unexpected cases
+     * return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
+     * body("Error accepting user to school.");
+     * }
+     * }
+     */
 
     @GetMapping("/applications/{schoolId}")
-public ResponseEntity<List<UserAssociation>> getApplicationsForSchool(@PathVariable String schoolId) {
-    // Fetch applications using the updated service method
-    List<UserAssociation> applications = associationService.getApplicationsForSchool(schoolId);
+    public ResponseEntity<List<UserAssociation>> getApplicationsForSchool(@PathVariable String schoolId) {
+        // Fetch applications using the updated service method
+        List<UserAssociation> applications = associationService.getApplicationsForSchool(schoolId);
 
-    if (applications.isEmpty()) {
-        return ResponseEntity.noContent().build(); // No applications
+        if (applications.isEmpty()) {
+            return ResponseEntity.noContent().build(); // No applications
+        }
+
+        return ResponseEntity.ok(applications);
     }
 
-    return ResponseEntity.ok(applications);
-}
-
-@GetMapping("/user/{userId}")
-public ResponseEntity<List<Association>> getAssociationsByUserId(@PathVariable String userId) {
-    List<Association> associations = associationService.getAssociationsByUserId(userId);
-    if (associations.isEmpty()) {
-        return ResponseEntity.noContent().build();  // No associations found for this user
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Association>> getAssociationsByUserId(@PathVariable String userId) {
+        List<Association> associations = associationService.getAssociationsByUserId(userId);
+        if (associations.isEmpty()) {
+            return ResponseEntity.noContent().build(); // No associations found for this user
+        }
+        return ResponseEntity.ok(associations);
     }
-    return ResponseEntity.ok(associations);
-}
 
 }
