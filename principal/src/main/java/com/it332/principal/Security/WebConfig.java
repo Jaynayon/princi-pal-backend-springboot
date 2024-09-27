@@ -11,7 +11,7 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("https://principals.engineer",
-                                "http://localhost:3000") // Back & frontend domains
+                                "https://localhost:3000") // Back & frontend domains
                         .allowCredentials(true) // Allow cookies or credentials
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Define allowed HTTP methods
                         .allowedHeaders("*"); // Allow all headers
