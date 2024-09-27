@@ -88,7 +88,7 @@ public class AuthenticationController {
                 // via JavaScript)
                 .maxAge(86400) // Set cookie expiration time in seconds (e.g., 86400 seconds = 1 day)
                 .sameSite("None")
-                .secure(true)
+                // .secure(true)
                 .path("/") // Set the cookie path to root ("/") so that it's accessible across the entire
                            // domain
                 .build();
