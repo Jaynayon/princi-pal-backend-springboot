@@ -20,7 +20,7 @@ import com.it332.principal.Services.NotificationService;
 import com.it332.principal.Security.NotFoundException;
 
 @RestController
-@RequestMapping("/Notifications")
+@RequestMapping("/api/Notifications")
 public class NotificationController {
 
     @Autowired

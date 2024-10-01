@@ -28,7 +28,7 @@ import com.it332.principal.Services.UserService;
 
 @RestController
 @CrossOrigin(origins = "https://localhost:3000")
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired

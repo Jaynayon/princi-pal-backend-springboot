@@ -23,7 +23,7 @@ import com.it332.principal.Services.AssociationService;
 
 @RestController
 @CrossOrigin(origins = "https://localhost:3000")
-@RequestMapping("/associations")
+@RequestMapping("/api/associations")
 public class AssociationController {
 
     @Autowired

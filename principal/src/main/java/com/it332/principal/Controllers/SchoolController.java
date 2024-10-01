@@ -24,7 +24,7 @@ import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.SchoolService;
 
 @RestController
-@RequestMapping("/schools")
+@RequestMapping("/api/schools")
 public class SchoolController {
 
     @Autowired

@@ -41,7 +41,7 @@ public class ExportController {
     @Autowired
     private ExportRCDService exportRCDService;
 
-    @PostMapping("/downloadExcel")
+    @PostMapping("/api/downloadExcel")
     public ResponseEntity<byte[]> downloadExcel(@RequestBody ExcelRequest request) {
         try {
             // Generate Excel file content as byte array
