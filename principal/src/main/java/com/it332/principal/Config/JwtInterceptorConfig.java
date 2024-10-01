@@ -15,8 +15,13 @@ public class JwtInterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // Define paths to exclude
+        String[] excludedPaths = { "/api/users/create", "/api/users/exists" };
+
         // Apply the JWT interceptor to API routes only
-        registry.addInterceptor(jwtInterceptor).addPathPatterns("/api/**");
+        registry.addInterceptor(jwtInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(excludedPaths);
     }
 
 }
