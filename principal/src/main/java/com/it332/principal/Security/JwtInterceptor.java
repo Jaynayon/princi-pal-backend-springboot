@@ -11,7 +11,6 @@ import com.it332.principal.Models.User;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-// import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
@@ -45,9 +44,6 @@ public class JwtInterceptor implements HandlerInterceptor {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     user, null, null); // Assuming no roles/authorities for simplicity
 
-            // authToken.setDetails(new
-            // WebAuthenticationDetailsSource().buildDetails(request));
-
             // additional details
             authToken.setDetails(request.getRemoteAddr());
 
@@ -56,7 +52,6 @@ public class JwtInterceptor implements HandlerInterceptor {
             throw new BadCredentialsException("Invalid token or user not found");
         }
 
-        System.out.println("pre handle test");
         return true;
     }
 
