@@ -15,11 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-
-import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Notification;
-import com.it332.principal.Repository.NotificationRepository;
-import com.it332.principal.Services.AssociationService;
 import com.it332.principal.Services.NotificationService;
 import com.it332.principal.Security.NotFoundException;
 
@@ -30,13 +26,6 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    @Autowired
-    private NotificationRepository notificationRepository;
-
-    @Autowired
-    private AssociationService associationService;
-
-    
     @GetMapping("/all")
     public ResponseEntity<List<Notification>> getAllNotifications() {
         List<Notification> notifications = notificationService.getAllNotifications();
@@ -58,20 +47,15 @@ public class NotificationController {
         try {
             // Check if the notification is an invitation
             boolean isInvitation = notification.getDetails().toLowerCase().contains("invited");
-            
+
             // Set the button flag based on whether it's an invitation
             notification.setHasButtons(isInvitation);
-    
+
             Notification createdNotification = notificationService.createNotification(notification);
             return new ResponseEntity<>(createdNotification, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-    
-
-    public NotificationController(AssociationService associationService) {
-        this.associationService = associationService;
     }
 
     @PutMapping("/accept/{id}")
@@ -85,7 +69,6 @@ public class NotificationController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @PutMapping("/reject/{id}")
     public ResponseEntity<Notification> rejectNotification(@PathVariable("id") String id) {
@@ -110,7 +93,7 @@ public class NotificationController {
     public ResponseEntity<List<Notification>> getNotificationsByUserAssociations(@PathVariable String userId) {
         // Fetch notifications through user's associations
         List<Notification> notifications = notificationService.getNotificationsByUserAssociations(userId);
-        
+
         if (notifications.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -144,18 +127,18 @@ public class NotificationController {
         }
     }
 
-     // Endpoint to delete a notification based on the notificationId
-     @DeleteMapping("/{notificationId}")
-     public ResponseEntity<String> deleteNotification(@PathVariable String notificationId) {
-         try {
-             // Call the service method to delete the notification
-             notificationService.deleteNotification(notificationId);
- 
-             // Return a success response
-             return ResponseEntity.ok("Notification with ID " + notificationId + " has been deleted.");
-         } catch (IllegalArgumentException e) {
-             // Return a bad request response if there's an error
-             return ResponseEntity.badRequest().body(e.getMessage());
-         }
-     }
+    // Endpoint to delete a notification based on the notificationId
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<String> deleteNotification(@PathVariable String notificationId) {
+        try {
+            // Call the service method to delete the notification
+            notificationService.deleteNotification(notificationId);
+
+            // Return a success response
+            return ResponseEntity.ok("Notification with ID " + notificationId + " has been deleted.");
+        } catch (IllegalArgumentException e) {
+            // Return a bad request response if there's an error
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
