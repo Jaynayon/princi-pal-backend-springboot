@@ -77,7 +77,7 @@ public class ExportController {
         }
     }
 
-    @PostMapping("/downloadZip")
+    @PostMapping("/api/downloadZip")
     public ResponseEntity<byte[]> downloadZip(@RequestBody ExcelRequest request) {
         try {
             // Create a ByteArrayOutputStream to hold the zip content
