@@ -77,6 +77,13 @@ public class AssociationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
     }
 
+    @DeleteMapping("/reject")
+    public ResponseEntity<Void> rejectUserFromAssociation(@RequestBody AssociationIdRequest association) {
+        associationService.rejectUserFromAssociation(association);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+
     @PostMapping("/approve/{notificationId}")
     public ResponseEntity<?> approveInvitation(
             @PathVariable String notificationId) {

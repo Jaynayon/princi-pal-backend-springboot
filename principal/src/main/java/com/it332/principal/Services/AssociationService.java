@@ -291,7 +291,28 @@ public class AssociationService extends Exception {
     
         // Save the updated association
         return associationRepository.save(existingAssociation);
-    }    
+    }  
+    
+    public void rejectUserFromAssociation(AssociationIdRequest associationRequest) {
+        // Check if the school exists
+        School existingSchool = schoolService.getSchoolById(associationRequest.getSchoolId());
+    
+        // Check if the user exists
+        UserResponse existingUser = userService.getUserAssociationsById(associationRequest.getUserId());
+    
+        // Check if the association exists where the user has applied but not yet approved or invited
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserIdAndApprovedFalseAndInvitationFalse(
+                existingSchool.getId(), existingUser.getId());
+    
+        // Handle the case where no association exists
+        if (existingAssociation == null) {
+            throw new IllegalStateException("No application found for this user or user already invited/approved.");
+        }
+    
+        // Delete the association
+        associationRepository.delete(existingAssociation);
+    }
+    
 
     public Association approveInvitation(String notificationId) {
         // Validate and fetch the notification
