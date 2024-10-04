@@ -4,11 +4,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.stream.Stream;
 
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Notification;
@@ -24,9 +22,6 @@ public class NotificationService {
     @Autowired
     private AssociationService associationService;
 
-    @Autowired
-    private UserService userService;
-
     public List<Notification> getAllNotifications() {
         return notificationRepository.findAll();
     }
@@ -39,7 +34,7 @@ public class NotificationService {
     public Notification createNotification(Notification notification) {
         return notificationRepository.save(notification);
     }
-    
+
     public void deleteNotificationsByUser(String userId) {
         try {
             notificationRepository.deleteByUserId(userId);
@@ -49,13 +44,12 @@ public class NotificationService {
             throw new RuntimeException("Failed to delete notifications for user ID: " + userId, e);
         }
     }
-    
 
     public void deleteNotification(String id) {
         // Fetch and validate the notification
         Notification notification = notificationRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + id));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + id));
+
         // Delete the notification
         notificationRepository.delete(notification);
     }
@@ -63,9 +57,10 @@ public class NotificationService {
     public String getAssociationId(String id) throws NotFoundException {
         // Retrieve the notification by its ID from the repository
         Notification notification = notificationRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Notification not found"));
+                .orElseThrow(() -> new NotFoundException("Notification not found"));
 
-        // Assuming `getAssociationId` is a method in Notification or has a field `associationId`
+        // Assuming `getAssociationId` is a method in Notification or has a field
+        // `associationId`
         return notification.getAssocId(); // This method or field should exist in Notification
     }
 
@@ -76,20 +71,19 @@ public class NotificationService {
             if (notification == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found");
             }
-    
+
             // Update notification fields
             notification.setAccepted(true);
             notification.setRejected(false); // Ensure rejection flag is reset
             notification.setHasButtons(false); // Disable the button
             notification.setDetails("You accepted the invitation to join the association");
-    
+
             // Save the updated notification
             return notificationRepository.save(notification);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating notification", e);
         }
     }
-    
 
     public Notification rejectNotification(String id) {
         try {
@@ -104,12 +98,10 @@ public class NotificationService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating notification", e);
         }
     }
-    
 
     public List<Notification> getNotificationsByUserId(String userId) {
         return notificationRepository.findByUserId(userId);
     }
-
 
     // Method to get notifications for a specific school
     public List<Notification> getNotificationsBySchool(String schoolId) {
@@ -123,36 +115,36 @@ public class NotificationService {
 
         // Collect all association IDs
         List<String> assocId = associations.stream()
-                                             .map(Association::getId)
-                                             .collect(Collectors.toList());
+                .map(Association::getId)
+                .collect(Collectors.toList());
 
         // Retrieve notifications for the collected association IDs
         return notificationRepository.findByAssocIdIn(assocId);
     }
 
-   public List<Notification> getNotificationsByUserIdThroughAssociations(String userId) {
-    // Get notifications for the user directly
-    List<Notification> notifications = getNotificationsByUserId(userId);
+    public List<Notification> getNotificationsByUserIdThroughAssociations(String userId) {
+        // Get notifications for the user directly
+        List<Notification> notifications = getNotificationsByUserId(userId);
 
-    // Get notifications for associations
-    List<Notification> associationNotifications = getNotificationsByUserAssociations(userId);
+        // Get notifications for associations
+        List<Notification> associationNotifications = getNotificationsByUserAssociations(userId);
 
-    // Use a Map to remove duplicates by notification ID
-    Map<String, Notification> notificationMap = new HashMap<>();
+        // Use a Map to remove duplicates by notification ID
+        Map<String, Notification> notificationMap = new HashMap<>();
 
-    // Add direct user notifications to the map
-    for (Notification notification : notifications) {
-        notificationMap.put(notification.getId(), notification);
+        // Add direct user notifications to the map
+        for (Notification notification : notifications) {
+            notificationMap.put(notification.getId(), notification);
+        }
+
+        // Add association notifications to the map, overriding duplicates
+        for (Notification notification : associationNotifications) {
+            notificationMap.put(notification.getId(), notification);
+        }
+
+        // Return a combined list of unique notifications
+        return new ArrayList<>(notificationMap.values());
     }
-
-    // Add association notifications to the map, overriding duplicates
-    for (Notification notification : associationNotifications) {
-        notificationMap.put(notification.getId(), notification);
-    }
-
-    // Return a combined list of unique notifications
-    return new ArrayList<>(notificationMap.values());
-}
 
     // Method to create a notification if balance exceeds the budget
     public void checkAndNotify(double balance, double budget, String userId) {

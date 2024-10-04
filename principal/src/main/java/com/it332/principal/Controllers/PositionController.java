@@ -15,7 +15,7 @@ import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.PositionService;
 
 @RestController
-@RequestMapping("/positions")
+@RequestMapping("/api/positions")
 public class PositionController {
 
     @Autowired

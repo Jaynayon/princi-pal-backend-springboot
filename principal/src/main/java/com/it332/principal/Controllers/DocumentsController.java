@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 @RestController
 @CrossOrigin(origins = "https://localhost:3000")
-@RequestMapping("/documents")
+@RequestMapping("/api/documents")
 public class DocumentsController {
 
     @Autowired

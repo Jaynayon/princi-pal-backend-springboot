@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "https://localhost:3000")
-@RequestMapping("/jev")
+@RequestMapping("/api/jev")
 public class JEVController {
 
     @Autowired

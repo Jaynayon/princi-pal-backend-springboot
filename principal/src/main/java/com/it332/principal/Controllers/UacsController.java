@@ -23,7 +23,7 @@ import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UacsService;
 
 @RestController
-@RequestMapping("/uacs")
+@RequestMapping("/api/uacs")
 public class UacsController {
 
     @Autowired
