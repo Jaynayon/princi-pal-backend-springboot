@@ -145,17 +145,4 @@ public class NotificationService {
         // Return a combined list of unique notifications
         return new ArrayList<>(notificationMap.values());
     }
-
-    // Method to create a notification if balance exceeds the budget
-    public void checkAndNotify(double balance, double budget, String userId) {
-        if (balance > budget) {
-            Notification notification = new Notification();
-            notification.setUserId(userId);
-            notification.setAssocId(null); // Set if needed
-            notification.setDetails("Your balance of " + balance + " exceeds the budget of " + budget + ".");
-            notification.setAccepted(false);
-            notification.setRejected(false);
-            createNotification(notification);
-        }
-    }
 }

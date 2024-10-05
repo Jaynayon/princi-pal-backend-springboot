@@ -9,8 +9,6 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     
     List<Notification> findByUserId(String userId);
 
-    // Find notifications by read status and acceptance status
-
     // Find notifications by rejection status
     List<Notification> findByUserIdAndIsRejected(String userId, boolean isRejected);
 

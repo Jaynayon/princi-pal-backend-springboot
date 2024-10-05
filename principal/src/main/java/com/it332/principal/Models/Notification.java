@@ -2,6 +2,7 @@ package com.it332.principal.Models;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.Date;
 
 @Document(collection = "Notifications")
 public class Notification {
@@ -13,20 +14,18 @@ public class Notification {
     private String details;
     private boolean isAccepted;
     private boolean isRejected;
-    private Double balance;
-    private Double budget;
+    private Date timestamp;
     private Boolean hasButtons;
 
     public Notification() {
     }
 
-    public Notification(String userId, String assocId, String schoolId, String details, Double balance, Double budget) {
+    public Notification(String userId, String assocId, String schoolId, String details, Date timestamp) {
         this.userId = userId;
         this.assocId = assocId;
         this.schoolId = schoolId;
         this.details = details;
-        this.balance = balance;
-        this.budget = budget;
+        this.timestamp = timestamp;
     }
 
     public String getId() {
@@ -85,20 +84,12 @@ public class Notification {
         isRejected = rejected;
     }
 
-    public Double getBalance() {
-        return balance;
+    public Date getTimestamp() {
+        return timestamp;
     }
-
-    public void setBalance(Double balance) {
-        this.balance = balance;
-    }
-
-    public Double getBudget() {
-        return budget;
-    }
-
-    public void setBudget(Double budget) {
-        this.budget = budget;
+    
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Boolean getHasButtons() {
@@ -118,8 +109,7 @@ public class Notification {
                 ", details='" + details + '\'' +
                 ", isAccepted=" + isAccepted +
                 ", isRejected=" + isRejected +
-                ", balance=" + balance +
-                ", budget=" + budget +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }
