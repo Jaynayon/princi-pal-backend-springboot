@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.it332.principal.DTO.NotificationRequest;
 import com.it332.principal.Models.Notification;
 import com.it332.principal.Services.NotificationService;
 import com.it332.principal.Security.NotFoundException;
@@ -32,25 +33,34 @@ public class NotificationController {
         return ResponseEntity.ok().body(notifications);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
+    // Gets notifications on a SINGLE school
+    @GetMapping("/user/{userId}/school/{schoolId}")
+    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId,
+            @PathVariable String schoolId) {
         try {
-            List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
+            List<Notification> notifications = notificationService.getNotificationsByUserId(userId, schoolId);
             return ResponseEntity.ok().body(notifications);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
+    // Gets notifications of ALL the schools user is affiliated
+    @GetMapping("/{userId}/associations")
+    public ResponseEntity<List<Notification>> getNotificationsByUserAssociations(@PathVariable String userId) {
+        // Fetch notifications through user's associations
+        List<Notification> notifications = notificationService.getNotificationsByUserAssociations(userId);
+
+        if (notifications.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(notifications);
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
+    public ResponseEntity<Notification> createNotification(@RequestBody NotificationRequest notification) {
         try {
-            // Check if the notification is an invitation
-            boolean isInvitation = notification.getDetails().toLowerCase().contains("invited");
-
-            // Set the button flag based on whether it's an invitation
-            notification.setHasButtons(isInvitation);
-
             Notification createdNotification = notificationService.createNotification(notification);
             return new ResponseEntity<>(createdNotification, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -84,39 +94,13 @@ public class NotificationController {
         }
     }
 
-    @GetMapping("/school/{schoolId}")
-    public List<Notification> getNotificationsForSchool(@PathVariable String schoolId) {
-        return notificationService.getNotificationsBySchool(schoolId);
-    }
-
-    @GetMapping("/{userId}/associations")
-    public ResponseEntity<List<Notification>> getNotificationsByUserAssociations(@PathVariable String userId) {
-        // Fetch notifications through user's associations
-        List<Notification> notifications = notificationService.getNotificationsByUserAssociations(userId);
-
-        if (notifications.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(notifications);
-    }
-
-    @GetMapping("/user/{userId}/all")
-    public ResponseEntity<List<Notification>> getNotificationsByUserIdThroughAssociations(
-            @PathVariable String userId) {
-        try {
-            List<Notification> notifications = notificationService.getNotificationsByUserIdThroughAssociations(userId);
-            return ResponseEntity.ok(notifications);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
-        }
-    }
-
-    @DeleteMapping("/user/{userId}")
-    public ResponseEntity<String> deleteNotificationsByUser(@PathVariable String userId) {
+    // Deletes all user's notifications
+    @DeleteMapping("/user/{userId}/school/{schoolId}")
+    public ResponseEntity<String> deleteNotificationsByUser(@PathVariable String userId,
+            @PathVariable String schoolId) {
         try {
             // Call the service method to delete notifications
-            notificationService.deleteNotificationsByUser(userId);
+            notificationService.deleteNotificationsByUser(userId, schoolId);
 
             // Return a success response
             return ResponseEntity.ok("Notifications for user ID " + userId + " have been deleted.");
@@ -141,4 +125,23 @@ public class NotificationController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    // @GetMapping("/school/{schoolId}") (Not needed/used)
+    // public List<Notification> getNotificationsForSchool(@PathVariable String
+    // schoolId) {
+    // return notificationService.getNotificationsBySchool(schoolId);
+    // }
+
+    // @GetMapping("/user/{userId}/all") (Redundant)
+    // public ResponseEntity<List<Notification>>
+    // getNotificationsByUserIdThroughAssociations(
+    // @PathVariable String userId) {
+    // try {
+    // List<Notification> notifications =
+    // notificationService.getNotificationsByUserIdThroughAssociations(userId);
+    // return ResponseEntity.ok(notifications);
+    // } catch (Exception e) {
+    // return ResponseEntity.status(500).body(null);
+    // }
+    // }
 }

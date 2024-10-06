@@ -8,8 +8,6 @@ import java.util.Date;
 public class Notification {
     @Id
     private String id;
-    private String userId;
-    private String schoolId;
     private String assocId;
     private String details;
     private boolean isAccepted;
@@ -20,12 +18,16 @@ public class Notification {
     public Notification() {
     }
 
-    public Notification(String userId, String assocId, String schoolId, String details, Date timestamp) {
-        this.userId = userId;
+    public Notification(String assocId, String details, Date timestamp) {
         this.assocId = assocId;
-        this.schoolId = schoolId;
         this.details = details;
         this.timestamp = timestamp;
+    }
+
+    public Notification(String assocId, String details) {
+        this.assocId = assocId;
+        this.details = details;
+        this.timestamp = new Date();
     }
 
     public String getId() {
@@ -36,28 +38,12 @@ public class Notification {
         this.id = id;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     public String getAssocId() {
         return assocId;
     }
 
     public void setAssocId(String assocId) {
         this.assocId = assocId;
-    }
-
-    public String getSchoolId() {
-        return schoolId;
-    }
-
-    public void setSchoolId(String schoolId) {
-        this.schoolId = schoolId;
     }
 
     public String getDetails() {
@@ -87,7 +73,7 @@ public class Notification {
     public Date getTimestamp() {
         return timestamp;
     }
-    
+
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
@@ -104,7 +90,6 @@ public class Notification {
     public String toString() {
         return "Notification{" +
                 "id='" + id + '\'' +
-                ", userId='" + userId + '\'' +
                 ", assocId='" + assocId + '\'' +
                 ", details='" + details + '\'' +
                 ", isAccepted=" + isAccepted +

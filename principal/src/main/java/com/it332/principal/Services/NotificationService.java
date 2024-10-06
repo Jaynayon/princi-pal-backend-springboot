@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.NotificationRequest;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Notification;
 import com.it332.principal.Repository.NotificationRepository;
@@ -31,13 +33,27 @@ public class NotificationService {
                 .orElseThrow(() -> new NotFoundException("Notification not found with id: " + id));
     }
 
-    public Notification createNotification(Notification notification) {
-        return notificationRepository.save(notification);
+    public Notification createNotification(NotificationRequest notification) {
+        Association existingAssociation = associationService
+                .getAssociationByUserIdAndSchoolId(
+                        new AssociationIdRequest(notification.getUserId(), notification.getSchoolId()));
+
+        // Check if the notification is an invitation
+        boolean isInvitation = notification.getDetails().toLowerCase().contains("invited");
+
+        Notification newNotification = new Notification(existingAssociation.getId(), notification.getDetails());
+
+        // Set the button flag based on whether it's an invitation
+        newNotification.setHasButtons(isInvitation);
+
+        return notificationRepository.save(newNotification);
     }
 
-    public void deleteNotificationsByUser(String userId) {
+    public void deleteNotificationsByUser(String userId, String schoolId) {
         try {
-            notificationRepository.deleteByUserId(userId);
+            Association existingAssociation = associationService
+                    .getAssociationByUserIdAndSchoolId(new AssociationIdRequest(userId, schoolId));
+            notificationRepository.deleteByAssocId(existingAssociation.getId());
         } catch (Exception e) {
             // Log the error for debugging purposes
             e.printStackTrace();
@@ -93,20 +109,24 @@ public class NotificationService {
             }
             notification.setAccepted(false); // Ensure acceptance flag is reset
             notification.setRejected(true);
+            notification.setHasButtons(false); // Disable the button
+            notification.setDetails("You rejected the invitation to join the association");
             return notificationRepository.save(notification);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating notification", e);
         }
     }
 
-    public List<Notification> getNotificationsByUserId(String userId) {
-        return notificationRepository.findByUserId(userId);
+    public List<Notification> getNotificationsByUserId(String userId, String schoolId) {
+        Association existingAssociation = associationService
+                .getAssociationByUserIdAndSchoolId(new AssociationIdRequest(userId, schoolId));
+        return notificationRepository.findByAssocId(existingAssociation.getId());
     }
 
-    // Method to get notifications for a specific school
-    public List<Notification> getNotificationsBySchool(String schoolId) {
-        return notificationRepository.findBySchoolId(schoolId);
-    }
+    // Method to get notifications for a specific school (Not)
+    // public List<Notification> getNotificationsBySchool(String schoolId) {
+    // return notificationRepository.findBySchoolId(schoolId);
+    // }
 
     // New method to get notifications through user's associations
     public List<Notification> getNotificationsByUserAssociations(String userId) {
@@ -122,27 +142,29 @@ public class NotificationService {
         return notificationRepository.findByAssocIdIn(assocId);
     }
 
-    public List<Notification> getNotificationsByUserIdThroughAssociations(String userId) {
-        // Get notifications for the user directly
-        List<Notification> notifications = getNotificationsByUserId(userId);
+    // public List<Notification> getNotificationsByUserIdThroughAssociations(String
+    // userId) {
+    // // Get notifications for the user directly
+    // List<Notification> notifications = getNotificationsByUserId(userId);
 
-        // Get notifications for associations
-        List<Notification> associationNotifications = getNotificationsByUserAssociations(userId);
+    // // Get notifications for associations
+    // List<Notification> associationNotifications =
+    // getNotificationsByUserAssociations(userId);
 
-        // Use a Map to remove duplicates by notification ID
-        Map<String, Notification> notificationMap = new HashMap<>();
+    // // Use a Map to remove duplicates by notification ID
+    // Map<String, Notification> notificationMap = new HashMap<>();
 
-        // Add direct user notifications to the map
-        for (Notification notification : notifications) {
-            notificationMap.put(notification.getId(), notification);
-        }
+    // // Add direct user notifications to the map
+    // for (Notification notification : notifications) {
+    // notificationMap.put(notification.getId(), notification);
+    // }
 
-        // Add association notifications to the map, overriding duplicates
-        for (Notification notification : associationNotifications) {
-            notificationMap.put(notification.getId(), notification);
-        }
+    // // Add association notifications to the map, overriding duplicates
+    // for (Notification notification : associationNotifications) {
+    // notificationMap.put(notification.getId(), notification);
+    // }
 
-        // Return a combined list of unique notifications
-        return new ArrayList<>(notificationMap.values());
-    }
+    // // Return a combined list of unique notifications
+    // return new ArrayList<>(notificationMap.values());
+    // }
 }
