@@ -123,11 +123,15 @@ public class NotificationService {
     }
 
     public List<Notification> getNotificationsByUserIdThroughAssociations(String userId) {
-        // Get notifications for the user directly
-        List<Notification> notifications = getNotificationsByUserId(userId);
+        // Get notifications for the user directly, sorted
+        List<Notification> notifications = getAllNotificationsSorted().stream()
+            .filter(n -> n.getUserId().equals(userId))
+            .collect(Collectors.toList());
 
-        // Get notifications for associations
-        List<Notification> associationNotifications = getNotificationsByUserAssociations(userId);
+        // Get notifications for associations, sorted
+        List<Notification> associationNotifications = getAllNotificationsSorted().stream()
+            .filter(n -> n.getAssocId() != null && !n.getAssocId().isEmpty()) // assuming getAssocId() exists
+            .collect(Collectors.toList());
 
         // Use a Map to remove duplicates by notification ID
         Map<String, Notification> notificationMap = new HashMap<>();
@@ -142,7 +146,14 @@ public class NotificationService {
             notificationMap.put(notification.getId(), notification);
         }
 
-        // Return a combined list of unique notifications
-        return new ArrayList<>(notificationMap.values());
+        // Return a combined list of unique notifications, still sorted by timestamp
+        return new ArrayList<>(notificationMap.values())
+            .stream()
+            .sorted(Comparator.comparing(Notification::getTimestamp).reversed())
+            .collect(Collectors.toList());
+    }
+
+    public List<Notification> getAllNotificationsSorted() {
+        return notificationRepository.findAllSortedByTimestamp();
     }
 }

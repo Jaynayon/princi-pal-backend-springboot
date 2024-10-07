@@ -141,4 +141,10 @@ public class NotificationController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/sorted")
+    public ResponseEntity<List<Notification>> getAllNotificationsSorted() {
+        List<Notification> notifications = notificationService.getAllNotificationsSorted();
+        return ResponseEntity.ok(notifications);
+    }
 }
