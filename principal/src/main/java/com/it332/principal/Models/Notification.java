@@ -3,6 +3,7 @@ package com.it332.principal.Models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
+import java.util.Objects; 
 
 @Document(collection = "Notifications")
 public class Notification {
@@ -112,4 +113,19 @@ public class Notification {
                 ", timestamp=" + timestamp +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Notification that = (Notification) o;
+        return Objects.equals(id, that.id);  // Compare based on 'id'
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);  // Use 'id' to compute hash code
+    }
+    
+
 }

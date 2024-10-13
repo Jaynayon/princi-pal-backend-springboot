@@ -7,10 +7,14 @@ import org.springframework.stereotype.Service;
 import com.it332.principal.DTO.DocumentsPatch;
 import com.it332.principal.DTO.DocumentsRequest;
 import com.it332.principal.DTO.DocumentsResponse;
+import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.School;
 import com.it332.principal.Repository.DocumentsRepository;
 import com.it332.principal.Security.NotFoundException;
+
+import com.it332.principal.Models.Notification;
+import java.util.Date;   
 
 import java.util.List;
 import java.util.ArrayList;
@@ -26,6 +30,10 @@ public class DocumentsService {
 
     @Autowired
     public JEVService jevService;
+
+    @Autowired
+    private NotificationService notificationService;
+
 
     public DocumentsResponse saveDocument(DocumentsRequest document) {
         // Check if school exists
@@ -44,6 +52,8 @@ public class DocumentsService {
 
         // Initialize JEV's in new document
         jevService.initializeJEV(newDoc.getId());
+
+        createBudgetLimitNotification(newDoc);
 
         return new DocumentsResponse(existingSchool, newDoc);
     }
@@ -146,6 +156,7 @@ public class DocumentsService {
 
         // Save new sum
         documentRepository.save(existingDocument);
+
     }
 
     public Documents updateDocument(String id, DocumentsPatch updatedSchool) {
@@ -181,6 +192,12 @@ public class DocumentsService {
         // newDoc.getCashAdvance().floatValue());
         // }
 
+        createBudgetLimitNotification(newDoc);
+
+        if (updatedSchool.getBudgetLimit() != null && newDoc.isBudgetLimitExceeded() && newDoc.getBudgetLimit() != 0 && newDoc.getBudget() > newDoc.getBudgetLimit()) {
+            createBudgetLimitExceededNotification(newDoc);
+        }     
+
         return newDoc;
     }
 
@@ -192,5 +209,63 @@ public class DocumentsService {
 
         documentRepository.delete(document);
     }
+
+    public void createBudgetLimitNotification(Documents document) {
+        // Check if the budget limit is greater than 0
+        if (document.getBudgetLimit() > 0) {
+            // Fetch the school details to get the full name
+            School school = schoolService.getSchoolById(document.getSchoolId());
+            String schoolFullName = school.getFullName(); // Assuming getFullName() exists
+    
+            // Prepare the notification message including the school's full name
+            String details = String.format(
+                "The budget limit for %s %s at %s has been set to ₱%.2f",
+                document.getMonth(), 
+                document.getYear(), 
+                schoolFullName, // Insert the school's full name
+                document.getBudgetLimit()
+            );
+    
+            // Create a new Notification object with assocId
+            Notification notification = new Notification(
+                document.getSchoolId(),  // Set the school ID as the user ID
+                null,  // Set assocId if available in Documents
+                document.getSchoolId(),  // School ID for associating the notification
+                details,
+                new java.util.Date()
+            );
+    
+            // Save the notification using NotificationService
+            notificationService.createNotification(notification);
+        }
+    }
+
+    public void createBudgetLimitExceededNotification(Documents document) {
+        // Fetch the school details to get the full name
+        School school = schoolService.getSchoolById(document.getSchoolId());
+        String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
+        
+        // Prepare the notification message including the school's full name
+        String details = String.format(
+            "Attention! The budget limit for %s %s at %s has been exceeded.",
+            document.getMonth(),
+            document.getYear(),
+            schoolFullName // Insert the school's full name
+        );
+
+        // Create a new Notification object
+        Notification notification = new Notification(
+            document.getSchoolId(),  // Set the school ID as the user ID
+            null,  // AssocId can be set as needed or left null
+            document.getSchoolId(),  // School ID for associating the notification
+            details,
+            new java.util.Date()
+        );
+
+        // Save the notification using NotificationService
+        notificationService.createNotification(notification);
+    }
+    
+    
 
 }

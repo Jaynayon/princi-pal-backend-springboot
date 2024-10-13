@@ -20,6 +20,9 @@ import com.it332.principal.Repository.NotificationRepository;
 import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.NotFoundException;
 
+import com.it332.principal.Models.Notification;
+import java.util.Date;  
+
 import java.util.ArrayList;
 
 @Service
@@ -292,8 +295,14 @@ public class AssociationService extends Exception {
         // Update the association to mark the user as accepted
         existingAssociation.setApproved(true);
     
-        // Save the updated association
-        return associationRepository.save(existingAssociation);
+        Association updatedAssociation = associationRepository.save(existingAssociation);
+
+        String assocId = updatedAssociation.getId();
+        createApprovalNotification(existingUser.getId(), existingSchool.getId(), assocId);
+
+
+        return updatedAssociation;
+
     }  
     
     public void rejectUserFromAssociation(AssociationIdRequest associationRequest) {
@@ -311,6 +320,8 @@ public class AssociationService extends Exception {
         if (existingAssociation == null) {
             throw new IllegalStateException("No application found for this user or user already invited/approved.");
         }
+
+        createRejectionNotification(existingUser.getId(), existingAssociation.getId(), existingSchool.getId());
     
         // Delete the association
         associationRepository.delete(existingAssociation);
@@ -426,7 +437,12 @@ public class AssociationService extends Exception {
         newAssociation.setApproved(false);
         newAssociation.setAdmin(associationRequest.getAdmin() != null && associationRequest.getAdmin()); // Set admin status from request
     
-        return associationRepository.save(newAssociation);
+        Association savedAssociation = associationRepository.save(newAssociation);
+
+        // Create a notification for the user
+        createInvitationNotification(existingUser.getId(), savedAssociation.getId(), associationRequest.getSchoolId());
+
+        return savedAssociation;
     }    
 
     public List<Association> getAssociationsByUserId(String userId) {
@@ -442,5 +458,73 @@ public class AssociationService extends Exception {
         
         return schoolIds;
     }
+
+
+    public Notification createApprovalNotification(String userId, String schoolId, String assocId) {
+        // Fetch the school name using the school service
+        School school = schoolService.getSchoolById(schoolId);
+        String schoolName = school.getFullName();
+    
+        // Create the notification details
+        String details = "Congratulations! Your application to join " + schoolName + " has been accepted";
+    
+        // Create a new notification object
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setSchoolId(schoolId);
+        notification.setAssocId(assocId);  // Set the assocId
+        notification.setDetails(details);
+        notification.setTimestamp(new Date());
+        notification.setHasButtons(false); // No buttons needed for this notification
+        notification.setAccepted(true); // Mark as accepted since it's for approval
+    
+        // Save the notification using the repository
+        return notificationRepository.save(notification);
+    }
+
+    public Notification createRejectionNotification(String userId, String assocId, String schoolId) {
+        // Get the school name using the SchoolService
+        School school = schoolService.getSchoolById(schoolId);
+        String schoolName = school.getFullName(); // Assuming `getName()` method exists in `School`
+    
+        // Create the rejection message
+        String details = "We regret to inform you that your application at " + schoolName + " is rejected.";
+    
+        // Create the notification object
+        Notification rejectionNotification = new Notification();
+        rejectionNotification.setUserId(userId);
+        rejectionNotification.setSchoolId(schoolId);
+        rejectionNotification.setAssocId(assocId); // Fixed the bug here
+        rejectionNotification.setDetails(details);
+        rejectionNotification.setTimestamp(new Date());
+        rejectionNotification.setAccepted(false); // This is a rejection, so accepted is false
+        rejectionNotification.setRejected(true);  // Mark it as a rejected notification
+        rejectionNotification.setHasButtons(false); // No action buttons for rejection notice
+    
+        // Save and return the notification using NotificationRepository
+        return notificationRepository.save(rejectionNotification);
+    }
+    
+
+    public Notification createInvitationNotification(String userId, String assocId, String schoolId) {
+        // Retrieve the school details to get the school name
+        School school = schoolService.getSchoolById(schoolId);
+        String schoolName = school.getFullName();
+    
+        // Construct the notification details message
+        String details = "You have been invited to join the association at " + schoolName;
+    
+        // Create the new Notification object
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setAssocId(assocId);
+        notification.setSchoolId(schoolId);
+        notification.setDetails(details);
+        notification.setTimestamp(new Date());
+        notification.setHasButtons(true); // Assuming this is an invitation with buttons
+    
+        // Save and return the created notification
+        return notificationRepository.save(notification);
+    }  
 
 }

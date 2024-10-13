@@ -5,6 +5,8 @@ import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.LR;
 import com.it332.principal.Models.LRJEV;
+import com.it332.principal.Models.Notification;
+import com.it332.principal.Models.School;
 import com.it332.principal.Models.Uacs;
 import com.it332.principal.Repository.DocumentsRepository;
 import com.it332.principal.Repository.LRRepository;
@@ -20,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;   
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +45,12 @@ public class LRService {
 
     @Autowired
     private HistoryService historyService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private SchoolService schoolService;
 
     Documents existingDocument;
 
@@ -115,13 +124,24 @@ public class LRService {
         Double cashAdvance = existingDocument.getCashAdvance();
         double cashAdvanceValue = (cashAdvance != null) ? cashAdvance : 0.0;
 
+        double previousBudget = existingDocument.getBudget();
+
         // Update the document's budget and budgetExceeded status
         existingDocument.setBudget(totalAmount);
-        existingDocument.setBudgetExceeded(totalAmount > cashAdvanceValue);
+        boolean isBudgetExceeded = totalAmount > cashAdvanceValue;
+        existingDocument.setBudgetExceeded(isBudgetExceeded);
         existingDocument.setBudgetLimitExceeded(totalAmount > existingDocument.getBudgetLimit());
 
         // Save new sum
         documentsRepository.save(existingDocument);
+
+        if (isBudgetExceeded && previousBudget != totalAmount) {
+            createBudgetExceededNotification(existingDocument);
+        }
+
+        if (existingDocument.isBudgetLimitExceeded() && existingDocument.getBudgetLimit() > 0 && previousBudget != totalAmount ) {
+            createBudgetLimitExceededNotification(existingDocument);
+        }     
     }
 
     public List<LRJEV> getJEVByDocumentsId(String documentsId) {
@@ -304,4 +324,58 @@ public class LRService {
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentBudget(lr.getDocumentsId());
     }
+
+        public void createBudgetLimitExceededNotification(Documents document) {
+        // Fetch the school details to get the full name
+        School school = schoolService.getSchoolById(document.getSchoolId());
+        String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
+        
+        // Prepare the notification message including the school's full name
+        String details = String.format(
+            "Attention! The budget limit for %s %s at %s has been exceeded.",
+            document.getMonth(),
+            document.getYear(),
+            schoolFullName // Insert the school's full name
+        );
+
+        // Create a new Notification object
+        Notification notification = new Notification(
+            document.getSchoolId(),  // Set the school ID as the user ID
+            null,  // AssocId can be set as needed or left null
+            document.getSchoolId(),  // School ID for associating the notification
+            details,
+            new java.util.Date()
+        );
+
+        // Save the notification using NotificationService
+        notificationService.createNotification(notification);
+    }
+
+
+    public void createBudgetExceededNotification(Documents document) {
+        // Fetch the school details to get the full name
+        School school = schoolService.getSchoolById(document.getSchoolId());
+        String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
+        
+        // Prepare the notification message including the school's full name
+        String details = String.format(
+            "The balance for %s %s at %s has gone negative. Please take appropriate action to resolve this.",
+            document.getMonth(),
+            document.getYear(),
+            schoolFullName // Insert the school's full name
+        );
+    
+        // Create a new Notification object
+        Notification notification = new Notification(
+            document.getSchoolId(),
+            null,
+            document.getSchoolId(),
+            details,
+            new Date()
+        );
+    
+        // Save the notification using NotificationService
+        notificationService.createNotification(notification);
+    }
+    
 }

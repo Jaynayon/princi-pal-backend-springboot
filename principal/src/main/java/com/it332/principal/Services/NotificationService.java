@@ -8,10 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Notification;
+import com.it332.principal.Models.Association;
+import com.it332.principal.Models.School;
+import com.it332.principal.Repository.AssociationRepository;
 import com.it332.principal.Repository.NotificationRepository;
 import com.it332.principal.Security.NotFoundException;
+
 
 @Service
 public class NotificationService {
@@ -20,140 +23,169 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     @Autowired
+    private AssociationRepository associationRepository;
+
+
+    @Autowired
     private AssociationService associationService;
 
-    public List<Notification> getAllNotifications() {
-        return notificationRepository.findAll();
-    }
-
-    public Notification getNotificationById(String id) {
-        return notificationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Notification not found with id: " + id));
-    }
+    @Autowired
+    private SchoolService schoolService;
 
     public Notification createNotification(Notification notification) {
         return notificationRepository.save(notification);
     }
 
-    public void deleteNotificationsByUser(String userId) {
-        try {
-            notificationRepository.deleteByUserId(userId);
-        } catch (Exception e) {
-            // Log the error for debugging purposes
-            e.printStackTrace();
-            throw new RuntimeException("Failed to delete notifications for user ID: " + userId, e);
-        }
-    }
-
-    public void deleteNotification(String id) {
-        // Fetch and validate the notification
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + id));
-
-        // Delete the notification
-        notificationRepository.delete(notification);
-    }
-
-    public String getAssociationId(String id) throws NotFoundException {
-        // Retrieve the notification by its ID from the repository
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Notification not found"));
-
-        // Assuming `getAssociationId` is a method in Notification or has a field
-        // `associationId`
-        return notification.getAssocId(); // This method or field should exist in Notification
-    }
-
-    public Notification acceptNotification(String id) {
-        try {
-            // Retrieve the notification by ID
-            Notification notification = getNotificationById(id);
-            if (notification == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found");
+    public List<Notification> getNotificationsByUserAssociation(String userId) {
+        // Step 1: Fetch user-specific notifications (no association approval applied)
+        List<Notification> userNotifications = getNotificationsByUserId(userId);
+        
+        // Step 2: Fetch all associations for the user
+        List<Association> associations = associationRepository.findByUserId(userId);
+    
+        // Step 3: If the user has associations, fetch the association IDs (only for approved associations)
+        List<String> approvedAssocIds = associations.stream()
+            .filter(Association::isApproved) // Only include associations where the user is approved
+            .map(Association::getId) // Extract approved association IDs
+            .collect(Collectors.toList());
+    
+        // Step 4: Fetch notifications that are associated with approved assocIds (only if there are approved associations)
+        List<Notification> assocNotifications = !approvedAssocIds.isEmpty()
+            ? notificationRepository.findByAssocIdIn(approvedAssocIds)
+            : Collections.emptyList();
+    
+        // Step 5: Combine user-specific and approved association-related notifications, avoid duplicates
+        Set<Notification> combinedNotifications = new HashSet<>(userNotifications); // Use Set to avoid duplicates
+        combinedNotifications.addAll(assocNotifications);
+    
+        // Step 6: Fetch school-related notifications where assocId is null, only for approved associations
+        for (Association association : associations) {
+            if (association.isApproved()) {
+                String schoolId = association.getSchoolId();
+                List<Notification> schoolNotificationsWithoutAssocId = notificationRepository.findBySchoolId(schoolId).stream()
+                    .filter(notification -> notification.getAssocId() == null || notification.getAssocId().isEmpty()) // Fetch notifications with no assocId
+                    .collect(Collectors.toList());
+    
+                combinedNotifications.addAll(schoolNotificationsWithoutAssocId); // Avoid duplicates via Set
             }
-
-            // Update notification fields
-            notification.setAccepted(true);
-            notification.setRejected(false); // Ensure rejection flag is reset
-            notification.setHasButtons(false); // Disable the button
-            notification.setDetails("You accepted the invitation to join the association");
-
-            // Save the updated notification
-            return notificationRepository.save(notification);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating notification", e);
         }
+    
+        // Step 7: Convert the set back to a list and sort by timestamp (if Notification has a getTimestamp method)
+        List<Notification> sortedNotifications = new ArrayList<>(combinedNotifications);
+        sortedNotifications.sort(Comparator.comparing(Notification::getTimestamp).reversed());
+    
+        // Return the sorted list of notifications
+        return sortedNotifications;
     }
-
-    public Notification rejectNotification(String id) {
-        try {
-            Notification notification = getNotificationById(id);
-            if (notification == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found");
-            }
-            notification.setAccepted(false); // Ensure acceptance flag is reset
-            notification.setRejected(true);
-            return notificationRepository.save(notification);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating notification", e);
-        }
-    }
+    
+    
 
     public List<Notification> getNotificationsByUserId(String userId) {
         return notificationRepository.findByUserId(userId);
     }
 
-    // Method to get notifications for a specific school
-    public List<Notification> getNotificationsBySchool(String schoolId) {
-        return notificationRepository.findBySchoolId(schoolId);
+    public List<Notification> getBudgetLimitNotifications() {
+        return notificationRepository.findAll().stream()
+            .filter(n -> n.getDetails() != null && n.getDetails().toLowerCase().contains("budget limit"))
+            .collect(Collectors.toList());
     }
 
-    // New method to get notifications through user's associations
-    public List<Notification> getNotificationsByUserAssociations(String userId) {
-        // Get all associations for the user
-        List<Association> associations = associationService.getAssociationsByUserId(userId);
+    public List<Notification> getBudgetLimitExceededNotifications() {
+        // Retrieve all notifications where the details indicate a budget limit has been exceeded
+        return notificationRepository.findAll().stream()
+            .filter(n -> n.getDetails() != null 
+                    && n.getDetails().toLowerCase().contains("budget limit")
+                    && n.getDetails().toLowerCase().contains("exceeded"))
+            .collect(Collectors.toList());
+    }    
 
-        // Collect all association IDs
-        List<String> assocId = associations.stream()
-                .map(Association::getId)
+    public List<Notification> getBudgetExceededNotifications(String schoolId) {
+        List<Notification> notifications = notificationRepository.findBySchoolId(schoolId);
+
+        // Filter notifications with "has exceeded the cash advance" in their details
+        return notifications.stream()
+                .filter(n -> n.getDetails() != null && 
+                             n.getDetails().toLowerCase().contains("negative"))
                 .collect(Collectors.toList());
-
-        // Retrieve notifications for the collected association IDs
-        return notificationRepository.findByAssocIdIn(assocId);
     }
 
-    public List<Notification> getNotificationsByUserIdThroughAssociations(String userId) {
-        // Get notifications for the user directly, sorted
-        List<Notification> notifications = getAllNotificationsSorted().stream()
-            .filter(n -> n.getUserId().equals(userId))
-            .collect(Collectors.toList());
-
-        // Get notifications for associations, sorted
-        List<Notification> associationNotifications = getAllNotificationsSorted().stream()
-            .filter(n -> n.getAssocId() != null && !n.getAssocId().isEmpty()) // assuming getAssocId() exists
-            .collect(Collectors.toList());
-
-        // Use a Map to remove duplicates by notification ID
-        Map<String, Notification> notificationMap = new HashMap<>();
-
-        // Add direct user notifications to the map
-        for (Notification notification : notifications) {
-            notificationMap.put(notification.getId(), notification);
-        }
-
-        // Add association notifications to the map, overriding duplicates
-        for (Notification notification : associationNotifications) {
-            notificationMap.put(notification.getId(), notification);
-        }
-
-        // Return a combined list of unique notifications, still sorted by timestamp
-        return new ArrayList<>(notificationMap.values())
-            .stream()
-            .sorted(Comparator.comparing(Notification::getTimestamp).reversed())
-            .collect(Collectors.toList());
+    public List<Notification> getApprovedNotificationsByUserId(String userId) {
+        // Fetch notifications where 'details' contain the keyword 'Congratulations'
+        return notificationRepository.findByUserId(userId).stream()
+                .filter(notification -> notification.getDetails() != null &&
+                        notification.getDetails().toLowerCase().contains("congratulations"))
+                .collect(Collectors.toList());
     }
 
-    public List<Notification> getAllNotificationsSorted() {
-        return notificationRepository.findAllSortedByTimestamp();
+    public List<Notification> getRejectionNotificationsByUserId(String userId) {
+        return notificationRepository.findByUserIdAndIsRejected(userId, true);
+    }    
+
+    public List<Notification> getInvitationNotificationsForUser(String userId) {
+        // Fetch notifications for the user containing the word "invited"
+        return notificationRepository.findByUserId(userId).stream()
+                .filter(notification -> notification.getDetails() != null && 
+                        notification.getDetails().toLowerCase().contains("invited"))
+                .collect(Collectors.toList());
+    }
+
+    public Notification updateAcceptInvitationNotification(String notificationId) {
+        // Find the notification by its ID
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NotFoundException("Notification not found with id: " + notificationId));
+    
+        // Retrieve the school associated with the notification
+        String schoolId = notification.getSchoolId();
+        School school = schoolService.getSchoolById(schoolId);
+        String schoolName = school.getFullName(); // Fetch the school's full name
+    
+        // Update the notification details to include the school name and set the button state to false
+        notification.setSchoolId(null);
+        notification.setDetails("You accepted the invitation to join " + schoolName);
+        notification.setHasButtons(false);
+        notification.setAccepted(true);
+        notification.setRejected(false);
+    
+        // Save and return the updated notification
+        return notificationRepository.save(notification);
+    }
+
+    public Notification updateRejectInvitationNotification(String notificationId) {
+        try {
+            // Retrieve the notification by its ID
+            Notification notification = notificationRepository.findById(notificationId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
+
+            // Retrieve the associated school details for the notification
+            String schoolId = notification.getSchoolId();
+            School school = schoolService.getSchoolById(schoolId);
+            String schoolName = school.getFullName(); // Fetch the school's full name
+
+            // Extract the association ID from the notification and delete the association
+            String assocId = notification.getAssocId();
+            if (assocId != null && !assocId.isEmpty()) {
+                Association association = associationRepository.findById(assocId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Association not found"));
+                
+                // Delete the association
+                associationRepository.delete(association);
+            }
+
+            // Update the notification details to reflect the rejection action
+            notification.setSchoolId(null);
+            notification.setDetails("You rejected the invitation to join " + schoolName);
+            notification.setAccepted(false);
+            notification.setRejected(true);
+            notification.setHasButtons(false); // Disable buttons as the action is completed
+
+            // Save and return the updated notification
+            return notificationRepository.save(notification);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating notification", e);
+        }
+    }
+
+    public void deleteNotificationsByUserId(String userId) {
+        notificationRepository.deleteByUserId(userId);
     }
 }

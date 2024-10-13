@@ -1,6 +1,8 @@
 package com.it332.principal.Controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.it332.principal.Models.Notification;
+import com.it332.principal.Services.AssociationService;
 import com.it332.principal.Services.NotificationService;
 import com.it332.principal.Security.NotFoundException;
 
@@ -26,125 +29,143 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Notification>> getAllNotifications() {
-        List<Notification> notifications = notificationService.getAllNotifications();
-        return ResponseEntity.ok().body(notifications);
-    }
+     @Autowired
+    private AssociationService associationService;
+    
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable String userId) {
+    @GetMapping("/user/{userId}/associations")
+    public ResponseEntity<List<Notification>> getNotificationsByUserAssociation(@PathVariable String userId) {
         try {
-            List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
-            return ResponseEntity.ok().body(notifications);
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
+            // Call the new service method to get notifications based on user associations
+            List<Notification> notifications = notificationService.getNotificationsByUserAssociation(userId);
 
-    @PostMapping("/create")
-    public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
-        try {
-            // Check if the notification is an invitation
-            boolean isInvitation = notification.getDetails().toLowerCase().contains("invited");
+            if (notifications.isEmpty()) {
+                return ResponseEntity.noContent().build(); // Return 204 No Content if no notifications found
+            }
 
-            // Set the button flag based on whether it's an invitation
-            notification.setHasButtons(isInvitation);
-
-            Notification createdNotification = notificationService.createNotification(notification);
-            return new ResponseEntity<>(createdNotification, HttpStatus.CREATED);
+            return ResponseEntity.ok(notifications); // Return 200 OK with the notifications
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR); // Return 500 Internal Server Error in case of exceptions
         }
     }
 
-    @PutMapping("/accept/{id}")
-    public ResponseEntity<Notification> approveNotification(@PathVariable String id) {
+
+        @GetMapping("/budget")
+    public ResponseEntity<List<Notification>> getBudgetNotifications() {
         try {
-            Notification updatedNotification = notificationService.acceptNotification(id);
-            return ResponseEntity.ok(updatedNotification);
-        } catch (ResponseStatusException e) {
-            return new ResponseEntity<>(null, e.getStatusCode());
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PutMapping("/reject/{id}")
-    public ResponseEntity<Notification> rejectNotification(@PathVariable("id") String id) {
-        try {
-            Notification notification = notificationService.rejectNotification(id);
-            return new ResponseEntity<>(notification, HttpStatus.OK);
-        } catch (ResponseStatusException e) {
-            // Return the error response with status code directly
-            return new ResponseEntity<>(null, e.getStatusCode());
-        } catch (Exception e) {
-            // Return a generic error response for unexpected issues
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/school/{schoolId}")
-    public List<Notification> getNotificationsForSchool(@PathVariable String schoolId) {
-        return notificationService.getNotificationsBySchool(schoolId);
-    }
-
-    @GetMapping("/{userId}/associations")
-    public ResponseEntity<List<Notification>> getNotificationsByUserAssociations(@PathVariable String userId) {
-        // Fetch notifications through user's associations
-        List<Notification> notifications = notificationService.getNotificationsByUserAssociations(userId);
-
-        if (notifications.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(notifications);
-    }
-
-    @GetMapping("/user/{userId}/all")
-    public ResponseEntity<List<Notification>> getNotificationsByUserIdThroughAssociations(
-            @PathVariable String userId) {
-        try {
-            List<Notification> notifications = notificationService.getNotificationsByUserIdThroughAssociations(userId);
+            // Use the service method to retrieve all notifications related to budget limits
+            List<Notification> notifications = notificationService.getBudgetLimitNotifications();
             return ResponseEntity.ok(notifications);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @DeleteMapping("/user/{userId}")
-    public ResponseEntity<String> deleteNotificationsByUser(@PathVariable String userId) {
+    
+        @GetMapping("/budget-exceeded")
+    public ResponseEntity<List<Notification>> getBudgetLimitExceededNotifications() {
         try {
-            // Call the service method to delete notifications
-            notificationService.deleteNotificationsByUser(userId);
-
-            // Return a success response
-            return ResponseEntity.ok("Notifications for user ID " + userId + " have been deleted.");
-        } catch (RuntimeException e) {
-            // Return a bad request response if there's an error
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error clearing notifications: " + e.getMessage());
+            // Use the service method to retrieve all notifications related to budget limits being exceeded
+            List<Notification> notifications = notificationService.getBudgetLimitExceededNotifications();
+            
+            if (notifications.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            
+            return ResponseEntity.ok(notifications);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Endpoint to delete a notification based on the notificationId
-    @DeleteMapping("/{notificationId}")
-    public ResponseEntity<String> deleteNotification(@PathVariable String notificationId) {
-        try {
-            // Call the service method to delete the notification
-            notificationService.deleteNotification(notificationId);
-
-            // Return a success response
-            return ResponseEntity.ok("Notification with ID " + notificationId + " has been deleted.");
-        } catch (IllegalArgumentException e) {
-            // Return a bad request response if there's an error
-            return ResponseEntity.badRequest().body(e.getMessage());
+    @GetMapping("/negative/{schoolId}")
+    public ResponseEntity<List<Notification>> getBudgetExceededNotifications(@PathVariable String schoolId) {
+        List<Notification> notifications = notificationService.getBudgetExceededNotifications(schoolId);
+        if (notifications.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(notifications);
         }
-    }
-
-    @GetMapping("/sorted")
-    public ResponseEntity<List<Notification>> getAllNotificationsSorted() {
-        List<Notification> notifications = notificationService.getAllNotificationsSorted();
         return ResponseEntity.ok(notifications);
     }
+
+    @GetMapping("/{userId}/approved")
+    public ResponseEntity<List<Notification>> getApprovedNotifications(@PathVariable String userId) {
+        List<Notification> notifications = notificationService.getApprovedNotificationsByUserId(userId);
+        if (notifications.isEmpty()) {
+            return ResponseEntity.noContent().build(); // No approval notifications found for this user
+        }
+        return ResponseEntity.ok(notifications);
+    }
+
+        @GetMapping("/{userId}/rejected")
+    public ResponseEntity<List<Notification>> getRejectionNotificationsByUserId(@PathVariable String userId) {
+        List<Notification> notifications = notificationService.getRejectionNotificationsByUserId(userId);
+        if (notifications.isEmpty()) {
+            return ResponseEntity.noContent().build(); // No rejection notifications found for this user
+        }
+        return ResponseEntity.ok(notifications);
+    }
+
+
+    @GetMapping("/{userId}/invitation")
+    public ResponseEntity<List<Notification>> getInvitationNotificationsForUser(@PathVariable String userId) {
+        List<Notification> notifications = notificationService.getInvitationNotificationsForUser(userId);
+        
+        if (notifications.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Return 204 if no notifications found
+        }
+
+        return ResponseEntity.ok(notifications);
+    }
+
+    @PutMapping("/accept/{notificationId}")
+    public ResponseEntity<Notification> updateAcceptInvitationNotification(
+     @PathVariable String notificationId) {
+        try {
+            if (notificationId == null || notificationId.isEmpty()) {
+                throw new IllegalArgumentException("Invalid request: notificationId is required.");
+            }
+
+            // Call the association approval logic first (similar to the axios POST request)
+            associationService.approveInvitation(notificationId);
+
+            // Update the notification details
+            Notification notification = notificationService.updateAcceptInvitationNotification(notificationId);
+
+            return ResponseEntity.ok(notification);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+    @PutMapping("/reject/{notificationId}")
+    public ResponseEntity<Notification> rejectInvitation(@PathVariable String notificationId) {
+        try {
+            // Call the service method to update the notification and delete the related association
+            Notification updatedNotification = notificationService.updateRejectInvitationNotification(notificationId);
+            return ResponseEntity.ok(updatedNotification);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<String> deleteNotificationsByUserId(@PathVariable String userId) {
+        try {
+            notificationService.deleteNotificationsByUserId(userId);
+            return ResponseEntity.ok("All notifications deleted for user ID: " + userId);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to delete notifications: " + e.getMessage());
+        }
+    }
+
 }
