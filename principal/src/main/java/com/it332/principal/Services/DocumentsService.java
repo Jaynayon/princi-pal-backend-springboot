@@ -14,6 +14,7 @@ import com.it332.principal.Repository.DocumentsRepository;
 import com.it332.principal.Security.NotFoundException;
 
 import com.it332.principal.Models.Notification;
+import com.it332.principal.Models.Association;
 import java.util.Date;   
 
 import java.util.List;
@@ -33,6 +34,9 @@ public class DocumentsService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private AssociationService associationService;
 
 
     public DocumentsResponse saveDocument(DocumentsRequest document) {
@@ -226,17 +230,21 @@ public class DocumentsService {
                 document.getBudgetLimit()
             );
     
-            // Create a new Notification object with assocId
-            Notification notification = new Notification(
-                document.getSchoolId(),  // Set the school ID as the user ID
-                null,  // Set assocId if available in Documents
-                document.getSchoolId(),  // School ID for associating the notification
-                details,
-                new java.util.Date()
-            );
+            // Fetch all users associated with the school through the AssociationService
+            List<Association> associations = associationService.getAssociationsBySchoolId(document.getSchoolId());
+            for (Association assoc : associations) {
+                // Create a new Notification object for each user associated with the school
+                Notification notification = new Notification(
+                    assoc.getUserId(),  // Set the user ID from the association
+                    assoc.getId(),  // AssocId if needed
+                    document.getSchoolId(),  // School ID for associating the notification
+                    details,
+                    new Date()
+                );
     
-            // Save the notification using NotificationService
-            notificationService.createNotification(notification);
+                // Save the notification using NotificationService
+                notificationService.createNotification(notification);
+            }
         }
     }
 
@@ -244,7 +252,7 @@ public class DocumentsService {
         // Fetch the school details to get the full name
         School school = schoolService.getSchoolById(document.getSchoolId());
         String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
-        
+    
         // Prepare the notification message including the school's full name
         String details = String.format(
             "Attention! The budget limit for %s %s at %s has been exceeded.",
@@ -252,20 +260,23 @@ public class DocumentsService {
             document.getYear(),
             schoolFullName // Insert the school's full name
         );
-
-        // Create a new Notification object
-        Notification notification = new Notification(
-            document.getSchoolId(),  // Set the school ID as the user ID
-            null,  // AssocId can be set as needed or left null
-            document.getSchoolId(),  // School ID for associating the notification
-            details,
-            new java.util.Date()
-        );
-
-        // Save the notification using NotificationService
-        notificationService.createNotification(notification);
-    }
     
+        // Fetch all users associated with the school through the AssociationService
+        List<Association> associations = associationService.getAssociationsBySchoolId(document.getSchoolId());
+        for (Association assoc : associations) {
+            // Create a new Notification object for each user associated with the school
+            Notification notification = new Notification(
+                assoc.getUserId(),  // Set the user ID from the association
+                assoc.getId(),  // AssocId if needed
+                document.getSchoolId(),  // School ID for associating the notification
+                details,
+                new Date()
+            );
+    
+            // Save the notification using NotificationService
+            notificationService.createNotification(notification);
+        }
+    }
     
 
 }

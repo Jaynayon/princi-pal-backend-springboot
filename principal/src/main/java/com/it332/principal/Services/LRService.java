@@ -2,6 +2,7 @@ package com.it332.principal.Services;
 
 import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
+import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.LR;
 import com.it332.principal.Models.LRJEV;
@@ -51,6 +52,9 @@ public class LRService {
 
     @Autowired
     private SchoolService schoolService;
+
+    @Autowired
+    private AssociationService associationService;
 
     Documents existingDocument;
 
@@ -325,11 +329,11 @@ public class LRService {
         updateDocumentBudget(lr.getDocumentsId());
     }
 
-        public void createBudgetLimitExceededNotification(Documents document) {
+    public void createBudgetLimitExceededNotification(Documents document) {
         // Fetch the school details to get the full name
         School school = schoolService.getSchoolById(document.getSchoolId());
         String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
-        
+    
         // Prepare the notification message including the school's full name
         String details = String.format(
             "Attention! The budget limit for %s %s at %s has been exceeded.",
@@ -337,18 +341,22 @@ public class LRService {
             document.getYear(),
             schoolFullName // Insert the school's full name
         );
-
-        // Create a new Notification object
-        Notification notification = new Notification(
-            document.getSchoolId(),  // Set the school ID as the user ID
-            null,  // AssocId can be set as needed or left null
-            document.getSchoolId(),  // School ID for associating the notification
-            details,
-            new java.util.Date()
-        );
-
-        // Save the notification using NotificationService
-        notificationService.createNotification(notification);
+    
+        // Fetch all users associated with the school through the AssociationService
+        List<Association> associations = associationService.getAssociationsBySchoolId(document.getSchoolId());
+        for (Association assoc : associations) {
+            // Create a new Notification object for each user associated with the school
+            Notification notification = new Notification(
+                assoc.getUserId(),  // Set the user ID from the association
+                assoc.getId(),  // AssocId if needed
+                document.getSchoolId(),  // School ID for associating the notification
+                details,
+                new Date()
+            );
+    
+            // Save the notification using NotificationService
+            notificationService.createNotification(notification);
+        }
     }
 
 
@@ -356,7 +364,7 @@ public class LRService {
         // Fetch the school details to get the full name
         School school = schoolService.getSchoolById(document.getSchoolId());
         String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
-        
+    
         // Prepare the notification message including the school's full name
         String details = String.format(
             "The balance for %s %s at %s has gone negative. Please take appropriate action to resolve this.",
@@ -365,17 +373,21 @@ public class LRService {
             schoolFullName // Insert the school's full name
         );
     
-        // Create a new Notification object
-        Notification notification = new Notification(
-            document.getSchoolId(),
-            null,
-            document.getSchoolId(),
-            details,
-            new Date()
-        );
+        // Fetch all users associated with the school through the AssociationService
+        List<Association> associations = associationService.getAssociationsBySchoolId(document.getSchoolId());
+        for (Association assoc : associations) {
+            // Create a new Notification object for each user associated with the school
+            Notification notification = new Notification(
+                assoc.getUserId(),  // Set the user ID from the association
+                assoc.getId(),  // AssocId if needed
+                document.getSchoolId(),  // School ID for associating the notification
+                details,
+                new Date()
+            );
     
-        // Save the notification using NotificationService
-        notificationService.createNotification(notification);
+            // Save the notification using NotificationService
+            notificationService.createNotification(notification);
+        }
     }
     
 }

@@ -527,4 +527,8 @@ public class AssociationService extends Exception {
         return notificationRepository.save(notification);
     }  
 
+    public List<Association> getAssociationsBySchoolId(String schoolId) {
+        return associationRepository.findBySchoolId(schoolId);
+    }
+
 }
