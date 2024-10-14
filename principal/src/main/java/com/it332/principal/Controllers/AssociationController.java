@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.AssociationEmailRequest;
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.AssociationSchoolInfo;
 import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Services.AssociationService;
@@ -221,6 +222,18 @@ public class AssociationController {
     public ResponseEntity<List<UserAssociation>> getApplicationsForSchool(@PathVariable String schoolId) {
         // Fetch applications using the updated service method
         List<UserAssociation> applications = associationService.getApplicationsForSchool(schoolId);
+
+        if (applications.isEmpty()) {
+            return ResponseEntity.noContent().build(); // No applications
+        }
+
+        return ResponseEntity.ok(applications);
+    }
+
+    @GetMapping("/applications/user/{userId}")
+    public ResponseEntity<List<AssociationSchoolInfo>> getApplicationsForUser(@PathVariable String userId) {
+        // Fetch applications using the updated service method
+        List<AssociationSchoolInfo> applications = associationService.getAppliedSchools(userId);
 
         if (applications.isEmpty()) {
             return ResponseEntity.noContent().build(); // No applications

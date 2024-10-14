@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.AssociationEmailRequest;
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.AssociationSchoolInfo;
 import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
@@ -18,6 +19,8 @@ import com.it332.principal.Repository.AssociationRepository;
 import com.it332.principal.Repository.NotificationRepository;
 import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.NotFoundException;
+
+import java.util.ArrayList;
 
 @Service
 public class AssociationService extends Exception {
@@ -428,6 +431,16 @@ public class AssociationService extends Exception {
 
     public List<Association> getAssociationsByUserId(String userId) {
         return associationRepository.findByUserId(userId);
+    }
+
+    public List<AssociationSchoolInfo> getAppliedSchools(String userId) {
+        List<Association> associations = associationRepository.findByUserIdAndApprovedFalseAndInvitationFalse(userId);
+
+        List<AssociationSchoolInfo> schoolIds = associations.stream()
+                                     .map(association -> new AssociationSchoolInfo(association.getId(), schoolService.getSchoolById(association.getSchoolId())))
+                                     .collect(Collectors.toList());
+        
+        return schoolIds;
     }
 
 }
