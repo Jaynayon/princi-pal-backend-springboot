@@ -3,6 +3,7 @@ package com.it332.principal.Controllers;
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
+import com.it332.principal.DTO.StackedBarDTO;
 import com.it332.principal.Models.LR;
 import com.it332.principal.Models.LRJEV;
 import com.it332.principal.Security.NotFoundException;
@@ -120,6 +121,31 @@ public class LRController {
         try {
             List<LRJEV> lrList = lrService.getJEVByDocumentsId(documentsId);
             return new ResponseEntity<>(lrList, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate document is detected
+            err.setMessage("Failed to get LR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get LR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @GetMapping("/jev/school/{schoolId}/year/{year}/stackedbar")
+    public ResponseEntity<Object> getAnnualStackedBarReport(@PathVariable String schoolId,
+            @PathVariable String year) {
+        try {
+            List<StackedBarDTO> stackedBarList = lrService.getAnnualStackedBarReport(schoolId, year);
+            return new ResponseEntity<>(stackedBarList, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate document is detected
             err.setMessage("Failed to get LR: " + e.getMessage());

@@ -2,6 +2,7 @@ package com.it332.principal.Services;
 
 import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
+import com.it332.principal.DTO.StackedBarDTO;
 import com.it332.principal.Models.Association;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.LR;
@@ -23,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Date;   
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @Service
@@ -143,9 +144,45 @@ public class LRService {
             createBudgetExceededNotification(existingDocument);
         }
 
-        if (existingDocument.isBudgetLimitExceeded() && existingDocument.getBudgetLimit() > 0 && previousBudget != totalAmount ) {
+        if (existingDocument.isBudgetLimitExceeded() && existingDocument.getBudgetLimit() > 0
+                && previousBudget != totalAmount) {
             createBudgetLimitExceededNotification(existingDocument);
-        }     
+        }
+    }
+
+    public List<StackedBarDTO> getAnnualStackedBarReport(String schoolId, String year) {
+        List<String> documentsIdByYear = documentsService.getDocumentIdsBySchoolYear(schoolId, year);
+        List<List<LRJEV>> docLrLists = new ArrayList<>();
+
+        List<Uacs> uacs = uacsService.getAllUacsExceptCashAdv();
+        List<StackedBarDTO> stackedBarDTOs = new ArrayList<>();
+
+        // Get the LRJEV list for each document and add to the List of Lists
+        for (String documentId : documentsIdByYear) {
+            docLrLists.add(getJEVByDocumentsId(documentId)); // Add the list to the List of Lists
+        }
+
+        for (Uacs uac : uacs) {
+            List<Double> data = new ArrayList<>(); // Use a list to collect the amounts
+
+            for (List<LRJEV> lrjevList : docLrLists) {
+
+                boolean amountAdded = false;
+                for (LRJEV lrjev : lrjevList) {
+                    if (lrjev.getUacsCode().equals(uac.getCode())) {
+                        data.add(lrjev.getAmount());
+                        amountAdded = true;
+                        break; // Exit the inner loop if the amount is added
+                    }
+                }
+                if (!amountAdded) {
+                    data.add(0.0); // Add 0.0 if no amount was added for this document
+                }
+            }
+            stackedBarDTOs.add(new StackedBarDTO(uac.getName(), data));
+        }
+
+        return stackedBarDTOs;
     }
 
     public List<LRJEV> getJEVByDocumentsId(String documentsId) {
@@ -333,61 +370,58 @@ public class LRService {
         // Fetch the school details to get the full name
         School school = schoolService.getSchoolById(document.getSchoolId());
         String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
-    
+
         // Prepare the notification message including the school's full name
         String details = String.format(
-            "Attention! The budget limit for %s %s at %s has been exceeded.",
-            document.getMonth(),
-            document.getYear(),
-            schoolFullName // Insert the school's full name
+                "Attention! The budget limit for %s %s at %s has been exceeded.",
+                document.getMonth(),
+                document.getYear(),
+                schoolFullName // Insert the school's full name
         );
-    
+
         // Fetch all users associated with the school through the AssociationService
         List<Association> associations = associationService.getAssociationsBySchoolId(document.getSchoolId());
         for (Association assoc : associations) {
             // Create a new Notification object for each user associated with the school
             Notification notification = new Notification(
-                assoc.getUserId(),  // Set the user ID from the association
-                assoc.getId(),  // AssocId if needed
-                document.getSchoolId(),  // School ID for associating the notification
-                details,
-                new Date()
-            );
-    
+                    assoc.getUserId(), // Set the user ID from the association
+                    assoc.getId(), // AssocId if needed
+                    document.getSchoolId(), // School ID for associating the notification
+                    details,
+                    new Date());
+
             // Save the notification using NotificationService
             notificationService.createNotification(notification);
         }
     }
-
 
     public void createBudgetExceededNotification(Documents document) {
         // Fetch the school details to get the full name
         School school = schoolService.getSchoolById(document.getSchoolId());
         String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
-    
+
         // Prepare the notification message including the school's full name
         String details = String.format(
-            "The balance for %s %s at %s has gone negative. Please take appropriate action to resolve this.",
-            document.getMonth(),
-            document.getYear(),
-            schoolFullName // Insert the school's full name
+                "The balance for %s %s at %s has gone negative. Please take appropriate action to resolve this.",
+                document.getMonth(),
+                document.getYear(),
+                schoolFullName // Insert the school's full name
         );
-    
+
         // Fetch all users associated with the school through the AssociationService
         List<Association> associations = associationService.getAssociationsBySchoolId(document.getSchoolId());
         for (Association assoc : associations) {
             // Create a new Notification object for each user associated with the school
             Notification notification = new Notification(
-                assoc.getUserId(),  // Set the user ID from the association
-                assoc.getId(),  // AssocId if needed
-                document.getSchoolId(),  // School ID for associating the notification
-                details,
-                new Date()
-            );
-    
+                    assoc.getUserId(), // Set the user ID from the association
+                    assoc.getId(), // AssocId if needed
+                    document.getSchoolId(), // School ID for associating the notification
+                    details,
+                    new Date());
+
             // Save the notification using NotificationService
             notificationService.createNotification(notification);
         }
     }
-    
+
 }

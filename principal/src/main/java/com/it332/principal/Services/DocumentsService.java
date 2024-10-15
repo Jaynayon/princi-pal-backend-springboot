@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.it332.principal.DTO.DocumentsPatch;
 import com.it332.principal.DTO.DocumentsRequest;
 import com.it332.principal.DTO.DocumentsResponse;
-import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.Models.Documents;
 import com.it332.principal.Models.School;
 import com.it332.principal.Repository.DocumentsRepository;
@@ -15,7 +14,7 @@ import com.it332.principal.Security.NotFoundException;
 
 import com.it332.principal.Models.Notification;
 import com.it332.principal.Models.Association;
-import java.util.Date;   
+import java.util.Date;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ public class DocumentsService {
 
     @Autowired
     private AssociationService associationService;
-
 
     public DocumentsResponse saveDocument(DocumentsRequest document) {
         // Check if school exists
@@ -113,6 +111,24 @@ public class DocumentsService {
         }
 
         return new DocumentsResponse(existingSchool, getDoc);
+    }
+
+    public List<String> getDocumentIdsBySchoolYear(String schoolId, String year) {
+        // Check if school exists
+        School existingSchool = schoolService.getSchoolById(schoolId);
+
+        List<Documents> documents = documentRepository.findBySchoolIdAndYear(schoolId, year);
+
+        if (documents == null || documents.isEmpty()) {
+            throw new NotFoundException("No Documents found for School id " + existingSchool.getId() + " in " + year);
+        }
+
+        List<String> documentIds = new ArrayList<>();
+        for (Documents doc : documents) {
+            documentIds.add(doc.getId());
+        }
+
+        return documentIds;
     }
 
     public List<Documents> getAllDocuments() {
@@ -198,9 +214,10 @@ public class DocumentsService {
 
         createBudgetLimitNotification(newDoc);
 
-        if (updatedSchool.getBudgetLimit() != null && newDoc.isBudgetLimitExceeded() && newDoc.getBudgetLimit() != 0 && newDoc.getBudget() > newDoc.getBudgetLimit()) {
+        if (updatedSchool.getBudgetLimit() != null && newDoc.isBudgetLimitExceeded() && newDoc.getBudgetLimit() != 0
+                && newDoc.getBudget() > newDoc.getBudgetLimit()) {
             createBudgetLimitExceededNotification(newDoc);
-        }     
+        }
 
         return newDoc;
     }
@@ -220,28 +237,26 @@ public class DocumentsService {
             // Fetch the school details to get the full name
             School school = schoolService.getSchoolById(document.getSchoolId());
             String schoolFullName = school.getFullName(); // Assuming getFullName() exists
-    
+
             // Prepare the notification message including the school's full name
             String details = String.format(
-                "The budget limit for %s %s at %s has been set to ₱%.2f",
-                document.getMonth(), 
-                document.getYear(), 
-                schoolFullName, // Insert the school's full name
-                document.getBudgetLimit()
-            );
-    
+                    "The budget limit for %s %s at %s has been set to ₱%.2f",
+                    document.getMonth(),
+                    document.getYear(),
+                    schoolFullName, // Insert the school's full name
+                    document.getBudgetLimit());
+
             // Fetch all users associated with the school through the AssociationService
             List<Association> associations = associationService.getAssociationsBySchoolId(document.getSchoolId());
             for (Association assoc : associations) {
                 // Create a new Notification object for each user associated with the school
                 Notification notification = new Notification(
-                    assoc.getUserId(),  // Set the user ID from the association
-                    assoc.getId(),  // AssocId if needed
-                    document.getSchoolId(),  // School ID for associating the notification
-                    details,
-                    new Date()
-                );
-    
+                        assoc.getUserId(), // Set the user ID from the association
+                        assoc.getId(), // AssocId if needed
+                        document.getSchoolId(), // School ID for associating the notification
+                        details,
+                        new Date());
+
                 // Save the notification using NotificationService
                 notificationService.createNotification(notification);
             }
@@ -252,31 +267,29 @@ public class DocumentsService {
         // Fetch the school details to get the full name
         School school = schoolService.getSchoolById(document.getSchoolId());
         String schoolFullName = school.getFullName(); // Assuming getFullName() method exists
-    
+
         // Prepare the notification message including the school's full name
         String details = String.format(
-            "Attention! The budget limit for %s %s at %s has been exceeded.",
-            document.getMonth(),
-            document.getYear(),
-            schoolFullName // Insert the school's full name
+                "Attention! The budget limit for %s %s at %s has been exceeded.",
+                document.getMonth(),
+                document.getYear(),
+                schoolFullName // Insert the school's full name
         );
-    
+
         // Fetch all users associated with the school through the AssociationService
         List<Association> associations = associationService.getAssociationsBySchoolId(document.getSchoolId());
         for (Association assoc : associations) {
             // Create a new Notification object for each user associated with the school
             Notification notification = new Notification(
-                assoc.getUserId(),  // Set the user ID from the association
-                assoc.getId(),  // AssocId if needed
-                document.getSchoolId(),  // School ID for associating the notification
-                details,
-                new Date()
-            );
-    
+                    assoc.getUserId(), // Set the user ID from the association
+                    assoc.getId(), // AssocId if needed
+                    document.getSchoolId(), // School ID for associating the notification
+                    details,
+                    new Date());
+
             // Save the notification using NotificationService
             notificationService.createNotification(notification);
         }
     }
-    
 
 }
