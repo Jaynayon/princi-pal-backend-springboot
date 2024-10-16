@@ -165,6 +165,30 @@ public class LRController {
         }
     }
 
+    @GetMapping("/documents/{documentsId}/highest")
+    public ResponseEntity<Object> getHighestAmountLRTranspoExpenses(@PathVariable String documentsId) {
+        try {
+            LRResponse reponse = lrService.getHighestAmountLRByDocumentsIdAndObjectCode(documentsId);
+            return new ResponseEntity<>(reponse, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate document is detected
+            err.setMessage("Failed to get LR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            // This exception is thrown when a no school is detected
+            err.setMessage("Failed to get LR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
     // Endpoint to retrieve an LR document by ID
     @GetMapping("/{id}")
     public ResponseEntity<Object> getLRById(@PathVariable String id) {

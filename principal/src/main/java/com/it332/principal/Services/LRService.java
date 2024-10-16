@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -269,6 +270,23 @@ public class LRService {
         return lrList.stream()
                 .map(LRResponse::new) // Map each LR to LRResponse using constructor
                 .collect(Collectors.toList());
+    }
+
+    // Method to retrieve the LR with the highest amount under a documentId where
+    // the objectCode is 5029904000
+    public LRResponse getHighestAmountLRByDocumentsIdAndObjectCode(String documentsId) {
+        existingDocument = documentsService.getDocumentById(documentsId);
+        List<LR> lrList = lrRepository.findByApprovedTrueAndDocumentsIdAndObjectCode(documentsId, "5029904000");
+
+        if (existingDocument == null) {
+            throw new NotFoundException("LR not found with ID: " + documentsId);
+        }
+
+        LR highestAmountLR = lrList.stream()
+                .max(Comparator.comparing(LR::getAmount))
+                .orElseThrow(() -> new NotFoundException("No LR found with the specified criteria"));
+
+        return new LRResponse(highestAmountLR);
     }
 
     public LR updateLR(String id, LRRequest updatedLR) {

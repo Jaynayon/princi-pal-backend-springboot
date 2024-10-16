@@ -14,6 +14,8 @@ public interface LRRepository extends MongoRepository<LR, String> {
 
     List<LR> findByApprovedFalseAndDocumentsIdOrderByDateAsc(String documentsId);
 
+    List<LR> findByApprovedTrueAndDocumentsIdAndObjectCode(String documentsId, String objectCode);
+
     List<LRResponse> findByDocumentsIdOrderByDateDesc(String documentsId);
 
     // Custom query method to find LR entities by documentsId
