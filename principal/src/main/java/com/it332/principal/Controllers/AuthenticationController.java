@@ -32,6 +32,7 @@ public class AuthenticationController {
 
     @GetMapping("/verify/")
     public ResponseEntity<?> verifyTokenAndTransform(@RequestParam("token") String token) {
+        ErrorMessage err = new ErrorMessage("");
         try {
             User claims = jwtTokenService.verifyTokenAndTransform(token);
             // Token is valid, return decoded claims
@@ -39,6 +40,12 @@ public class AuthenticationController {
         } catch (IllegalArgumentException e) {
             // Invalid token
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication denied");
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
         }
     }
 
