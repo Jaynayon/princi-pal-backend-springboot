@@ -18,6 +18,7 @@ public class User {
     private String password;
     private String position;
     private String avatar = "Blue"; // default value
+    private PasswordResetToken passwordResetToken; // Changed from OneToOne to a direct reference
 
     public User() {
     }
@@ -116,4 +117,11 @@ public class User {
         this.avatar = avatar;
     }
 
+    public PasswordResetToken getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(PasswordResetToken passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
 }
