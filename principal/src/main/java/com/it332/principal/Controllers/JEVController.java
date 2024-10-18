@@ -15,7 +15,6 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "https://localhost:3000")
 @RequestMapping("/api/jev")
 public class JEVController {
 
