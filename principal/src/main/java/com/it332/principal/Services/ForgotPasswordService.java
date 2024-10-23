@@ -9,6 +9,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import com.it332.principal.Security.NotFoundException;
+
  
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -34,21 +36,30 @@ public class ForgotPasswordService {
     private JavaMailSender mailSender; // Inject JavaMailSender
  
     public void forgotPass(String email) {
+        // Check if user exists
         User user = userService.getUserByEmail(email);
- 
-        // Generate token
+        
+        if (user == null) {
+            // If user does not exist, throw NotFoundException
+            throw new NotFoundException("User with email " + email + " not found.");
+        }
+    
+        // Generate token and set it in the user object
         String token = generateToken();
         user.setToken(token);
         user.setTokenCreationDate(LocalDateTime.now());
- 
+    
         // Save the user and log the success
-        User updatedUser = userRepository.save(user);
-        logger.info("User updated successfully: {}", updatedUser.getEmail());
+        userRepository.save(user); // Ensure you're saving the user here
+    
+        // Log and send email
+        logger.info("User updated successfully: {}", user.getEmail());
         logger.info("Sending password reset email to: {}", user.getEmail());
- 
-        // Send email
+        
         sendPasswordResetEmail(user.getEmail(), token);
     }
+    
+    
  
     public void sendPasswordResetEmail(String to, String token) {
         String subject = "Password Reset Request";

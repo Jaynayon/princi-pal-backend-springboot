@@ -12,26 +12,28 @@ public class ForgotPasswordController {
     @Autowired
     private ForgotPasswordService service;
  
+
     @PostMapping("/forgot-password")
-    public ResponseEntity<Object> forgotPass(@RequestParam String email) {
-        try {
-            // Call send reset link to email service
-            service.forgotPass(email);
- 
-            return new ResponseEntity<>("Email sent", HttpStatus.OK); // Return affirmation
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("Email sent"); // Return false-positive affirmation
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("Email sent"); // Return false-positive affirmation
-        } catch (Exception e) {
-            // Catching any other unexpected exceptions
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("Email sent"); // Return false-positive affirmation
-        }
+public ResponseEntity<Object> forgotPass(@RequestParam String email) {
+    try {
+        // This will check if the user exists and may throw NotFoundException
+        service.forgotPass(email);
+        
+        // If successful, return a success message
+        return ResponseEntity.ok("Email sent"); // This will only be executed if no exception is thrown
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body("Invalid email format");
+    } catch (NotFoundException e) {
+        // This should trigger for unregistered emails
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email is not registered");
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred, please try again later");
     }
+}
+
+    
+
  
     @PutMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String password) {
