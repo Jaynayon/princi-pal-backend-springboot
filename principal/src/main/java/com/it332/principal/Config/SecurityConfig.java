@@ -1,7 +1,12 @@
 package com.it332.principal.Config;
 
+import java.util.Properties;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 // import org.springframework.http.HttpMethod;
 // import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 // import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,7 +18,27 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 // @EnableWebSecurity
 public class SecurityConfig {
+      @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public JavaMailSender getJavaMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("smtp.gmail.com");
+        mailSender.setPort(587);
 
+        mailSender.setUsername("janickamariealgonas@gmail.com");
+        mailSender.setPassword("zmgq ocxa bopo wejk");  // Use your app password
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.starttls.enable", "true");
+        props.put("mail.debug", "true");
+
+        return mailSender;
+    }
     // @Bean
     // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws
     // Exception {

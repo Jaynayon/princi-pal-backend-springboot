@@ -1,8 +1,9 @@
 package com.it332.principal.Models;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import com.it332.principal.DTO.UserAdminRequest;
 
 @Document(collection = "Users")
@@ -17,8 +18,10 @@ public class User {
     private String email;
     private String password;
     private String position;
-    private String avatar = "Blue"; // default value
-    private PasswordResetToken passwordResetToken; // Changed from OneToOne to a direct reference
+    private String avatar = "Blue"; // Default value
+
+    private String token; // Token for password reset
+    private LocalDateTime tokenCreationDate; // Date when the token was created
 
     public User() {
     }
@@ -35,7 +38,7 @@ public class User {
 
     // Constructor with essential fields
     public User(String fname, String mname, String lname, String username, String email, String password,
-            String position) {
+                String position) {
         this.fname = fname;
         this.mname = mname;
         this.lname = lname;
@@ -45,6 +48,7 @@ public class User {
         this.position = position;
     }
 
+    // Getters and setters
     public String getId() {
         return id;
     }
@@ -117,11 +121,19 @@ public class User {
         this.avatar = avatar;
     }
 
-    public PasswordResetToken getPasswordResetToken() {
-        return passwordResetToken;
+    public String getToken() {
+        return token;
     }
 
-    public void setPasswordResetToken(PasswordResetToken passwordResetToken) {
-        this.passwordResetToken = passwordResetToken;
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public LocalDateTime getTokenCreationDate() {
+        return tokenCreationDate;
+    }
+
+    public void setTokenCreationDate(LocalDateTime tokenCreationDate) {
+        this.tokenCreationDate = tokenCreationDate;
     }
 }
