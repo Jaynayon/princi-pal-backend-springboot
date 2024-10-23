@@ -69,7 +69,8 @@ public class LRService {
         LR newLr = new LR(lr, existingUacs.getCode());
 
         // Check approved
-        newLr.setApproved(lr.getAmount() + existingDocument.getBudget() < existingDocument.getCashAdvance());
+        // newLr.setApproved(lr.getAmount() + existingDocument.getBudget() <
+        // existingDocument.getCashAdvance());
 
         lrRepository.save(newLr);
 
@@ -339,19 +340,20 @@ public class LRService {
             oldValue = lr.getAmount() + "";
             newValue = updatedLR.getAmount() + "";
             // LR displayed will always be approved ones
-            if (lr.isApproved()) {
-                // lr amount + total lrs amount > monthly budget
-                if ((updatedLR.getAmount() + (existingDocument.getBudget() - lr.getAmount())) > existingDocument
-                        .getCashAdvance()) {
-                    lr.setApproved(false);
-                } else {
-                    lr.setApproved(true);
-                }
-            }
-            // Cancel / Reject
-            else {
-                lr.setApproved(true);
-            }
+            // if (lr.isApproved()) {
+            // // lr amount + total lrs amount > monthly budget
+            // if ((updatedLR.getAmount() + (existingDocument.getBudget() - lr.getAmount()))
+            // > existingDocument
+            // .getCashAdvance()) {
+            // lr.setApproved(false);
+            // } else {
+            // lr.setApproved(true);
+            // }
+            // }
+            // // Cancel / Reject
+            // else {
+            // lr.setApproved(true);
+            // }
             lr.setAmount(updatedLR.getAmount());
         }
         if (updatedLR.isApproved()) {

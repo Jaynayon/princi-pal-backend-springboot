@@ -20,10 +20,7 @@ import com.it332.principal.Repository.NotificationRepository;
 import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.NotFoundException;
 
-import com.it332.principal.Models.Notification;
-import java.util.Date;  
-
-import java.util.ArrayList;
+import java.util.Date;
 
 @Service
 public class AssociationService extends Exception {
@@ -36,7 +33,7 @@ public class AssociationService extends Exception {
 
     @Autowired
     private SchoolService schoolService;
-    
+
     @Autowired
     private UserRepository userRepository;
 
@@ -79,33 +76,6 @@ public class AssociationService extends Exception {
 
         return associationRepository.save(association);
     }
-
-    // public Association updateAssociation(String userId, Association association)
-    // {
-    // // get if user exists
-
-    // //provide logic
-    // association.setUserId(userId);
-    // return associationRepository.save(association);
-    // }
-
-    // public Boolean checkPrincipalAssociation(String schoolId) {
-    // // Get user associations for school
-    // List<User> users = schoolService.getUsersBySchoolId(schoolId);
-
-    // for (User user : users) {
-    // //User user = userService.getUserById(association.getUserId());
-    // if ("Principal".equals(user.getPosition())) {
-    // return true;
-    // }
-    // }
-
-    // return false;
-    // }
-
-    // public List<Association> getBySchoolId(String schoolId) {
-    // return associationRepository.findBySchoolId(schoolId);
-    // }
 
     public void deleteAssociation(String schoolId, String userId) {
         Association association = associationRepository.findBySchoolIdAndUserId(schoolId, userId);
@@ -176,48 +146,6 @@ public class AssociationService extends Exception {
         return associationRepository.save(newAssociation);
     }
 
-    /*public Association inviteUserToAssociation(AssociationIdRequest association) {
-        // Check if user or school exists
-        School existSchool = schoolService.getSchoolById(association.getSchoolId());
-        UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
-
-        // Check if the association already exists for the given schoolId and userId
-        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
-                existSchool.getId(), existUser.getId());
-
-        if (existingAssociation != null) {
-            // If the association already exists and is approved, no need to invite again
-            if (existingAssociation.isApproved()) {
-                // Return the existing association without modification
-                return existingAssociation;
-            } else {
-                // If the association exists but is not approved, update invitation status to
-                // true
-                existingAssociation.setInvitation(true);
-                // Remove fields that are confidential
-                existingAssociation.setApproved(false);
-                existingAssociation.setAdmin(false);
-
-                // Save the updated association
-                return associationRepository.save(existingAssociation);
-            }
-        }
-        // If the association doesn't exist, create a new one without setting invitation
-        // status
-        Association newAssociation = new Association();
-
-        newAssociation.setSchoolId(existSchool.getId());
-        newAssociation.setUserId(existUser.getId());
-
-        // Remove fields that are confidential
-        newAssociation.setInvitation(true);
-        newAssociation.setApproved(false);
-        newAssociation.setAdmin(false);
-
-        // Save and return the new association
-        return associationRepository.save(newAssociation);
-    }*/
-    
     public Association promoteAssociation(AssociationIdRequest association) {
         // Check if user or school exists
         School existSchool = schoolService.getSchoolById(association.getSchoolId());
@@ -267,7 +195,7 @@ public class AssociationService extends Exception {
         Association newAssociation = new Association();
         newAssociation.setSchoolId(existingSchool.getId());
         newAssociation.setUserId(existingUser.getId());
-        newAssociation.setInvitation(false);    
+        newAssociation.setInvitation(false);
         newAssociation.setApproved(false);
         newAssociation.setAdmin(false);
 
@@ -278,150 +206,152 @@ public class AssociationService extends Exception {
     public Association approveUserToAssociation(AssociationIdRequest associationRequest) {
         // Check if the school exists
         School existingSchool = schoolService.getSchoolById(associationRequest.getSchoolId());
-    
+
         // Check if the user exists
         UserResponse existingUser = userService.getUserAssociationsById(associationRequest.getUserId());
-    
-        // Check if the association exists where the user has applied but not yet approved or invited
-        Association existingAssociation = associationRepository.findBySchoolIdAndUserIdAndApprovedFalseAndInvitationFalse(
-                existingSchool.getId(), existingUser.getId());
-    
+
+        // Check if the association exists where the user has applied but not yet
+        // approved or invited
+        Association existingAssociation = associationRepository
+                .findBySchoolIdAndUserIdAndApprovedFalseAndInvitationFalse(
+                        existingSchool.getId(), existingUser.getId());
+
         // Handle the case where no association exists
         if (existingAssociation == null) {
             // If no association exists, throw an exception
             throw new IllegalStateException("No application found for this user or user already invited/approved.");
         }
-    
+
         // Update the association to mark the user as accepted
         existingAssociation.setApproved(true);
-    
+
         Association updatedAssociation = associationRepository.save(existingAssociation);
 
         String assocId = updatedAssociation.getId();
         createApprovalNotification(existingUser.getId(), existingSchool.getId(), assocId);
 
-
         return updatedAssociation;
 
-    }  
-    
+    }
+
     public void rejectUserFromAssociation(AssociationIdRequest associationRequest) {
         // Check if the school exists
         School existingSchool = schoolService.getSchoolById(associationRequest.getSchoolId());
-    
+
         // Check if the user exists
         UserResponse existingUser = userService.getUserAssociationsById(associationRequest.getUserId());
-    
-        // Check if the association exists where the user has applied but not yet approved or invited
-        Association existingAssociation = associationRepository.findBySchoolIdAndUserIdAndApprovedFalseAndInvitationFalse(
-                existingSchool.getId(), existingUser.getId());
-    
+
+        // Check if the association exists where the user has applied but not yet
+        // approved or invited
+        Association existingAssociation = associationRepository
+                .findBySchoolIdAndUserIdAndApprovedFalseAndInvitationFalse(
+                        existingSchool.getId(), existingUser.getId());
+
         // Handle the case where no association exists
         if (existingAssociation == null) {
             throw new IllegalStateException("No application found for this user or user already invited/approved.");
         }
 
         createRejectionNotification(existingUser.getId(), existingAssociation.getId(), existingSchool.getId());
-    
+
         // Delete the association
         associationRepository.delete(existingAssociation);
     }
-    
 
     public Association approveInvitation(String notificationId) {
         // Validate and fetch the notification
         Notification notification = notificationRepository.findById(notificationId)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + notificationId));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + notificationId));
+
         // Extract the assocId from the notification
         String assocId = notification.getAssocId();
-        
+
         if (assocId == null || assocId.isEmpty()) {
             throw new IllegalStateException("Association ID is missing from the notification.");
         }
-        
+
         // Fetch the existing association
         Association existingAssociation = associationRepository.findById(assocId)
-            .orElseThrow(() -> new IllegalStateException("No association found for assocId: " + assocId));
-        
+                .orElseThrow(() -> new IllegalStateException("No association found for assocId: " + assocId));
+
         // Update the association status and save
         existingAssociation.setApproved(true);
         Association updatedAssociation = associationRepository.save(existingAssociation);
-        
+
         // You might need to add logic to handle user association here.
         // Example: addUserToAssociation(userId, updatedAssociation);
-        
+
         return updatedAssociation;
     }
-    
+
     public void deleteAssociation(String notificationId) {
         // Validate and fetch the notification
         Notification notification = notificationRepository.findById(notificationId)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + notificationId));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Invalid notificationId: " + notificationId));
+
         // Extract the assocId from the notification
         String assocId = notification.getAssocId();
-        
+
         if (assocId == null || assocId.isEmpty()) {
             throw new IllegalStateException("Association ID is missing from the notification.");
         }
-        
+
         // Fetch the existing association
         Association existingAssociation = associationRepository.findById(assocId)
-            .orElseThrow(() -> new IllegalStateException("No association found for assocId: " + assocId));
-        
+                .orElseThrow(() -> new IllegalStateException("No association found for assocId: " + assocId));
+
         // Delete the association
         associationRepository.delete(existingAssociation);
     }
-    
-    
 
-     
-    
-    
-    /*public List<Association> getApplicationsForSchool(String schoolId) {
-    return associationRepository.findBySchoolIdAndApprovedFalseAndInvitationFalse(schoolId);
-    }*/
+    /*
+     * public List<Association> getApplicationsForSchool(String schoolId) {
+     * return
+     * associationRepository.findBySchoolIdAndApprovedFalseAndInvitationFalse(
+     * schoolId);
+     * }
+     */
 
     public List<UserAssociation> getApplicationsForSchool(String schoolId) {
-    // Fetch associations that are not approved and not invitations
-    List<Association> associations = associationRepository.findBySchoolIdAndApprovedFalseAndInvitationFalse(schoolId);
+        // Fetch associations that are not approved and not invitations
+        List<Association> associations = associationRepository
+                .findBySchoolIdAndApprovedFalseAndInvitationFalse(schoolId);
 
-    // Extract user IDs from associations
-    List<String> userIds = associations.stream()
-            .map(Association::getUserId)
-            .distinct() // Ensure no duplicate user IDs
-            .collect(Collectors.toList());
+        // Extract user IDs from associations
+        List<String> userIds = associations.stream()
+                .map(Association::getUserId)
+                .distinct() // Ensure no duplicate user IDs
+                .collect(Collectors.toList());
 
-    // Get all users for the extracted IDs
-    List<User> schoolUsers = userRepository.findAllById(userIds);
+        // Get all users for the extracted IDs
+        List<User> schoolUsers = userRepository.findAllById(userIds);
 
-    // Map each user to their respective association to create UserAssociation DTOs
-    return schoolUsers.stream()
-            .map(user -> {
-                // Find the corresponding association for the user
-                Association assoc = associations.stream()
-                        .filter(a -> a.getUserId().equals(user.getId()))
-                        .findFirst()
-                        .orElseThrow(
-                                () -> new RuntimeException("Association not found for user ID: " + user.getId()));
+        // Map each user to their respective association to create UserAssociation DTOs
+        return schoolUsers.stream()
+                .map(user -> {
+                    // Find the corresponding association for the user
+                    Association assoc = associations.stream()
+                            .filter(a -> a.getUserId().equals(user.getId()))
+                            .findFirst()
+                            .orElseThrow(
+                                    () -> new RuntimeException("Association not found for user ID: " + user.getId()));
 
-                // Create and return UserAssociation DTO
-                return new UserAssociation(user, assoc);
-            })
-            .collect(Collectors.toList());
-}
+                    // Create and return UserAssociation DTO
+                    return new UserAssociation(user, assoc);
+                })
+                .collect(Collectors.toList());
+    }
 
     public Association inviteUserToAssociation(AssociationEmailRequest associationRequest) {
         if (associationRequest.getEmail() == null || associationRequest.getSchoolId() == null) {
             throw new IllegalArgumentException("Email and School ID are required.");
         }
-    
+
         User existingUser = userService.getUserByEmail(associationRequest.getEmail());
-    
+
         Association existingAssociation = associationRepository.findBySchoolIdAndUserId(
                 associationRequest.getSchoolId(), existingUser.getId());
-    
+
         if (existingAssociation != null) {
             if (existingAssociation.isInvitation()) {
                 throw new IllegalStateException("User has already been invited.");
@@ -429,21 +359,23 @@ public class AssociationService extends Exception {
                 throw new IllegalStateException("User is already associated with this school.");
             }
         }
-    
+
         Association newAssociation = new Association();
         newAssociation.setUserId(existingUser.getId());
         newAssociation.setSchoolId(associationRequest.getSchoolId());
         newAssociation.setInvitation(true);
         newAssociation.setApproved(false);
-        newAssociation.setAdmin(associationRequest.getAdmin() != null && associationRequest.getAdmin()); // Set admin status from request
-    
+        newAssociation.setAdmin(associationRequest.getAdmin() != null && associationRequest.getAdmin()); // Set admin
+                                                                                                         // status from
+                                                                                                         // request
+
         Association savedAssociation = associationRepository.save(newAssociation);
 
         // Create a notification for the user
         createInvitationNotification(existingUser.getId(), savedAssociation.getId(), associationRequest.getSchoolId());
 
         return savedAssociation;
-    }    
+    }
 
     public List<Association> getAssociationsByUserId(String userId) {
         return associationRepository.findByUserId(userId);
@@ -453,31 +385,31 @@ public class AssociationService extends Exception {
         List<Association> associations = associationRepository.findByUserIdAndApprovedFalseAndInvitationFalse(userId);
 
         List<AssociationSchoolInfo> schoolIds = associations.stream()
-                                     .map(association -> new AssociationSchoolInfo(association.getId(), schoolService.getSchoolById(association.getSchoolId())))
-                                     .collect(Collectors.toList());
-        
+                .map(association -> new AssociationSchoolInfo(association.getId(),
+                        schoolService.getSchoolById(association.getSchoolId())))
+                .collect(Collectors.toList());
+
         return schoolIds;
     }
-
 
     public Notification createApprovalNotification(String userId, String schoolId, String assocId) {
         // Fetch the school name using the school service
         School school = schoolService.getSchoolById(schoolId);
         String schoolName = school.getFullName();
-    
+
         // Create the notification details
         String details = "Congratulations! Your application to join " + schoolName + " has been accepted";
-    
+
         // Create a new notification object
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setSchoolId(schoolId);
-        notification.setAssocId(assocId);  // Set the assocId
+        notification.setAssocId(assocId); // Set the assocId
         notification.setDetails(details);
         notification.setTimestamp(new Date());
         notification.setHasButtons(false); // No buttons needed for this notification
         notification.setAccepted(true); // Mark as accepted since it's for approval
-    
+
         // Save the notification using the repository
         return notificationRepository.save(notification);
     }
@@ -486,10 +418,10 @@ public class AssociationService extends Exception {
         // Get the school name using the SchoolService
         School school = schoolService.getSchoolById(schoolId);
         String schoolName = school.getFullName(); // Assuming `getName()` method exists in `School`
-    
+
         // Create the rejection message
         String details = "We regret to inform you that your application at " + schoolName + " is rejected.";
-    
+
         // Create the notification object
         Notification rejectionNotification = new Notification();
         rejectionNotification.setUserId(userId);
@@ -498,22 +430,21 @@ public class AssociationService extends Exception {
         rejectionNotification.setDetails(details);
         rejectionNotification.setTimestamp(new Date());
         rejectionNotification.setAccepted(false); // This is a rejection, so accepted is false
-        rejectionNotification.setRejected(true);  // Mark it as a rejected notification
+        rejectionNotification.setRejected(true); // Mark it as a rejected notification
         rejectionNotification.setHasButtons(false); // No action buttons for rejection notice
-    
+
         // Save and return the notification using NotificationRepository
         return notificationRepository.save(rejectionNotification);
     }
-    
 
     public Notification createInvitationNotification(String userId, String assocId, String schoolId) {
         // Retrieve the school details to get the school name
         School school = schoolService.getSchoolById(schoolId);
         String schoolName = school.getFullName();
-    
+
         // Construct the notification details message
         String details = "You have been invited to join the association at " + schoolName;
-    
+
         // Create the new Notification object
         Notification notification = new Notification();
         notification.setUserId(userId);
@@ -522,10 +453,10 @@ public class AssociationService extends Exception {
         notification.setDetails(details);
         notification.setTimestamp(new Date());
         notification.setHasButtons(true); // Assuming this is an invitation with buttons
-    
+
         // Save and return the created notification
         return notificationRepository.save(notification);
-    }  
+    }
 
     public List<Association> getAssociationsBySchoolId(String schoolId) {
         return associationRepository.findBySchoolId(schoolId);
