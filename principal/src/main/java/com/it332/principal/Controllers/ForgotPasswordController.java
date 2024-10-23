@@ -1,5 +1,6 @@
 package com.it332.principal.Controllers;
 
+import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.ForgotPasswordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,22 +14,30 @@ public class ForgotPasswordController {
     private ForgotPasswordService service;
 
     @PostMapping("/forgot-password")
-    public String forgotPass(@RequestParam String email) {
-        String response = service.forgotPass(email);
+    public ResponseEntity<Object> forgotPass(@RequestParam String email) {
+        try {
+            // Call send reset link to email service
+            service.forgotPass(email);
 
-        if (response.startsWith("Invalid")) {
-            return response; // Return the error message directly
+            return new ResponseEntity<>("Email sent", HttpStatus.OK); // Return affirmation
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Email sent"); // Return false-positive affirmation
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Email sent"); // Return false-positive affirmation
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Email sent"); // Return false-positive affirmation
         }
-        
-        // Construct the reset link using the token returned by the service
-        return "https://localhost:3000/reset-password?token=" + response;
     }
-
 
     @PutMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String password) {
         String result = service.resetPass(token, password);
-       
+
         if (result.equals("Your password has been successfully updated.")) {
             return ResponseEntity.ok(result);
         } else {
@@ -43,7 +52,8 @@ public class ForgotPasswordController {
             service.sendPasswordResetEmail(email, "test-token");
             return ResponseEntity.ok("Test email sent successfully!");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send test email: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send test email: " + e.getMessage());
         }
     }
 }

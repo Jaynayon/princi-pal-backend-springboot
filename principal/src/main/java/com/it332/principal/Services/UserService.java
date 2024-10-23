@@ -152,6 +152,16 @@ public class UserService {
         return user;
     }
 
+    public User getUserByToken(String token) {
+        User user = userRepository.findByToken(token);
+
+        if (user == null) {
+            throw new NotFoundException("User not found with token: " + token);
+        }
+
+        return user;
+    }
+
     public UserResponse getUserAssociationsById(String id) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
