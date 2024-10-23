@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "https://localhost:3000")
 public class ForgotPasswordController {
     @Autowired
     private ForgotPasswordService service;
