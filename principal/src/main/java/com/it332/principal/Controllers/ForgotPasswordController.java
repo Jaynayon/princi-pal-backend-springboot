@@ -55,4 +55,14 @@ public class ForgotPasswordController {
                     .body("Failed to send test email: " + e.getMessage());
         }
     }
+
+    @GetMapping("/validate-token")
+    public ResponseEntity<String> validateToken(@RequestParam String token) {
+        boolean isValid = service.validateToken(token);
+        if (isValid) {
+            return ResponseEntity.ok("Valid token");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired token");
+        }
+    }
 }

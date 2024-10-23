@@ -89,4 +89,13 @@ public class ForgotPasswordService {
         Duration diff = Duration.between(tokenCreationDate, now);
         return diff.toMinutes() >= EXPIRE_TOKEN;
     }
+
+    public boolean validateToken(String token) {
+        User user = userRepository.findByToken(token);
+        if (user == null) {
+            return false; // Token not found
+        }
+    
+        return !isTokenExpired(user.getTokenCreationDate()); // Return true if the token is still valid
+    }
 }
