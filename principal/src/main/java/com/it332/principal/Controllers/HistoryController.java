@@ -16,7 +16,6 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "https://localhost:3000")
 @RequestMapping("/api/history")
 public class HistoryController {
 

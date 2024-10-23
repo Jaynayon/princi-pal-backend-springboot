@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,7 +22,6 @@ import com.it332.principal.Models.Association;
 import com.it332.principal.Services.AssociationService;
 
 @RestController
-@CrossOrigin(origins = "https://localhost:3000")
 @RequestMapping("/api/associations")
 public class AssociationController {
 
@@ -81,7 +79,6 @@ public class AssociationController {
         associationService.rejectUserFromAssociation(association);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
 
     @PostMapping("/approve/{notificationId}")
     public ResponseEntity<?> approveInvitation(

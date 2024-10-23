@@ -1,8 +1,6 @@
 package com.it332.principal.Controllers;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,12 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.it332.principal.Models.Notification;
 import com.it332.principal.Services.AssociationService;
@@ -29,9 +24,8 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-     @Autowired
+    @Autowired
     private AssociationService associationService;
-    
 
     @GetMapping("/user/{userId}/associations")
     public ResponseEntity<List<Notification>> getNotificationsByUserAssociation(@PathVariable String userId) {
@@ -45,12 +39,12 @@ public class NotificationController {
 
             return ResponseEntity.ok(notifications); // Return 200 OK with the notifications
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR); // Return 500 Internal Server Error in case of exceptions
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR); // Return 500 Internal Server Error in
+                                                                                 // case of exceptions
         }
     }
 
-
-        @GetMapping("/budget")
+    @GetMapping("/budget")
     public ResponseEntity<List<Notification>> getBudgetNotifications() {
         try {
             // Use the service method to retrieve all notifications related to budget limits
@@ -61,17 +55,17 @@ public class NotificationController {
         }
     }
 
-    
-        @GetMapping("/budget-exceeded")
+    @GetMapping("/budget-exceeded")
     public ResponseEntity<List<Notification>> getBudgetLimitExceededNotifications() {
         try {
-            // Use the service method to retrieve all notifications related to budget limits being exceeded
+            // Use the service method to retrieve all notifications related to budget limits
+            // being exceeded
             List<Notification> notifications = notificationService.getBudgetLimitExceededNotifications();
-            
+
             if (notifications.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
-            
+
             return ResponseEntity.ok(notifications);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -96,7 +90,7 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
-        @GetMapping("/{userId}/rejected")
+    @GetMapping("/{userId}/rejected")
     public ResponseEntity<List<Notification>> getRejectionNotificationsByUserId(@PathVariable String userId) {
         List<Notification> notifications = notificationService.getRejectionNotificationsByUserId(userId);
         if (notifications.isEmpty()) {
@@ -105,11 +99,10 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
-
     @GetMapping("/{userId}/invitation")
     public ResponseEntity<List<Notification>> getInvitationNotificationsForUser(@PathVariable String userId) {
         List<Notification> notifications = notificationService.getInvitationNotificationsForUser(userId);
-        
+
         if (notifications.isEmpty()) {
             return ResponseEntity.noContent().build(); // Return 204 if no notifications found
         }
@@ -119,7 +112,7 @@ public class NotificationController {
 
     @PutMapping("/accept/{notificationId}")
     public ResponseEntity<Notification> updateAcceptInvitationNotification(
-     @PathVariable String notificationId) {
+            @PathVariable String notificationId) {
         try {
             if (notificationId == null || notificationId.isEmpty()) {
                 throw new IllegalArgumentException("Invalid request: notificationId is required.");
@@ -141,11 +134,11 @@ public class NotificationController {
         }
     }
 
-
     @PutMapping("/reject/{notificationId}")
     public ResponseEntity<Notification> rejectInvitation(@PathVariable String notificationId) {
         try {
-            // Call the service method to update the notification and delete the related association
+            // Call the service method to update the notification and delete the related
+            // association
             Notification updatedNotification = notificationService.updateRejectInvitationNotification(notificationId);
             return ResponseEntity.ok(updatedNotification);
         } catch (NotFoundException e) {
@@ -156,7 +149,6 @@ public class NotificationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<String> deleteNotificationsByUserId(@PathVariable String userId) {

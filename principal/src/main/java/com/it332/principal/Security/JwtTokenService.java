@@ -1,6 +1,7 @@
 package com.it332.principal.Security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureException;
 
@@ -39,6 +40,12 @@ public class JwtTokenService {
             return exist;
         } catch (SignatureException e) {
             // JWT signature validation failed
+            throw new IllegalArgumentException("Invalid token. Authentication denied.");
+        } catch (ExpiredJwtException e) {
+            // JWT expired
+            throw new IllegalArgumentException("Token expired. Authentication denied.");
+        } catch (Exception e) {
+            // Other exceptions
             throw new IllegalArgumentException("Invalid token. Authentication denied.");
         }
     }

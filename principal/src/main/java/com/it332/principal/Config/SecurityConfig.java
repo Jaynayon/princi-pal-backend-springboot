@@ -2,6 +2,7 @@ package com.it332.principal.Config;
 
 import java.util.Properties;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,10 +19,11 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 // @EnableWebSecurity
 public class SecurityConfig {
-      @Bean
+    @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -29,7 +31,7 @@ public class SecurityConfig {
         mailSender.setPort(587);
 
         mailSender.setUsername("janickamariealgonas@gmail.com");
-        mailSender.setPassword("zmgq ocxa bopo wejk");  // Use your app password
+        mailSender.setPassword("zmgq ocxa bopo wejk"); // Use your app password
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
@@ -39,6 +41,10 @@ public class SecurityConfig {
 
         return mailSender;
     }
+
+    @Value("${base.url}")
+    private String baseUrl;
+
     // @Bean
     // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws
     // Exception {
@@ -65,7 +71,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // Allow credentials (Authorization header, cookies, etc.)
-        config.addAllowedOrigin("https://localhost:3000"); // Your frontend URL
+        config.addAllowedOrigin(baseUrl); // Your frontend URL
         config.addAllowedHeader("*"); // Allow all headers
         config.addAllowedMethod("*"); // Allow all methods (GET, POST, PUT, DELETE, etc.)
         source.registerCorsConfiguration("/**", config);

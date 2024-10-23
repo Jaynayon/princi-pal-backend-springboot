@@ -7,11 +7,8 @@ import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(origins = "https://localhost:3000")
 @RequestMapping("/authenticate")
 public class AuthenticationController {
 
@@ -32,6 +28,7 @@ public class AuthenticationController {
 
     @GetMapping("/verify/")
     public ResponseEntity<?> verifyTokenAndTransform(@RequestParam("token") String token) {
+        ErrorMessage err = new ErrorMessage("");
         try {
             User claims = jwtTokenService.verifyTokenAndTransform(token);
             // Token is valid, return decoded claims
@@ -39,6 +36,12 @@ public class AuthenticationController {
         } catch (IllegalArgumentException e) {
             // Invalid token
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication denied");
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
         }
     }
 
