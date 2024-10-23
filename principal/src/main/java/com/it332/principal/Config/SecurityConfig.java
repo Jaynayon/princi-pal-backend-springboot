@@ -18,27 +18,27 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 // @EnableWebSecurity
 public class SecurityConfig {
-      @Bean
+    @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    @Bean
-    public JavaMailSender getJavaMailSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
+    // @Bean
+    // public JavaMailSender getJavaMailSender() {
+    // JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+    // mailSender.setHost("smtp.gmail.com");
+    // mailSender.setPort(587);
 
-        mailSender.setUsername("janickamariealgonas@gmail.com");
-        mailSender.setPassword("zmgq ocxa bopo wejk");  // Use your app password
+    // mailSender.setUsername("janickamariealgonas@gmail.com");
+    // mailSender.setPassword("zmgq ocxa bopo wejk"); // Use your app password
 
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.starttls.enable", "true");
-        props.put("mail.debug", "true");
+    // Properties props = mailSender.getJavaMailProperties();
+    // props.put("mail.transport.protocol", "smtp");
+    // props.put("mail.smtp.auth", "true");
+    // props.put("mail.starttls.enable", "true");
+    // props.put("mail.debug", "true");
 
-        return mailSender;
-    }
+    // return mailSender;
+    // }
     // @Bean
     // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws
     // Exception {
