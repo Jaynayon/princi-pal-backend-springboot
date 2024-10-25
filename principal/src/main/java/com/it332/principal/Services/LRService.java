@@ -1,5 +1,6 @@
 package com.it332.principal.Services;
 
+import com.it332.principal.DTO.JEVSummary;
 import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.DTO.StackedBarDTO;
@@ -229,10 +230,10 @@ public class LRService {
         return jevs;
     }
 
-    public List<LRJEV> getJEVByDocumentsIdSummary(String documentsId) {
+    public List<JEVSummary> getJEVByDocumentsIdSummary(String documentsId) {
         existingDocument = documentsService.getDocumentById(documentsId);
         List<LRResponse> docLr = getAllApprovedLRsByDocumentsId(documentsId);
-        List<LRJEV> jevs = new ArrayList<>();
+        List<JEVSummary> summary = new ArrayList<>();
 
         // Use a Set to collect unique objectCodes, avoiding duplicates
         Set<String> uniqueObjectCodes = new HashSet<>();
@@ -241,34 +242,35 @@ public class LRService {
         }
 
         // Create a map to quickly find the LRJEV object by UACS code
-        Map<String, LRJEV> jevMap = new HashMap<>();
+        Map<String, JEVSummary> jevMap = new HashMap<>();
 
         // Create LRJEV object per unique object code and store in the map
         for (String code : uniqueObjectCodes) {
             Uacs existingUacs = uacsService.getUacsByCode(code);
-            LRJEV jev = new LRJEV(existingUacs);
-            jevs.add(jev);
+            JEVSummary jev = new JEVSummary(existingUacs);
+            summary.add(jev);
             jevMap.put(code, jev); // Add to the map for quick lookup
         }
 
         // Add the special case for the cash advance
-        LRJEV cashAdvanceJev = new LRJEV(uacsService.getUacsByCode("1990101000"));
-        jevs.add(cashAdvanceJev);
+        JEVSummary cashAdvanceJev = new JEVSummary(uacsService.getUacsByCode("1990101000"));
+        summary.add(cashAdvanceJev);
         jevMap.put("1990101000", cashAdvanceJev);
 
         // Update amounts efficiently by directly accessing the corresponding LRJEV from
         // the map
         for (LRResponse lr : docLr) {
-            LRJEV jev = jevMap.get(lr.getObjectCode());
+            JEVSummary jev = jevMap.get(lr.getObjectCode());
             if (jev != null) {
                 jev.setAmount(jev.getAmount() + lr.getAmount());
             }
+            jev.addLr(lr);
         }
 
         // Set the cash advance amount explicitly after the loop
         cashAdvanceJev.setAmount(existingDocument.getCashAdvance());
 
-        return jevs;
+        return summary;
     }
 
     public LR getLRById(String id) {
