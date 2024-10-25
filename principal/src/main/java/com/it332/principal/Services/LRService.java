@@ -220,7 +220,48 @@ public class LRService {
             LRJEV jev = jevMap.get(lr.getObjectCode());
             if (jev != null) {
                 jev.setAmount(jev.getAmount() + lr.getAmount());
-                jev.setBudgetExceeded(jev.getAmount() > jev.getBudget());
+            }
+        }
+
+        // Set the cash advance amount explicitly after the loop
+        cashAdvanceJev.setAmount(existingDocument.getCashAdvance());
+
+        return jevs;
+    }
+
+    public List<LRJEV> getJEVByDocumentsIdSummary(String documentsId) {
+        existingDocument = documentsService.getDocumentById(documentsId);
+        List<LRResponse> docLr = getAllApprovedLRsByDocumentsId(documentsId);
+        List<LRJEV> jevs = new ArrayList<>();
+
+        // Use a Set to collect unique objectCodes, avoiding duplicates
+        Set<String> uniqueObjectCodes = new HashSet<>();
+        for (LRResponse lr : docLr) {
+            uniqueObjectCodes.add(lr.getObjectCode());
+        }
+
+        // Create a map to quickly find the LRJEV object by UACS code
+        Map<String, LRJEV> jevMap = new HashMap<>();
+
+        // Create LRJEV object per unique object code and store in the map
+        for (String code : uniqueObjectCodes) {
+            Uacs existingUacs = uacsService.getUacsByCode(code);
+            LRJEV jev = new LRJEV(existingUacs);
+            jevs.add(jev);
+            jevMap.put(code, jev); // Add to the map for quick lookup
+        }
+
+        // Add the special case for the cash advance
+        LRJEV cashAdvanceJev = new LRJEV(uacsService.getUacsByCode("1990101000"));
+        jevs.add(cashAdvanceJev);
+        jevMap.put("1990101000", cashAdvanceJev);
+
+        // Update amounts efficiently by directly accessing the corresponding LRJEV from
+        // the map
+        for (LRResponse lr : docLr) {
+            LRJEV jev = jevMap.get(lr.getObjectCode());
+            if (jev != null) {
+                jev.setAmount(jev.getAmount() + lr.getAmount());
             }
         }
 
