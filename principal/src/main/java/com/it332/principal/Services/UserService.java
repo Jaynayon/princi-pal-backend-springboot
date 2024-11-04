@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
  
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
  
@@ -20,12 +21,15 @@ import com.it332.principal.Repository.AssociationRepository;
 import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.JwtUtil;
 import com.it332.principal.Security.NotFoundException;
- 
+import com.it332.principal.Models.Token; // Your Token model
+import com.it332.principal.Repository.TokenRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  
 @Service
 public class UserService {
  
+    @Autowired
+    private TokenRepository tokenRepository;
     @Autowired
     private UserRepository userRepository;
  
@@ -37,6 +41,10 @@ public class UserService {
  
     @Autowired
     private PositionService positionService;
+
+    @Autowired
+    @Lazy
+    private TokenService tokenService;
  
     @Autowired
     private JwtUtil jwtUtil; // Inject your JwtUtil for token management
@@ -61,9 +69,15 @@ public class UserService {
  
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
+        user.setVerified(false);
+         // Save user to the repository
+         User savedUser = userRepository.save(user);
+
+         // Send verification email after user creation
+         tokenService.sendEmailVerification(savedUser);
  
-        return userRepository.save(user);
-    }
+         return savedUser; // Return the saved user object
+     }
  
     // Create a new user as an admin: for creation of principal
     public User createUser(UserAdminRequest user) {
@@ -152,13 +166,15 @@ public class UserService {
         return user;
     }
  
-    public User getUserByToken(String token) {
-        User user = userRepository.findByToken(token);
- 
-        if (user == null) {
-            throw new NotFoundException("User not found with token: " + token);
-        }
- 
+    public User getUserByToken(String tokenValue) {
+        // Retrieve the token from the repository
+        Token foundToken = tokenRepository.findByToken(tokenValue)
+                .orElseThrow(() -> new NotFoundException("Token not found: " + tokenValue));
+    
+        // Use the found token to get the associated user
+        User user = userRepository.findById(foundToken.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found with token: " + tokenValue));
+    
         return user;
     }
  
@@ -278,4 +294,5 @@ public class UserService {
             throw new NotFoundException("User not found with ID: " + userId);
         }
     }
+
 }
