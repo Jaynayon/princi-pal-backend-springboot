@@ -23,6 +23,9 @@ import com.it332.principal.Security.JwtUtil;
 import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Models.Token; // Your Token model
 import com.it332.principal.Repository.TokenRepository;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  
 @Service
@@ -294,5 +297,45 @@ public class UserService {
             throw new NotFoundException("User not found with ID: " + userId);
         }
     }
+    public boolean isCurrentUserVerified(String emailOrUsername) {
+        UserResponse userResponse = getUserByEmailUsername(emailOrUsername);
+        
+        // Check if userResponse is not null
+        if (userResponse != null) {
+            return userResponse.isVerified(); // Return the verification status
+        }
+        
+        // Return false if the user is not found
+        return false; 
+    }
+    
+
+    public void updateUserVerificationStatus(String email, boolean status) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            user.setVerified(status);
+            userRepository.save(user);
+        } else {
+            throw new NotFoundException("User not found with email: " + email);
+        }
+    }
+
+    public UserResponse getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName(); // Get the current username
+    
+        // Fetch the user by their email/username
+        User user = userRepository.findByEmail(currentUsername);
+        if (user == null) {
+            user = userRepository.findByUsername(currentUsername);
+        }
+        if (user != null) {
+            return new UserResponse(user); // This should now work
+        }
+        throw new NotFoundException("User not found: " + currentUsername);
+    }
+    
+
+    
 
 }
