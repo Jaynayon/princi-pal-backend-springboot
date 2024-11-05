@@ -1,15 +1,15 @@
 package com.it332.principal.Services;
- 
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
- 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
- 
+
 import com.it332.principal.DTO.UserAdminRequest;
 import com.it332.principal.DTO.UserDetails;
 import com.it332.principal.DTO.UserResponse;
@@ -27,37 +27,37 @@ import com.it332.principal.Repository.TokenRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
- 
+
 @Service
 public class UserService {
- 
+
     @Autowired
     private TokenRepository tokenRepository;
     @Autowired
     private UserRepository userRepository;
- 
+
     @Autowired
     private AssociationRepository associationRepository;
- 
+
     @Autowired
     private SchoolService schoolService;
- 
+
     @Autowired
     private PositionService positionService;
 
     @Autowired
     @Lazy
     private TokenService tokenService;
- 
+
     @Autowired
     private JwtUtil jwtUtil; // Inject your JwtUtil for token management
- 
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
- 
+
     public String generateToken(String userId) {
         return jwtUtil.generateToken(userId);
     }
- 
+
     @Transactional
     public User createUser(User user) {
         // special case for creating super admin account
@@ -69,19 +69,19 @@ public class UserService {
             // insert position name to user
             user.setPosition(exist.getName());
         }
- 
+
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         user.setVerified(false);
-         // Save user to the repository
-         User savedUser = userRepository.save(user);
+        // Save user to the repository
+        User savedUser = userRepository.save(user);
 
-         // Send verification email after user creation
-         tokenService.sendEmailVerification(savedUser);
- 
-         return savedUser; // Return the saved user object
-     }
- 
+        // Send verification email after user creation
+        tokenService.sendEmailVerification(savedUser);
+
+        return savedUser; // Return the saved user object
+    }
+
     // Create a new user as an admin: for creation of principal
     public User createUser(UserAdminRequest user) {
         // Check if user requesting is admin
@@ -90,138 +90,145 @@ public class UserService {
         if (!position.equals("Super administrator")) {
             throw new IllegalArgumentException("Cannot process this request: Insufficient priviledge");
         }
- 
+
         // Check if position is existent
         Position exist = positionService.getPositionByName(user.getPosition());
- 
+
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
- 
+
         // insert position name to user
         user.setPosition(exist.getName());
         return userRepository.save(new User(user));
     }
- 
+
     public boolean validateUser(String emailOrUsername, String password) {
         // Find user by email or username
         User userByEmail = userRepository.findByEmail(emailOrUsername);
         User userByUsername = userRepository.findByUsername(emailOrUsername);
         User user;
- 
+
         if (userByEmail != null || userByUsername != null) {
             if (userByEmail != null) {
                 user = userByEmail;
             } else {
                 user = userByUsername;
             }
- 
+
             // Verify the password using BCrypt
             return passwordEncoder.matches(password, user.getPassword());
         }
- 
+
         return false; // User not found
     }
- 
+
+    public List<UserDetails> fetchPrincipals() {
+        List<User> principals = userRepository.findByPosition("Principal");
+        return principals.stream()
+                .map(UserDetails::new)
+                .collect(Collectors.toList());
+    }
+
     public UserResponse getUserByEmailUsername(String emailOrUsername) {
         // Find user by email or username
         User userByEmail = userRepository.findByEmail(emailOrUsername);
         User userByUsername = userRepository.findByUsername(emailOrUsername);
         User user;
- 
+
         if (userByEmail != null || userByUsername != null) {
             if (userByEmail != null) {
                 user = getUserByEmail(emailOrUsername);
             } else {
                 user = getUserByUsername(emailOrUsername);
             }
- 
+
             List<Association> associations = associationRepository.findByUserId(user.getId());
- 
+
             // Filter associations where approved is true
             List<String> approvedSchoolIds = associations.stream()
                     .filter(Association::isApproved)
                     .map(Association::getSchoolId)
                     .collect(Collectors.toList());
- 
+
             // Retrieve School objects for approved schoolIds
             List<School> approvedSchools = approvedSchoolIds.stream()
                     .map(schoolId -> schoolService.getSchoolById(schoolId))
                     .collect(Collectors.toList());
- 
+
             // Verify the password using BCrypt
             return new UserResponse(user, approvedSchools);
         }
- 
+
         throw new NotFoundException("User not found with email/username: " + emailOrUsername);
     }
- 
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
- 
+
     public User getUserByEmail(String email) {
         User user = userRepository.findByEmail(email);
- 
+
         if (user == null) {
             throw new NotFoundException("User not found with email: " + email);
         }
- 
+
         return user;
     }
- 
+
     public User getUserByToken(String tokenValue) {
         // Retrieve the token from the repository
         Token foundToken = tokenRepository.findByToken(tokenValue)
                 .orElseThrow(() -> new NotFoundException("Token not found: " + tokenValue));
-    
+
         // Use the found token to get the associated user
         User user = userRepository.findById(foundToken.getUserId())
                 .orElseThrow(() -> new NotFoundException("User not found with token: " + tokenValue));
-    
+
         return user;
     }
- 
+
     public UserResponse getUserAssociationsById(String id) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
- 
+
         List<Association> associations = associationRepository.findByUserId(existingUser.getId());
- 
+
         // Filter associations where approved is true
         List<String> approvedSchoolIds = associations.stream()
                 .filter(Association::isApproved)
                 .map(Association::getSchoolId)
                 .collect(Collectors.toList());
- 
+
         // Retrieve School objects for approved schoolIds
         List<School> approvedSchools = approvedSchoolIds.stream()
                 .map(schoolId -> schoolService.getSchoolById(schoolId))
                 .collect(Collectors.toList());
- 
+
         // Verify the password using BCrypt
         return new UserResponse(existingUser, approvedSchools);
     }
- 
+
     public User getUserById(String id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
     }
- 
+
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
- 
+
     public List<UserDetails> getUsersByIds(Collection<String> userIds) {
         return userRepository.findAllById(userIds).stream()
                 .map(UserDetails::new) // Convert User to UserDetails
                 .collect(Collectors.toList()); // Collect results into a list
     }
- 
+
     public void updateUser(String userId, User updateUser) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
- 
+
             // Update only the fields that are present in updateUser
             if (updateUser.getFname() != null) {
                 user.setFname(updateUser.getFname());
@@ -248,28 +255,28 @@ public class UserService {
             if (updateUser.getAvatar() != null) {
                 user.setAvatar(updateUser.getAvatar());
             }
- 
+
             userRepository.save(user); // Save the updated user object
         } else {
             throw new NotFoundException("User not found with ID: " + userId);
         }
     }
- 
+
     public void updateUserAvatar(String userId, String avatar) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
- 
+
             if (avatar != null) {
                 user.setAvatar(avatar);
             }
- 
+
             userRepository.save(user); // Save the updated user object
         } else {
             throw new NotFoundException("User not found with ID: " + userId);
         }
     }
- 
+
     public void deleteUserById(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
@@ -278,14 +285,14 @@ public class UserService {
             throw new NotFoundException("User not found with ID: " + userId);
         }
     }
- 
+
     public boolean checkIfUserExists(String emailOrUsername) {
         User userByEmail = userRepository.findByEmail(emailOrUsername);
         User userByUsername = userRepository.findByUsername(emailOrUsername);
- 
+
         return userByEmail != null || userByUsername != null;
     }
- 
+
     public void updateUserPassword(String userId, String newPassword) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
@@ -297,18 +304,18 @@ public class UserService {
             throw new NotFoundException("User not found with ID: " + userId);
         }
     }
+
     public boolean isCurrentUserVerified(String emailOrUsername) {
         UserResponse userResponse = getUserByEmailUsername(emailOrUsername);
-        
+
         // Check if userResponse is not null
         if (userResponse != null) {
             return userResponse.isVerified(); // Return the verification status
         }
-        
+
         // Return false if the user is not found
-        return false; 
+        return false;
     }
-    
 
     public void updateUserVerificationStatus(String email, boolean status) {
         User user = userRepository.findByEmail(email);
@@ -323,7 +330,7 @@ public class UserService {
     public UserResponse getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName(); // Get the current username
-    
+
         // Fetch the user by their email/username
         User user = userRepository.findByEmail(currentUsername);
         if (user == null) {
@@ -334,8 +341,5 @@ public class UserService {
         }
         throw new NotFoundException("User not found: " + currentUsername);
     }
-    
-
-    
 
 }

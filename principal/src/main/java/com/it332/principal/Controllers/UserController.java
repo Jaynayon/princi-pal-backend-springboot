@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.ErrorMessage;
 import com.it332.principal.DTO.UserAdminRequest;
+import com.it332.principal.DTO.UserDetails;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.User;
 import com.it332.principal.Models.UserCredentials;
@@ -75,6 +76,30 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             // This exception is thrown when a duplicate school name is detected
             err.setMessage("Failed to create user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Position not found: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            // Catching any other unexpected exceptions
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
+    @GetMapping("/principals")
+    public ResponseEntity<Object> fetchPrincipals() {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            List<UserDetails> principals = userService.fetchPrincipals();// Corrected method invocation
+            return new ResponseEntity<>(principals, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // This exception is thrown when a duplicate school name is detected
+            err.setMessage("Failed to get user: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(err);
         } catch (NotFoundException e) {
