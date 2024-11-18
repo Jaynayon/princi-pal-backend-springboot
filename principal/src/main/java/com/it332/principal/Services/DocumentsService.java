@@ -179,6 +179,35 @@ public class DocumentsService {
 
     }
 
+    public void updateDocumentAnnualBudget(DocumentsRequest doc) {
+        // Check if the needed fields are provided
+        if (doc.getCashAdvance() == null) {
+            throw new IllegalArgumentException("Cash Advance is required");
+        }
+        if (doc.getSchoolId() == null) {
+            throw new IllegalArgumentException("School ID is required");
+        }
+        if (doc.getYear() == null) {
+            throw new IllegalArgumentException("Year is required");
+        }
+
+        // Find all documents with the specified schoolId and year
+        List<Documents> documents = getDocumentsBySchoolYear(doc.getSchoolId(), doc.getYear());
+        double newCashAdvance = doc.getAnnualBudget() / 12; // Calculate the new cash advance
+
+        // Update the cash advance for each document
+        documents.forEach(document -> {
+            document.setAnnualBudget(doc.getAnnualBudget());
+            document.setCashAdvance(newCashAdvance);
+        });
+
+        // Save all documents in one batch operation
+        documentRepository.saveAll(documents);
+
+        // Update the budget exceeded status for all documents
+        documents.forEach(document -> updateDocumentBudgetExceeded(document.getId()));
+    }
+
     public Documents updateDocument(String id, DocumentsPatch updatedSchool) {
         // Check if document exists
         Documents document = getDocumentById(id);
