@@ -188,6 +188,8 @@ public class NotificationService {
     }
 
     public void deleteNotificationsByUserId(String userId) {
-        notificationRepository.deleteByUserId(userId);
+        List<Notification> notifications = notificationRepository
+                .findByUserIdAndHasButtonsIsFalse(userId);
+        notificationRepository.deleteAll(notifications);
     }
 }
