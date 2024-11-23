@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.AssociationEmailRequest;
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.AssociationReferral;
 import com.it332.principal.DTO.AssociationSchoolInfo;
 import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.Models.Association;
@@ -35,7 +36,7 @@ public class AssociationController {
             List<Association> associationOptional = associationService.getAllAssociations();
             return ResponseEntity.ok().body(associationOptional);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -51,7 +52,7 @@ public class AssociationController {
 
             return ResponseEntity.ok().body(associationOptional);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -66,7 +67,7 @@ public class AssociationController {
             Association createdAssociation = associationService.createAssociation(association);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -81,7 +82,7 @@ public class AssociationController {
             UserAssociation createdAssociation = associationService.getUserAssocation(association);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -98,9 +99,28 @@ public class AssociationController {
             Association updatedAssociation = associationService.insertUserToAssociation(association);
             return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/referral")
+    public ResponseEntity<Object> acceptUserReferral(@RequestBody AssociationReferral association) {
+        try {
+            // Assuming the association object contains the necessary information to invite
+            // a user
+            Association newAssociation = associationService.acceptUserReferral(association);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Internal server error: " + e.getMessage());
@@ -115,7 +135,7 @@ public class AssociationController {
             Association updatedAssociation = associationService.approveUserToAssociation(association);
             return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -130,7 +150,7 @@ public class AssociationController {
             associationService.rejectUserFromAssociation(association);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -164,7 +184,7 @@ public class AssociationController {
             Association updateAssociation = associationService.promoteAssociation(association);
             return ResponseEntity.ok(updateAssociation);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -179,7 +199,7 @@ public class AssociationController {
             Association updateAssociation = associationService.demoteAssociation(association);
             return ResponseEntity.ok(updateAssociation);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -194,7 +214,7 @@ public class AssociationController {
             associationService.deleteAssociation(schoolId, userId);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -209,7 +229,7 @@ public class AssociationController {
             associationService.deleteAssociationById(id);
             return ResponseEntity.noContent().build();
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -238,7 +258,7 @@ public class AssociationController {
             Association createdAssociation = associationService.applyToSchool(associationRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -331,7 +351,7 @@ public class AssociationController {
 
             return ResponseEntity.ok(applications);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -352,7 +372,7 @@ public class AssociationController {
 
             return ResponseEntity.ok(applications);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -370,7 +390,7 @@ public class AssociationController {
             }
             return ResponseEntity.ok(associations);
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {

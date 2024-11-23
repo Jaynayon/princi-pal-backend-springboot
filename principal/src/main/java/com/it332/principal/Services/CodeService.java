@@ -6,6 +6,7 @@ import com.it332.principal.Repository.CodeRepository;
 import com.it332.principal.Security.NotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.Random;
 import java.time.Duration;
@@ -21,6 +22,9 @@ public class CodeService {
 
     @Autowired
     private SchoolService schoolService;
+
+    @Value("${base.url}")
+    private String baseUrl;
 
     // Generate code
     public Code createCode(String schoolId) {
@@ -40,20 +44,15 @@ public class CodeService {
 
     public String getReferralCode(String schoolId) {
         // Get the existing code by schoolId
-        Code existingCode = getCodeBySchoolId(schoolId);
+        Code code = getCodeBySchoolId(schoolId);
 
-        if (existingCode == null) {
-            // If code doesn't exist, create a new one
-            return createCode(schoolId).getCode();
+        // If no existing code or code is expired, create or update it
+        if (code == null || isExpired(code)) {
+            code = (code == null) ? createCode(schoolId) : updateNewCode(schoolId);
         }
 
-        if (isExpired(existingCode)) {
-            // If the existing code is expired, renew it
-            return updateNewCode(schoolId).getCode();
-        }
-
-        // If the code exists and is not expired
-        return existingCode.getCode();
+        // Return the referral link with the valid code
+        return baseUrl + "/referral/" + code.getCode();
     }
 
     public School getSchoolByCode(String code) {

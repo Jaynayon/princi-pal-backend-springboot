@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 
 import com.it332.principal.DTO.AssociationEmailRequest;
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.AssociationReferral;
 import com.it332.principal.DTO.AssociationSchoolInfo;
 import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.DTO.UserResponse;
 import com.it332.principal.Models.Association;
+import com.it332.principal.Models.Code;
 import com.it332.principal.Models.Notification;
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
@@ -39,6 +41,9 @@ public class AssociationService extends Exception {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private CodeService codeService;
 
     public List<Association> getAllAssociations() {
         return associationRepository.findAll();
@@ -144,6 +149,28 @@ public class AssociationService extends Exception {
 
         // Save and return the new association
         return associationRepository.save(newAssociation);
+    }
+
+    public Association acceptUserReferral(AssociationReferral associationReferral) {
+        // Check if user exists
+        User existingUser = userService.getUserById(associationReferral.getUserId());
+        // Check if code exists
+        Code existingCode = codeService.getCode(associationReferral.getCode());
+
+        // Check if the association already exists for the given schoolId and userId
+        Association existingAssociation = associationRepository.findBySchoolIdAndUserId(existingCode.getSchoolId(),
+                existingUser.getId());
+        if (existingAssociation != null) {
+            // Throw conflict exception
+            throw new IllegalStateException("User has already been invited.");
+        } else {
+            Association newAssociation = new Association(existingUser.getId(), existingCode.getSchoolId(),
+                    true, false, false);
+            // Create notifcation for the user
+            createApprovalNotification(existingUser.getId(), existingCode.getSchoolId(), newAssociation.getId());
+            // Return new accepted association
+            return associationRepository.save(newAssociation);
+        }
     }
 
     public Association promoteAssociation(AssociationIdRequest association) {
