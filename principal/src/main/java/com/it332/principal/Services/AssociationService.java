@@ -164,12 +164,12 @@ public class AssociationService extends Exception {
             // Throw conflict exception
             throw new IllegalStateException("User has already been invited.");
         } else {
-            Association newAssociation = new Association(existingUser.getId(), existingCode.getSchoolId(),
-                    true, false, false);
+            Association newAssociation = associationRepository
+                    .save(new Association(existingUser.getId(), existingCode.getSchoolId(),
+                            true, false, false));
             // Create notifcation for the user
             createApprovalNotification(existingUser.getId(), existingCode.getSchoolId(), newAssociation.getId());
-            // Return new accepted association
-            return associationRepository.save(newAssociation);
+            return newAssociation;
         }
     }
 
