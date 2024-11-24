@@ -159,6 +159,10 @@ public class AssociationService extends Exception {
         // Check if code exists
         Code existingCode = codeService.getCode(associationReferral.getCode());
 
+        if ("Principal".equals(existingUser.getPosition())) {
+            throw new IllegalStateException("Principal cannot be referred.");
+        }
+
         // Check if the association already exists for the given schoolId and userId
         Association existingAssociation = associationRepository.findBySchoolIdAndUserId(existingCode.getSchoolId(),
                 existingUser.getId());
