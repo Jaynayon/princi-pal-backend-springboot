@@ -79,7 +79,7 @@ public class AssociationController {
     @PostMapping("/user")
     public ResponseEntity<Object> getUserAssociation(@RequestBody AssociationIdRequest association) {
         try {
-            UserAssociation createdAssociation = associationService.getUserAssocation(association);
+            UserAssociation createdAssociation = associationService.createUserAssocation(association);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

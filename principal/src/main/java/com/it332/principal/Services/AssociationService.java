@@ -60,21 +60,23 @@ public class AssociationService extends Exception {
         UserResponse existUser = userService.getUserAssociationsById(association.getUserId());
 
         // Check if the association already exists for the given schoolId and userId
-        return associationRepository.findBySchoolIdAndUserId(existSchool.getId(), existUser.getId());
+        Association assoc = associationRepository.findBySchoolIdAndUserId(existSchool.getId(), existUser.getId());
+
+        if (assoc == null) {
+            throw new NotFoundException("Association not found with User ID: " + association.getUserId());
+        }
+
+        return assoc;
     }
 
-    public UserAssociation getUserAssocation(AssociationIdRequest association) {
-        try {
-            // Get user association
-            Association existingAssociation = getAssociationByUserIdAndSchoolId(association);
+    public UserAssociation createUserAssocation(AssociationIdRequest association) {
+        // Get user association
+        Association existingAssociation = getAssociationByUserIdAndSchoolId(association);
 
-            // Get user
-            User existingUser = userService.getUserById(association.getUserId());
+        // Get user
+        User existingUser = userService.getUserById(association.getUserId());
 
-            return new UserAssociation(existingUser, existingAssociation);
-        } catch (Exception e) {
-            throw e;
-        }
+        return new UserAssociation(existingUser, existingAssociation);
     }
 
     public Association createAssociation(Association association) {
