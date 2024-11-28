@@ -1,7 +1,6 @@
 package com.it332.principal.DTO;
 
 import java.util.List;
-
 import com.it332.principal.Models.School;
 import com.it332.principal.Models.User;
 
@@ -16,12 +15,13 @@ public class UserResponse {
     private String position;
     private String avatar = "Blue"; // default value
     private List<School> schools;
+    private boolean verified; // New field for email verification
 
     public UserResponse() {
     }
 
     public UserResponse(String id, String fname, String mname, String lname, String username, String email,
-            String password, String position, String avatar) {
+            String password, String position, String avatar, boolean verified) { // Include verified in constructor
         this.id = id;
         this.fname = fname;
         this.mname = mname;
@@ -31,6 +31,7 @@ public class UserResponse {
         this.password = password;
         this.position = position;
         this.avatar = avatar;
+        this.verified = verified; // Set the verified status
     }
 
     public UserResponse(User user, List<School> schools) {
@@ -44,7 +45,22 @@ public class UserResponse {
         this.position = user.getPosition();
         this.avatar = user.getAvatar();
         this.schools = schools;
+        this.verified = user.isVerified(); // Retrieve verified status from User
     }
+    public UserResponse(User user) {
+        this.id = user.getId();
+        this.fname = user.getFname();
+        this.mname = user.getMname();
+        this.lname = user.getLname();
+        this.username = user.getUsername();
+        this.email = user.getEmail();
+        this.password = user.getPassword(); // You might not want to expose the password
+        this.position = user.getPosition();
+        this.avatar = user.getAvatar();
+        this.verified = user.isVerified(); // Retrieve verified status from User
+        this.schools = null; // Or initialize with an empty list if required
+    }
+    
 
     public String getId() {
         return id;
@@ -126,4 +142,8 @@ public class UserResponse {
         this.schools = schools;
     }
 
+    // Getter for verified status
+    public boolean isVerified() {
+        return verified;
+    }
 }

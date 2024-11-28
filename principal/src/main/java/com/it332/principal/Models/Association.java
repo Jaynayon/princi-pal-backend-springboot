@@ -12,13 +12,20 @@ public class Association {
     private boolean approved = false;
     private boolean invitation = false;
     private boolean admin = false;
-    
 
     public Association() {
     }
 
     public Association(String id, String userId, String schoolId, boolean approved, boolean invitation, boolean admin) {
         this.id = id;
+        this.userId = userId;
+        this.schoolId = schoolId;
+        this.approved = approved;
+        this.invitation = invitation;
+        this.admin = admin;
+    }
+
+    public Association(String userId, String schoolId, boolean approved, boolean invitation, boolean admin) {
         this.userId = userId;
         this.schoolId = schoolId;
         this.approved = approved;

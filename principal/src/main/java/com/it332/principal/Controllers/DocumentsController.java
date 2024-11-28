@@ -187,6 +187,27 @@ public class DocumentsController {
         }
     }
 
+    @PatchMapping("/resetBudget")
+    public ResponseEntity<Object> updateDocumentAnnualBudget(@RequestBody @Valid DocumentsRequest updatedSchool) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            documentsService.updateDocumentAnnualBudget(updatedSchool);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            err.setMessage("Failed to patch Document: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Document not found: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            err.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteDocument(@PathVariable String id) {
         ErrorMessage err = new ErrorMessage("");

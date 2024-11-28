@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.it332.principal.DTO.AssociationEmailRequest;
 import com.it332.principal.DTO.AssociationIdRequest;
+import com.it332.principal.DTO.AssociationReferral;
 import com.it332.principal.DTO.AssociationSchoolInfo;
 import com.it332.principal.DTO.UserAssociation;
 import com.it332.principal.Models.Association;
+import com.it332.principal.Security.NotFoundException;
 import com.it332.principal.Services.AssociationService;
 
 @RestController
@@ -29,55 +31,132 @@ public class AssociationController {
     private AssociationService associationService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Association>> getAllAssociation() {
-        List<Association> associationOptional = associationService.getAllAssociations();
-
-        return ResponseEntity.ok().body(associationOptional);
+    public ResponseEntity<Object> getAllAssociation() {
+        try {
+            List<Association> associationOptional = associationService.getAllAssociations();
+            return ResponseEntity.ok().body(associationOptional);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Association> getAssociationById(@PathVariable String id) {
-        Association associationOptional = associationService.getAssociationById(id);
+    public ResponseEntity<Object> getAssociationById(@PathVariable String id) {
+        try {
+            Association associationOptional = associationService.getAssociationById(id);
 
-        return ResponseEntity.ok().body(associationOptional);
-
-        // return associationOptional.map(association ->
-        // ResponseEntity.ok().body(association))
-        // .orElseGet(() -> ResponseEntity.notFound().build());
+            return ResponseEntity.ok().body(associationOptional);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Association> createAssociation(@RequestBody Association association) {
-        Association createdAssociation = associationService.createAssociation(association);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
+    public ResponseEntity<Object> createAssociation(@RequestBody Association association) {
+        try {
+            Association createdAssociation = associationService.createAssociation(association);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/user")
-    public ResponseEntity<UserAssociation> getUserAssociation(@RequestBody AssociationIdRequest association) {
-        UserAssociation createdAssociation = associationService.getUserAssocation(association);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
+    public ResponseEntity<Object> getUserAssociation(@RequestBody AssociationIdRequest association) {
+        try {
+            UserAssociation createdAssociation = associationService.createUserAssocation(association);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/insert")
-    public ResponseEntity<Association> insertUserToAssociation(@RequestBody AssociationIdRequest association) {
-        // Assuming the association object contains the necessary information to invite
-        // a user
-        Association updatedAssociation = associationService.insertUserToAssociation(association);
-        return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
+    public ResponseEntity<Object> insertUserToAssociation(@RequestBody AssociationIdRequest association) {
+        try {
+            // Assuming the association object contains the necessary information to invite
+            // a user
+            Association updatedAssociation = associationService.insertUserToAssociation(association);
+            return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/referral")
+    public ResponseEntity<Object> acceptUserReferral(@RequestBody AssociationReferral association) {
+        try {
+            // Assuming the association object contains the necessary information to invite
+            // a user
+            Association newAssociation = associationService.acceptUserReferral(association);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/approve")
-    public ResponseEntity<Association> approveUserToAssociation(@RequestBody AssociationIdRequest association) {
-        // Assuming the association object contains the necessary information to invite
-        // a user
-        Association updatedAssociation = associationService.approveUserToAssociation(association);
-        return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
+    public ResponseEntity<Object> approveUserToAssociation(@RequestBody AssociationIdRequest association) {
+        try {
+            // Assuming the association object contains the necessary information to invite
+            // a user
+            Association updatedAssociation = associationService.approveUserToAssociation(association);
+            return ResponseEntity.status(HttpStatus.CREATED).body(updatedAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/reject")
-    public ResponseEntity<Void> rejectUserFromAssociation(@RequestBody AssociationIdRequest association) {
-        associationService.rejectUserFromAssociation(association);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public ResponseEntity<?> rejectUserFromAssociation(@RequestBody AssociationIdRequest association) {
+        try {
+            associationService.rejectUserFromAssociation(association);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/approve/{notificationId}")
@@ -100,27 +179,63 @@ public class AssociationController {
     }
 
     @PatchMapping("/promote")
-    public ResponseEntity<Association> promoteAssociation(@RequestBody AssociationIdRequest association) {
-        Association updateAssociation = associationService.promoteAssociation(association);
-        return ResponseEntity.ok(updateAssociation);
+    public ResponseEntity<Object> promoteAssociation(@RequestBody AssociationIdRequest association) {
+        try {
+            Association updateAssociation = associationService.promoteAssociation(association);
+            return ResponseEntity.ok(updateAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Association not found: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @PatchMapping("/demote")
-    public ResponseEntity<Association> demoteAssociation(@RequestBody AssociationIdRequest association) {
-        Association updateAssociation = associationService.demoteAssociation(association);
-        return ResponseEntity.ok(updateAssociation);
+    public ResponseEntity<Object> demoteAssociation(@RequestBody AssociationIdRequest association) {
+        try {
+            Association updateAssociation = associationService.demoteAssociation(association);
+            return ResponseEntity.ok(updateAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{userId}/{schoolId}")
     public ResponseEntity<?> deleteAssociation(@PathVariable String userId, @PathVariable String schoolId) {
-        associationService.deleteAssociation(schoolId, userId);
-        return ResponseEntity.noContent().build();
+        try {
+            associationService.deleteAssociation(schoolId, userId);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAssociationById(@PathVariable String id) {
-        associationService.deleteAssociationById(id);
-        return ResponseEntity.noContent().build();
+        try {
+            associationService.deleteAssociationById(id);
+            return ResponseEntity.noContent().build();
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete/{notificationId}")
@@ -138,9 +253,18 @@ public class AssociationController {
     }
 
     @PostMapping("/apply")
-    public ResponseEntity<Association> applyToSchool(@RequestBody AssociationIdRequest associationRequest) {
-        Association createdAssociation = associationService.applyToSchool(associationRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
+    public ResponseEntity<Object> applyToSchool(@RequestBody AssociationIdRequest associationRequest) {
+        try {
+            Association createdAssociation = associationService.applyToSchool(associationRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdAssociation);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 
     /*
@@ -216,36 +340,63 @@ public class AssociationController {
      */
 
     @GetMapping("/applications/{schoolId}")
-    public ResponseEntity<List<UserAssociation>> getApplicationsForSchool(@PathVariable String schoolId) {
-        // Fetch applications using the updated service method
-        List<UserAssociation> applications = associationService.getApplicationsForSchool(schoolId);
+    public ResponseEntity<Object> getApplicationsForSchool(@PathVariable String schoolId) {
+        try {
+            // Fetch applications using the updated service method
+            List<UserAssociation> applications = associationService.getApplicationsForSchool(schoolId);
 
-        if (applications.isEmpty()) {
-            return ResponseEntity.noContent().build(); // No applications
+            if (applications.isEmpty()) {
+                return ResponseEntity.noContent().build(); // No applications
+            }
+
+            return ResponseEntity.ok(applications);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
         }
-
-        return ResponseEntity.ok(applications);
     }
 
     @GetMapping("/applications/user/{userId}")
-    public ResponseEntity<List<AssociationSchoolInfo>> getApplicationsForUser(@PathVariable String userId) {
-        // Fetch applications using the updated service method
-        List<AssociationSchoolInfo> applications = associationService.getAppliedSchools(userId);
+    public ResponseEntity<Object> getApplicationsForUser(@PathVariable String userId) {
+        try {
+            // Fetch applications using the updated service method
+            List<AssociationSchoolInfo> applications = associationService.getAppliedSchools(userId);
 
-        if (applications.isEmpty()) {
-            return ResponseEntity.noContent().build(); // No applications
+            if (applications.isEmpty()) {
+                return ResponseEntity.noContent().build(); // No applications
+            }
+
+            return ResponseEntity.ok(applications);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
         }
-
-        return ResponseEntity.ok(applications);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Association>> getAssociationsByUserId(@PathVariable String userId) {
-        List<Association> associations = associationService.getAssociationsByUserId(userId);
-        if (associations.isEmpty()) {
-            return ResponseEntity.noContent().build(); // No associations found for this user
+    public ResponseEntity<Object> getAssociationsByUserId(@PathVariable String userId) {
+        try {
+            List<Association> associations = associationService.getAssociationsByUserId(userId);
+            if (associations.isEmpty()) {
+                return ResponseEntity.noContent().build(); // No associations found for this user
+            }
+            return ResponseEntity.ok(associations);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
         }
-        return ResponseEntity.ok(associations);
     }
 
 }

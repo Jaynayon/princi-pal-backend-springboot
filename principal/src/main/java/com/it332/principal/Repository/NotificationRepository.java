@@ -3,11 +3,10 @@ package com.it332.principal.Repository;
 import com.it332.principal.Models.Notification;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-
 import java.util.List;
 
 public interface NotificationRepository extends MongoRepository<Notification, String> {
-    
+
     List<Notification> findByUserId(String userId);
 
     List<Notification> findByAssocId(String assocId);
@@ -18,6 +17,8 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     List<Notification> findByUserIdAndIsRejected(String userId, boolean isRejected);
 
     List<Notification> findBySchoolId(String schoolId);
+
+    List<Notification> findByUserIdAndHasButtonsIsNullOrHasButtonsIsFalse(String userId);
 
     void deleteByUserId(String userId);
 }

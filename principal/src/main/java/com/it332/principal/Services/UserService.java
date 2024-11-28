@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +21,18 @@ import com.it332.principal.Repository.AssociationRepository;
 import com.it332.principal.Repository.UserRepository;
 import com.it332.principal.Security.JwtUtil;
 import com.it332.principal.Security.NotFoundException;
+import com.it332.principal.Models.Token; // Your Token model
+import com.it332.principal.Repository.TokenRepository;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Service
 public class UserService {
 
+    @Autowired
+    private TokenRepository tokenRepository;
     @Autowired
     private UserRepository userRepository;
 
@@ -37,6 +44,10 @@ public class UserService {
 
     @Autowired
     private PositionService positionService;
+
+    @Autowired
+    @Lazy
+    private TokenService tokenService;
 
     @Autowired
     private JwtUtil jwtUtil; // Inject your JwtUtil for token management
@@ -61,8 +72,14 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
+        user.setVerified(false);
+        // Save user to the repository
+        User savedUser = userRepository.save(user);
 
-        return userRepository.save(user);
+        // Send verification email after user creation
+        tokenService.sendEmailVerification(savedUser);
+
+        return savedUser; // Return the saved user object
     }
 
     // Create a new user as an admin: for creation of principal
@@ -103,6 +120,13 @@ public class UserService {
         }
 
         return false; // User not found
+    }
+
+    public List<UserDetails> fetchPrincipals() {
+        List<User> principals = userRepository.findByPosition("Principal");
+        return principals.stream()
+                .map(UserDetails::new)
+                .collect(Collectors.toList());
     }
 
     public UserResponse getUserByEmailUsername(String emailOrUsername) {
@@ -148,6 +172,18 @@ public class UserService {
         if (user == null) {
             throw new NotFoundException("User not found with email: " + email);
         }
+
+        return user;
+    }
+
+    public User getUserByToken(String tokenValue) {
+        // Retrieve the token from the repository
+        Token foundToken = tokenRepository.findByToken(tokenValue)
+                .orElseThrow(() -> new NotFoundException("Token not found: " + tokenValue));
+
+        // Use the found token to get the associated user
+        User user = userRepository.findById(foundToken.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found with token: " + tokenValue));
 
         return user;
     }
@@ -268,4 +304,42 @@ public class UserService {
             throw new NotFoundException("User not found with ID: " + userId);
         }
     }
+
+    public boolean isCurrentUserVerified(String emailOrUsername) {
+        UserResponse userResponse = getUserByEmailUsername(emailOrUsername);
+
+        // Check if userResponse is not null
+        if (userResponse != null) {
+            return userResponse.isVerified(); // Return the verification status
+        }
+
+        // Return false if the user is not found
+        return false;
+    }
+
+    public void updateUserVerificationStatus(String email, boolean status) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            user.setVerified(status);
+            userRepository.save(user);
+        } else {
+            throw new NotFoundException("User not found with email: " + email);
+        }
+    }
+
+    public UserResponse getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName(); // Get the current username
+
+        // Fetch the user by their email/username
+        User user = userRepository.findByEmail(currentUsername);
+        if (user == null) {
+            user = userRepository.findByUsername(currentUsername);
+        }
+        if (user != null) {
+            return new UserResponse(user); // This should now work
+        }
+        throw new NotFoundException("User not found: " + currentUsername);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.it332.principal.Services;
 
+import com.it332.principal.DTO.JEVSummary;
 import com.it332.principal.DTO.LRRequest;
 import com.it332.principal.DTO.LRResponse;
 import com.it332.principal.DTO.StackedBarDTO;
@@ -69,7 +70,8 @@ public class LRService {
         LR newLr = new LR(lr, existingUacs.getCode());
 
         // Check approved
-        newLr.setApproved(lr.getAmount() + existingDocument.getBudget() < existingDocument.getCashAdvance());
+        // newLr.setApproved(lr.getAmount() + existingDocument.getBudget() <
+        // existingDocument.getCashAdvance());
 
         lrRepository.save(newLr);
 
@@ -219,7 +221,6 @@ public class LRService {
             LRJEV jev = jevMap.get(lr.getObjectCode());
             if (jev != null) {
                 jev.setAmount(jev.getAmount() + lr.getAmount());
-                jev.setBudgetExceeded(jev.getAmount() > jev.getBudget());
             }
         }
 
@@ -227,6 +228,49 @@ public class LRService {
         cashAdvanceJev.setAmount(existingDocument.getCashAdvance());
 
         return jevs;
+    }
+
+    public List<JEVSummary> getJEVByDocumentsIdSummary(String documentsId) {
+        existingDocument = documentsService.getDocumentById(documentsId);
+        List<LRResponse> docLr = getAllApprovedLRsByDocumentsId(documentsId);
+        List<JEVSummary> summary = new ArrayList<>();
+
+        // Use a Set to collect unique objectCodes, avoiding duplicates
+        Set<String> uniqueObjectCodes = new HashSet<>();
+        for (LRResponse lr : docLr) {
+            uniqueObjectCodes.add(lr.getObjectCode());
+        }
+
+        // Create a map to quickly find the LRJEV object by UACS code
+        Map<String, JEVSummary> jevMap = new HashMap<>();
+
+        // Create LRJEV object per unique object code and store in the map
+        for (String code : uniqueObjectCodes) {
+            Uacs existingUacs = uacsService.getUacsByCode(code);
+            JEVSummary jev = new JEVSummary(existingUacs);
+            summary.add(jev);
+            jevMap.put(code, jev); // Add to the map for quick lookup
+        }
+
+        // Add the special case for the cash advance
+        JEVSummary cashAdvanceJev = new JEVSummary(uacsService.getUacsByCode("1990101000"));
+        summary.add(cashAdvanceJev);
+        jevMap.put("1990101000", cashAdvanceJev);
+
+        // Update amounts efficiently by directly accessing the corresponding LRJEV from
+        // the map
+        for (LRResponse lr : docLr) {
+            JEVSummary jev = jevMap.get(lr.getObjectCode());
+            if (jev != null) {
+                jev.setAmount(jev.getAmount() + lr.getAmount());
+            }
+            jev.addLr(lr);
+        }
+
+        // Set the cash advance amount explicitly after the loop
+        cashAdvanceJev.setAmount(existingDocument.getCashAdvance());
+
+        return summary;
     }
 
     public LR getLRById(String id) {
@@ -339,19 +383,20 @@ public class LRService {
             oldValue = lr.getAmount() + "";
             newValue = updatedLR.getAmount() + "";
             // LR displayed will always be approved ones
-            if (lr.isApproved()) {
-                // lr amount + total lrs amount > monthly budget
-                if ((updatedLR.getAmount() + (existingDocument.getBudget() - lr.getAmount())) > existingDocument
-                        .getCashAdvance()) {
-                    lr.setApproved(false);
-                } else {
-                    lr.setApproved(true);
-                }
-            }
-            // Cancel / Reject
-            else {
-                lr.setApproved(true);
-            }
+            // if (lr.isApproved()) {
+            // // lr amount + total lrs amount > monthly budget
+            // if ((updatedLR.getAmount() + (existingDocument.getBudget() - lr.getAmount()))
+            // > existingDocument
+            // .getCashAdvance()) {
+            // lr.setApproved(false);
+            // } else {
+            // lr.setApproved(true);
+            // }
+            // }
+            // // Cancel / Reject
+            // else {
+            // lr.setApproved(true);
+            // }
             lr.setAmount(updatedLR.getAmount());
         }
         if (updatedLR.isApproved()) {

@@ -19,6 +19,7 @@ public class UserAssociation {
     private String lname;
     private String position;
     private Boolean admin;
+    private String avatar;
 
     public UserAssociation(User user, Association association) {
         this.id = user.getId();
@@ -31,5 +32,6 @@ public class UserAssociation {
         this.lname = user.getLname();
         this.position = user.getPosition();
         this.admin = association.isAdmin();
+        this.avatar = user.getAvatar();
     }
 }

@@ -77,21 +77,30 @@ public class DocumentsService {
                     existingSchool.getId(), document.getYear(), month);
 
             if (existingDoc != null) {
-                continue; // Skip if document already exist
+                existingDoc.setCashAdvance(document.getAnnualBudget() / 12);
+                existingDoc.setAnnualBudget(document.getAnnualBudget());
+
+                // Store requested month Document
+                if (document.getMonth().equals(month)) {
+                    documentRequest = existingDoc;
+                }
+
+                // Add the new document to year documents
+                yearDocuments.add(existingDoc);
+            } else {
+                // Create a new document for each month
+                Documents newDoc = new Documents(document);
+                newDoc.setMonth(month); // Set the month
+                newDoc.setCashAdvance(document.getAnnualBudget() / 12);
+
+                // Store requested month Document
+                if (document.getMonth().equals(month)) {
+                    documentRequest = newDoc;
+                }
+
+                // Add the new document to year documents
+                yearDocuments.add(newDoc);
             }
-
-            // Create a new document for each month
-            Documents newDoc = new Documents(document);
-            newDoc.setMonth(month); // Set the month
-            newDoc.setCashAdvance(document.getAnnualBudget() / 12);
-
-            // Store requested month Document
-            if (document.getMonth().equals(month)) {
-                documentRequest = newDoc;
-            }
-
-            // Add the new document to year documents
-            yearDocuments.add(newDoc);
         }
 
         documentRepository.saveAll(yearDocuments);
@@ -177,6 +186,35 @@ public class DocumentsService {
         // Save new sum
         documentRepository.save(existingDocument);
 
+    }
+
+    public void updateDocumentAnnualBudget(DocumentsRequest doc) {
+        // Check if the needed fields are provided
+        if (doc.getCashAdvance() == null) {
+            throw new IllegalArgumentException("Cash Advance is required");
+        }
+        if (doc.getSchoolId() == null) {
+            throw new IllegalArgumentException("School ID is required");
+        }
+        if (doc.getYear() == null) {
+            throw new IllegalArgumentException("Year is required");
+        }
+
+        // Find all documents with the specified schoolId and year
+        List<Documents> documents = getDocumentsBySchoolYear(doc.getSchoolId(), doc.getYear());
+        double newCashAdvance = doc.getAnnualBudget() / 12; // Calculate the new cash advance
+
+        // Update the cash advance for each document
+        documents.forEach(document -> {
+            document.setAnnualBudget(doc.getAnnualBudget());
+            document.setCashAdvance(newCashAdvance);
+        });
+
+        // Save all documents in one batch operation
+        documentRepository.saveAll(documents);
+
+        // Update the budget exceeded status for all documents
+        documents.forEach(document -> updateDocumentBudgetExceeded(document.getId()));
     }
 
     public Documents updateDocument(String id, DocumentsPatch updatedSchool) {
