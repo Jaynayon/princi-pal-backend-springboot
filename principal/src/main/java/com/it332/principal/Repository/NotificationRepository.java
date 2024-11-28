@@ -18,7 +18,7 @@ public interface NotificationRepository extends MongoRepository<Notification, St
 
     List<Notification> findBySchoolId(String schoolId);
 
-    List<Notification> findByUserIdAndHasButtonsIsFalse(String userId);
+    List<Notification> findByUserIdAndHasButtonsIsNullOrHasButtonsIsFalse(String userId);
 
     void deleteByUserId(String userId);
 }

@@ -189,7 +189,7 @@ public class NotificationService {
 
     public void deleteNotificationsByUserId(String userId) {
         List<Notification> notifications = notificationRepository
-                .findByUserIdAndHasButtonsIsFalse(userId);
+                .findByUserIdAndHasButtonsIsNullOrHasButtonsIsFalse(userId);
         notificationRepository.deleteAll(notifications);
     }
 }
