@@ -77,21 +77,30 @@ public class DocumentsService {
                     existingSchool.getId(), document.getYear(), month);
 
             if (existingDoc != null) {
-                continue; // Skip if document already exist
+                existingDoc.setCashAdvance(document.getAnnualBudget() / 12);
+                existingDoc.setAnnualBudget(document.getAnnualBudget());
+
+                // Store requested month Document
+                if (document.getMonth().equals(month)) {
+                    documentRequest = existingDoc;
+                }
+
+                // Add the new document to year documents
+                yearDocuments.add(existingDoc);
+            } else {
+                // Create a new document for each month
+                Documents newDoc = new Documents(document);
+                newDoc.setMonth(month); // Set the month
+                newDoc.setCashAdvance(document.getAnnualBudget() / 12);
+
+                // Store requested month Document
+                if (document.getMonth().equals(month)) {
+                    documentRequest = newDoc;
+                }
+
+                // Add the new document to year documents
+                yearDocuments.add(newDoc);
             }
-
-            // Create a new document for each month
-            Documents newDoc = new Documents(document);
-            newDoc.setMonth(month); // Set the month
-            newDoc.setCashAdvance(document.getAnnualBudget() / 12);
-
-            // Store requested month Document
-            if (document.getMonth().equals(month)) {
-                documentRequest = newDoc;
-            }
-
-            // Add the new document to year documents
-            yearDocuments.add(newDoc);
         }
 
         documentRepository.saveAll(yearDocuments);
