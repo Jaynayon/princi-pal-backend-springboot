@@ -1,6 +1,7 @@
 package com.it332.principal.Services;
 
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -10,6 +11,7 @@ import com.it332.principal.DTO.DocumentsResponse;
 import com.it332.principal.DTO.ExcelRequest;
 import com.it332.principal.Models.LRJEV;
 import com.it332.principal.Models.School;
+import com.it332.principal.Models.Uacs;
 import com.it332.principal.Models.User;
 
 import java.io.IOException;
@@ -31,6 +33,9 @@ public class ExportJEVService {
     @Autowired
     SchoolService schoolService;
 
+    final int DEFAULT_COL_NUM = 9; // Column C-K
+    final int DEFAULT_COL_START = 2; // Column C
+
     public byte[] generateJEVData(ExcelRequest request) throws IOException {
         // Data to write
         School school = schoolService.getSchoolById(request.getSchoolId());
@@ -44,6 +49,7 @@ public class ExportJEVService {
         // jevService.getAllJEVsByDocumentsId(document.getId());
         List<LRJEV> dataToWrite = lrService.getJEVByDocumentsId(request.getDocumentId());
         User user = userService.getUserById(request.getUserId());
+        List<Uacs> addtlUacs = lrService.getAdditionalUacsListByApprovedLr(request.getDocumentId());
 
         // Load template workbook from the classpath
         ClassPathResource resource = new ClassPathResource("Templates/JEV-2024.xlsx");
@@ -58,7 +64,12 @@ public class ExportJEVService {
                     request.getMonth(),
                     request.getYear()) + " (JEV)");
 
+            int addtlCol = addtlUacs.size();
             Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
+
+            if (addtlCol > 0) {
+                insertAdditionalRows(sheet, 12, addtlCol);
+            }
 
             // Set Entity/School name
             setJEVEntity(sheet, workbook, school.getFullName(), 6, 2);
@@ -66,15 +77,15 @@ public class ExportJEVService {
             // Set Prepared and Cert. Cor.
             setJEVPeopleCells(sheet, workbook,
                     user.getFname() + " " + user.getMname().substring(0, 1) + ". " + user.getLname(),
-                    29, 1);
-            setJEVPeopleCells(sheet, workbook, document.getHeadAccounting(), 29, 4);
+                    29 + addtlCol, 1, true);
+            setJEVPeopleCells(sheet, workbook, document.getHeadAccounting(), 29 + addtlCol, 4, false);
 
             // Set User position
-            setJEVPeoplePosition(sheet, workbook, user.getPosition(), 30, 1);
+            setJEVPeoplePosition(sheet, workbook, user.getPosition(), 30 + addtlCol, 1);
 
             // Set note
             setJEVNote(sheet, workbook, school.getFullName(), document.getClaimant(), document.getMonth(),
-                    document.getYear(), 22, 2);
+                    document.getYear(), 22 + addtlCol, 2);
 
             int rowIndex = 12; // Start from row 13 (zero-based index)
 
@@ -131,7 +142,7 @@ public class ExportJEVService {
                 Row row = sheet.createRow(rowIndex);
 
                 // Populate cells and apply styles
-                for (int i = 0; i < 11; i++) {
+                for (int i = 1; i < 11; i++) {
                     Cell cell = row.createCell(i);
                     switch (i) {
                         case 2:
@@ -157,7 +168,13 @@ public class ExportJEVService {
                     // Apply cell style from the template
                     if (cellStyles[i] != null) {
                         // Only apply on Accounts and Explanation column/cell
-                        if (i == 2) {
+                        if (i == 1) {
+                            CellStyle thickLeftBorder = workbook.createCellStyle();
+                            thickLeftBorder.setBorderLeft(BorderStyle.MEDIUM);
+                            thickLeftBorder.setBorderTop(BorderStyle.THIN);
+                            thickLeftBorder.setBorderBottom(BorderStyle.THIN);
+                            cell.setCellStyle(thickLeftBorder);
+                        } else if (i == 2) {
                             if (data.getUacsCode().equals("1990101000")) {
                                 // Create a new custom style for right alignment
                                 CellStyle customRightAlignedStyle = workbook.createCellStyle();
@@ -191,6 +208,24 @@ public class ExportJEVService {
 
             // workbook.close();
             return outputStream.toByteArray(); // Return the byte array
+        }
+    }
+
+    private void insertAdditionalRows(Sheet sheet, int rowIndex, int n) {
+        // Ensure all rows exist in the range to shift
+        for (int i = rowIndex; i <= sheet.getLastRowNum(); i++) {
+            if (sheet.getRow(i) == null) {
+                sheet.createRow(i);
+            }
+        }
+
+        // Shift rows down
+        sheet.shiftRows(rowIndex, sheet.getLastRowNum(), n);
+
+        // Merge cells for the new rows
+        for (int i = rowIndex; i < rowIndex + n; i++) {
+            sheet.addMergedRegion(new CellRangeAddress(i, i, 6, 7));
+            sheet.addMergedRegion(new CellRangeAddress(i, i, 9, 10));
         }
     }
 
@@ -235,6 +270,7 @@ public class ExportJEVService {
         customFont.setFontHeightInPoints((short) 11);
         customFont.setColor(IndexedColors.BLACK.getIndex());
         cellStyle.setFont(customFont);
+        cellStyle.setBorderLeft(BorderStyle.MEDIUM);
 
         // Set alignment to centered
         cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
@@ -244,7 +280,7 @@ public class ExportJEVService {
         cell.setCellStyle(cellStyle);
     }
 
-    public void setJEVPeopleCells(Sheet sheet, Workbook workbook, String name, int rowNo, int colNo) {
+    public void setJEVPeopleCells(Sheet sheet, Workbook workbook, String name, int rowNo, int colNo, boolean isLeft) {
         // Find the specific cell to alter (B96)
         Row customRow = sheet.getRow(rowNo - 1); // Row index 95 (zero-based) is row 96 in Excel
         Cell cell = customRow.getCell(colNo); // Cell B96
@@ -262,6 +298,9 @@ public class ExportJEVService {
         customFont.setUnderline(Font.U_SINGLE);
         customFont.setBold(true);
         cellStyle.setFont(customFont);
+        if (isLeft) {
+            cellStyle.setBorderLeft(BorderStyle.MEDIUM);
+        }
 
         // Set alignment to centered
         cellStyle.setVerticalAlignment(VerticalAlignment.TOP);
