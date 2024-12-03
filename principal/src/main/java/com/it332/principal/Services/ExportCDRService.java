@@ -230,7 +230,7 @@ public class ExportCDRService {
             // sheet
             String sheetName = workbook.getSheetName(0); // Get sheet name (assuming first sheet)
             // Set print area (adjust row and column indices)
-            workbook.setPrintArea(workbook.getSheetIndex(sheetName), 0, 15 + addtlCol, 0, 89);
+            workbook.setPrintArea(workbook.getSheetIndex(sheetName), 0, 15 + addtlCol, 0, 89 + addtlCol);
 
             // Write workbook to ByteArrayOutputStream
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -282,8 +282,15 @@ public class ExportCDRService {
     }
 
     private void insertAdditionalRows(Sheet sheet, int rowIndex, List<Uacs> addtlUacs) {
+        // Ensure all rows exist in the range to shift
+        for (int i = rowIndex; i <= sheet.getLastRowNum(); i++) {
+            if (sheet.getRow(i) == null) {
+                sheet.createRow(i);
+            }
+        }
+
         // Shift rows down to make room for the additional rows
-        sheet.shiftRows(rowIndex, rowIndex + addtlUacs.size(), addtlUacs.size());
+        sheet.shiftRows(rowIndex, sheet.getLastRowNum(), addtlUacs.size());
 
         // Reference the source row for default styling (row after the shifted rows)
         int sourceRowIndex = rowIndex + addtlUacs.size(); // This should point to row 81 in this case
