@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -427,6 +428,33 @@ public class LRService {
 
         // Update the associated Document's budget based on the saved LR's amount
         updateDocumentBudget(lr.getDocumentsId());
+    }
+
+    public List<Uacs> getAdditionalUacsListByApprovedLr(String documentsId) {
+        // Fetch all approved LRs by document ID
+        List<LRResponse> lrs = getAllApprovedLRsByDocumentsId(documentsId);
+
+        // Use a Set for faster lookup of default object codes
+        Set<String> defaultObjectCodes = new HashSet<>(Arrays.asList(
+                "5020502001", "5020402000", "5020503000", "5029904000",
+                "5020201000", "5021304002", "5020399000"));
+
+        // Create a Set to store UACS codes
+        Set<Uacs> uacsCodes = new HashSet<>();
+
+        // Add UACS objects from LR responses to the Set
+        for (LRResponse lr : lrs) {
+            Uacs uacs = uacsService.getUacsByCode(lr.getObjectCode());
+            if (uacs != null) {
+                uacsCodes.add(uacs);
+            }
+        }
+
+        // Remove default UACS codes from the set
+        uacsCodes.removeIf(uacs -> defaultObjectCodes.contains(uacs.getCode()));
+
+        // Return the result as a List
+        return new ArrayList<>(uacsCodes);
     }
 
     public void createBudgetLimitExceededNotification(Documents document) {
