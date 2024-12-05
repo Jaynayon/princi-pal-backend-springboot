@@ -60,6 +60,15 @@ public class SchoolService {
         return null;
     }
 
+    public void deleteIsPrincipalPresent(String schoolId) {
+        // Find the first user with the position "Principal" directly
+        getUsersBySchoolId(schoolId).stream()
+                .filter(user -> "Principal".equals(user.getPosition()))
+                .findFirst()
+                .ifPresent(user -> associationRepository.delete(
+                        associationRepository.findBySchoolIdAndUserId(schoolId, user.getId())));
+    }
+
     public List<UserAssociation> getUsersBySchoolId(String schoolId) {
         List<Association> association = associationRepository.findBySchoolIdAndApprovedTrue(schoolId);
 

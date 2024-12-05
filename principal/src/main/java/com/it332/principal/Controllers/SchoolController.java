@@ -178,6 +178,33 @@ public class SchoolController {
         }
     }
 
+    @DeleteMapping("/users/principal")
+    public ResponseEntity<Object> deletePrincipalBySchoolId(@RequestBody Map<String, String> requestBody) {
+        ErrorMessage err = new ErrorMessage("");
+        try {
+            String schoolId = requestBody.get("schoolId");
+            if (schoolId == null || schoolId.isEmpty()) {
+                throw new IllegalArgumentException("School Id is required");
+            }
+
+            schoolService.deleteIsPrincipalPresent(schoolId);
+            return ResponseEntity.noContent().build(); // Return 204 No Content on successful deletion
+        } catch (IllegalArgumentException e) {
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(err);
+        } catch (NotFoundException e) {
+            err.setMessage("Failed to get user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(err);
+        } catch (Exception e) {
+            e.printStackTrace();
+            err.setMessage("Internal server error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(err);
+        }
+    }
+
     @PostMapping("/fullname")
     public ResponseEntity<Object> getSchoolByFullName(@RequestBody Map<String, String> requestBody) {
         ErrorMessage err = new ErrorMessage("");
