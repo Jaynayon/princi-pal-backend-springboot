@@ -104,8 +104,8 @@ public class ExportCDRService {
             setCDRHeader(sheet, workbook, document.getCashAdvance(), 14, 3);
 
             // Set Cert. Cor. and Received by
-            setCDRPeopleCells(sheet, workbook, document.getClaimant(), 88, 0);
-            setCDRPeopleCells(sheet, workbook, userFullName, 88, 9 + addtlCol);
+            setCDRPeopleCells(sheet, workbook, document.getClaimant(), 88 + addtlCol, 0);
+            setCDRPeopleCells(sheet, workbook, userFullName, 88 + addtlCol, 9 + addtlCol);
 
             int rowIndex = 16; // Start from row 17 (zero-based index)
 
@@ -299,6 +299,10 @@ public class ExportCDRService {
             sourceRow = sheet.createRow(sourceRowIndex); // Create source row if it doesn't exist
         }
 
+        // Recapitulation section starts at the 3rd column from the rightmost column
+        int start = DEFAULT_COL_NUM + addtlUacs.size() - 2;
+        int end = DEFAULT_COL_NUM + addtlUacs.size() + 2;
+
         for (int i = 0; i < addtlUacs.size(); i++) {
             int targetRowIndex = rowIndex + i; // Start creating new rows at 78 + i
             Row targetRow = sheet.getRow(targetRowIndex);
@@ -306,16 +310,15 @@ public class ExportCDRService {
                 targetRow = sheet.createRow(targetRowIndex); // Create the target row if it doesn't exist
             }
 
-            // 3 columns to occupy: description, object code, and amount
-            for (int j = DEFAULT_COL_NUM; j < DEFAULT_COL_NUM + 3; j++) {
+            for (int j = start; j < end; j++) {
                 Cell sourceCell = sourceRow.getCell(j - 1); // Get the source cell for styling
                 Cell targetCell = targetRow.createCell(j - 1); // Create target cell
 
                 if (sourceCell != null) {
                     copyRowCellStyle(sourceCell, targetCell, DEFAULT_COL_START + i);
-                    if (j == DEFAULT_COL_NUM) {
+                    if (j == start) {
                         targetCell.setCellValue(addtlUacs.get(i).getName());
-                    } else if (j == DEFAULT_COL_NUM + 1) {
+                    } else if (j == start + 1) {
                         targetCell.setCellValue(addtlUacs.get(i).getCode());
                     } else {
                         targetCell.setCellValue("Amount");
