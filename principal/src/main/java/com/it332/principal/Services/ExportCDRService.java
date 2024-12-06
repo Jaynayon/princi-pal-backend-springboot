@@ -38,6 +38,7 @@ public class ExportCDRService {
     final int DEFAULT_ROW_SUM = 73;
     final int DEFAULT_ROW_START = 78;
     final int DEFAULT_ROW_LAST = 90;
+    final int DEFAULT_ROW_RECAP = 85;
 
     public byte[] generateCDRData(ExcelRequest request) throws IOException {
         // Data to write
@@ -89,6 +90,9 @@ public class ExportCDRService {
 
                 // Update the SUM formula that includes the additional columns
                 updateSumFormula(sheet, DEFAULT_COL_NUM + addtlUacs.size(), 75, addtlUacs.size());
+
+                updateRecapitulationSumFormula(sheet, DEFAULT_COL_NUM + addtlUacs.size(), DEFAULT_ROW_START,
+                        DEFAULT_ROW_RECAP, addtlCol);
             }
 
             // Set Date
@@ -398,6 +402,24 @@ public class ExportCDRService {
 
         String newFormula = sb.toString() + cell.getCellFormula();
         cell.setCellFormula(newFormula);
+    }
+
+    private void updateRecapitulationSumFormula(Sheet sheet, int colNo, int startRow, int endRow, int n) {
+        int targetCol = colNo - 1;
+        // The new target row for the sum formula is the
+        // DEFAULT_ROW_RECAP + number of added UACS
+        int targetRow = endRow + n;
+        // startRow is DEFAULT_ROW_START, row 75 which is a header
+        // + 1 so we start counting the contents
+        int targetInitialRange = startRow + 1;
+
+        Row customRow = sheet.getRow(targetRow);
+        Cell cell = customRow.getCell(targetCol);
+
+        String formula = "SUM(" + getCellLetter(targetCol) + targetInitialRange + ":" +
+                getCellLetter(targetCol) + targetRow + ")";
+
+        cell.setCellFormula(formula);
     }
 
     private String getCellLetter(int columnIndex) {
