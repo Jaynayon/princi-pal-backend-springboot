@@ -4,7 +4,6 @@ public class DocumentsRequest {
     private String schoolId;
     private String month;
     private String year;
-    private Double budget = 0.0;
     private Double budgetLimit = 0.0;
     private Double cashAdvance = 0.0;
     private Double annualBudget = 0.0;
@@ -15,12 +14,11 @@ public class DocumentsRequest {
     public DocumentsRequest() {
     }
 
-    public DocumentsRequest(String schoolId, String month, String year, Double budget, Double budgetLimit,
+    public DocumentsRequest(String schoolId, String month, String year, Double budgetLimit,
             Double cashAdvance, Double annualBudget, String sds, String claimant, String headAccounting) {
         this.schoolId = schoolId;
         this.month = month;
         this.year = year;
-        this.budget = budget;
         this.budgetLimit = budgetLimit;
         this.cashAdvance = cashAdvance;
         this.annualBudget = annualBudget;
@@ -33,7 +31,6 @@ public class DocumentsRequest {
         this.schoolId = schoolId;
         this.month = month;
         this.year = year;
-        setBudget(Double.parseDouble("0"));
         setBudgetLimit(Double.parseDouble("0"));
         setCashAdvance(Double.parseDouble("0"));
         setAnnualBudget(Double.parseDouble("0"));
@@ -64,14 +61,6 @@ public class DocumentsRequest {
 
     public void setYear(String year) {
         this.year = year;
-    }
-
-    public Double getBudget() {
-        return budget;
-    }
-
-    public void setBudget(Double budget) {
-        this.budget = budget;
     }
 
     public Double getBudgetLimit() {

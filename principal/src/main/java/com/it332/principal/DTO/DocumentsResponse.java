@@ -25,6 +25,8 @@ public class DocumentsResponse {
 
     private Double annualBudget;
 
+    private Double annualExpense;
+
     private boolean budgetExceeded;
 
     private boolean budgetLimitExceeded;
@@ -44,6 +46,7 @@ public class DocumentsResponse {
         setMonth(document.getMonth());
         setYear(document.getYear());
         setBudget(document.getBudget());
+        setAnnualExpense(document.getAnnualExpense());
         setBudgetLimit(document.getBudgetLimit());
         setCashAdvance(document.getCashAdvance());
         setAnnualBudget(document.getAnnualBudget());

@@ -32,8 +32,11 @@ public class Documents {
     @Min(value = 0, message = "Cash advance must be a non-negative number")
     private Double cashAdvance = 0.0;
 
-    @Min(value = 0, message = "Cash advance must be a non-negative number")
+    @Min(value = 0, message = "Annual budget must be a non-negative number")
     private Double annualBudget = 0.0;
+
+    @Min(value = 0, message = "Annual expense must be a non-negative number")
+    private Double annualExpense = 0.0;
 
     private boolean budgetExceeded;
 
@@ -53,7 +56,6 @@ public class Documents {
         setMonth(doc.getMonth());
         setYear(doc.getYear());
         setAnnualBudget(doc.getAnnualBudget());
-        setBudget(doc.getBudget());
         setBudgetLimit(doc.getBudgetLimit());
         setBudgetExceeded(false);
         setBudgetLimitExceeded(false);
@@ -78,7 +80,6 @@ public class Documents {
     }
 
     public Documents(String schoolId, @NotBlank String month, @NotBlank String year,
-            @Min(value = 0, message = "Budget must be a non-negative number") Double budget,
             @Min(value = 0, message = "Budget limit must be a non-negative number") Double budgetLimit,
             @Min(value = 0, message = "Cash advance must be a non-negative number") Double cashAdvance,
             @Min(value = 0, message = "Annual budget must be a non-negative number") Double annualBudget,
@@ -86,7 +87,6 @@ public class Documents {
         this.schoolId = schoolId;
         this.month = month;
         this.year = year;
-        this.budget = budget;
         this.budgetLimit = budgetLimit;
         this.cashAdvance = cashAdvance;
         this.annualBudget = annualBudget;
@@ -208,6 +208,14 @@ public class Documents {
             this.headAccounting = "";
         } else
             this.headAccounting = headAccounting;
+    }
+
+    public Double getAnnualExpense() {
+        return annualExpense;
+    }
+
+    public void setAnnualExpense(Double annualExpense) {
+        this.annualExpense = annualExpense;
     }
 
 }

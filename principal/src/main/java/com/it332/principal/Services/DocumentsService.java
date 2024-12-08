@@ -217,6 +217,22 @@ public class DocumentsService {
         documents.forEach(document -> updateDocumentBudgetExceeded(document.getId()));
     }
 
+    public void updateDocumentAnnualExpense(String schoolId, String year) {
+        // Find all documents with the specified schoolId and year
+        List<Documents> documents = getDocumentsBySchoolYear(schoolId, year);
+        double totalAnnualExpense = documents.stream()
+                .mapToDouble(Documents::getBudget)
+                .sum();
+
+        // Update the cash advance for each document
+        documents.forEach(document -> {
+            document.setAnnualExpense(totalAnnualExpense);
+        });
+
+        // Save all documents in one batch operation
+        documentRepository.saveAll(documents);
+    }
+
     public Documents updateDocument(String id, DocumentsPatch updatedSchool) {
         // Check if document exists
         Documents document = getDocumentById(id);

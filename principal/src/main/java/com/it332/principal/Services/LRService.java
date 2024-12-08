@@ -144,6 +144,9 @@ public class LRService {
         // Save new sum
         documentsRepository.save(existingDocument);
 
+        // Update the annual expense for all the documents under the same school & year
+        documentsService.updateDocumentAnnualExpense(existingDocument.getSchoolId(), existingDocument.getYear());
+
         if (isBudgetExceeded && previousBudget != totalAmount) {
             createBudgetExceededNotification(existingDocument);
         }
