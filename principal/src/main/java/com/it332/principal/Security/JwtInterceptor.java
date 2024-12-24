@@ -30,7 +30,9 @@ public class JwtInterceptor implements HandlerInterceptor {
             // Use JwtTokenService to verify the token
             try {
                 user = jwtTokenService.verifyTokenAndTransform(token);
-                user.getEmail();
+
+                // Store the user in the request so the second interceptor can access it
+                request.setAttribute("user", user);
             } catch (Exception e) {
                 throw new BadCredentialsException("Invalid JWT Token");
             }
