@@ -60,6 +60,9 @@ public class UserService {
 
     @Transactional
     public User createUser(User user) {
+        // Check if user exists and throws and exception
+        checkUserExists(user.getEmail(), user.getUsername());
+
         // special case for creating super admin account
         if (user.getUsername().equals("administrator")) {
             user.setPosition("Super administrator");
@@ -73,6 +76,7 @@ public class UserService {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         user.setVerified(false);
+
         // Save user to the repository
         User savedUser = userRepository.save(user);
 
@@ -84,6 +88,9 @@ public class UserService {
 
     // Create a new user as an admin: for creation of principal
     public User createUser(UserAdminRequest user) {
+        // Check if user exists and throws and exception
+        checkUserExists(user.getEmail(), user.getUsername());
+
         // Check if user requesting is admin
         User admin = getUserById(user.getAdminId());
         String position = admin.getPosition();
@@ -120,6 +127,16 @@ public class UserService {
         }
 
         return false; // User not found
+    }
+
+    public void checkUserExists(String email, String username) {
+        if (userRepository.findByEmail(email) != null) {
+            throw new IllegalArgumentException("An account with this email already exists.");
+        }
+
+        if (userRepository.findByUsername(username) != null) {
+            throw new IllegalArgumentException("An account with this username already exists.");
+        }
     }
 
     public List<UserDetails> fetchPrincipals() {
